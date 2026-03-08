@@ -4,3 +4,29 @@ templates/blog_test.html
 static/images/the-power-of-first-step.png
 static/images/the-power-of-first-step-original.png
 static/images/og_image.png
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info/
+dist/
+build/
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Database
+*.db
+instance/*.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
