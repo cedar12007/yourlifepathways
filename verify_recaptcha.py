@@ -7,7 +7,7 @@ def verify_recaptcha(token):
     
     if not secret_key:
         print("ERROR: RECAPTCHA_SECRET_KEY not found in environment variables")
-        return str({"success": False, "error": "Server configuration error"})
+        return {"success": False, "error": "Server configuration error"}
     
     url = "https://www.google.com/recaptcha/api/siteverify"
     payload = {"secret": secret_key, "response": token}
@@ -18,13 +18,8 @@ def verify_recaptcha(token):
 
     print("Recaptcha response: " + str(result))
 
-    # Process the verification result
-    if result.get("success"):
-        print("CAPTCHA verified successfully!")
-        return str(result)
-    else:
-        print("CAPTCHA verification failed.")
-        return str(result)
+    # Return the result dictionary directly (not as a string)
+    return result
 
 
 
