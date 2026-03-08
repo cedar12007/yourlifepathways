@@ -619,6 +619,15 @@ $(document).ready(function () {
 		)
 			.appendTo($body);
 
+		// Nav Panel Close Button.
+		$('<button id="navPanelClose"></button>')
+			.appendTo($body)
+			.on('click', function(event) {
+				event.preventDefault();
+				event.stopPropagation();
+				$body.removeClass('is-navPanel-visible');
+			});
+
 		// Nav Panel.
 		$(
 			'<div id="navPanel">' +
@@ -632,6 +641,7 @@ $(document).ready(function () {
 				delay: 500,
 				hideOnClick: true,
 				hideOnSwipe: true,
+				hideOnEscape: true,
 				resetScroll: true,
 				resetForms: true,
 				side: 'left',
@@ -728,6 +738,7 @@ $(document).ready(function () {
 			delay: 500,
 			hideOnClick: true,
 			hideOnSwipe: true,
+			hideOnEscape: true,
 			resetScroll: true,
 			resetForms: true,
 			side: 'left',
@@ -742,6 +753,15 @@ $(document).ready(function () {
 		'</div>'
 	)
 		.appendTo($body);
+
+	// Nav Panel Close Button.
+	$('<button id="navPanelClose"></button>')
+		.appendTo($body)
+		.on('click', function(event) {
+			event.preventDefault();
+			event.stopPropagation();
+			$body.removeClass('is-navPanel-visible');
+		});
 
 	// Show navButton only on medium and smaller screens
 	breakpoints.on('<=medium', function () {

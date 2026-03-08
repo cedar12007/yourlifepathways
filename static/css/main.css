@@ -1820,6 +1820,14 @@ label {
 	#nav .logo {
 		height: 75px !important;
 		width: auto !important;
+		max-width: 90% !important;
+		object-fit: contain !important;
+	}
+	
+	#nav .logo img {
+		max-width: 100% !important;
+		height: auto !important;
+		object-fit: contain !important;
 	}
 
 	/* 3. Make the main content area 100% width and remove rounded corners */
@@ -2136,80 +2144,119 @@ label {
 	border-color: white transparent transparent transparent;
 }
 
+/* Disable thumbnail preview on mobile/touch devices */
+@media screen and (max-width: 980px) {
+	.link-preview .thumbnail-preview {
+		display: none !important;
+	}
+}
+
 
 /* Nav Panel */
 #navPanel {
-	background: rgba(243, 238, 238, 0.95);
-	/* Matches .modal-content background */
-	backdrop-filter: blur(3px);
-	/* Match backdrop blur */
-	color: black;
-	/* Matches .modal-content text color */
-	height: 100%;
+	background: linear-gradient(135deg, rgba(29, 58, 94, 0.85) 0%, rgba(44, 75, 117, 0.85) 100%);
+	backdrop-filter: blur(10px);
+	color: white;
+	height: 100vh;
 	left: 0;
 	overflow-y: auto;
 	position: fixed;
 	top: 0;
-	width: 200px;
+	width: 100%;
 	z-index: 10002;
-	transform: translateX(-275px);
-	transition: transform 0.2s ease;
-	box-shadow: inset -2px 0 5px rgba(0, 0, 0, 0.1);
-	border-right: 1px solid #555;
-	/* Matches modal border */
+	transform: translateX(-100%);
+	transition: transform 0.3s cubic-bezier(0.4, 0.0, 0.2, 1);
 }
 
-/* The plugin toggles 'is-navPanel-visible' on the BODY, which then affects the #navPanel via this selector */
 body.is-navPanel-visible #navPanel {
 	transform: translateX(0);
 }
 
 body.is-navPanel-visible #main {
-	filter: blur(2px);
+	filter: blur(3px);
 }
 
 #navPanel nav {
-	padding: 1rem;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	min-height: 100vh;
+	padding: 2rem;
+	gap: 1rem;
 }
 
 #navPanel .link {
 	display: block;
-	color: #555;
-	/* Darker grey for links */
+	color: white;
 	text-decoration: none;
-	border-top: solid 1px rgba(0, 0, 0, 0.1);
-	/* Lighter border */
-	padding: 0.75rem 0;
-	font-size: 0.9rem;
-	font-weight: bold;
-	/* Bold like modal text */
-}
-
-#navPanel .link:first-child {
-	border-top: 0;
-}
-
-#navPanel .link {
-	position: relative;
-	width: calc(100% + 2rem);
-	margin-left: -1rem;
-	padding-left: 1rem;
-	padding-right: 1rem;
-	box-sizing: border-box;
+	padding: 1.2rem 2.5rem;
+	font-size: 1.5rem;
+	font-weight: 700;
+	text-align: center;
+	width: 100%;
+	max-width: 400px;
+	transition: all 0.3s ease;
+	letter-spacing: 0.5px;
+	border: none !important;
+	border-top: none !important;
 }
 
 #navPanel .link:hover,
 #navPanel .link:active {
-	color: black !important;
-	/* Darkest for hover */
-	background-color: #e0e0e0 !important;
-	/* Subtle highlight */
+	color: #8cc9f0 !important;
+	transform: translateX(10px);
 }
 
 #navPanel .link.active {
-	color: black;
+	color: #8cc9f0;
 	font-weight: 800;
-	/* Extra bold for active */
+	text-shadow: 0 0 20px rgba(140, 201, 240, 0.6);
+}
+
+/* Close Button for Nav Panel */
+#navPanelClose {
+	position: fixed;
+	top: 10px;
+	left: 5px;
+	width: 50px;
+	height: 50px;
+	min-width: 50px;
+	min-height: 50px;
+	z-index: 10003;
+	cursor: pointer;
+	display: none;
+	background: transparent;
+	border: 2px solid rgba(255, 255, 255, 0.3);
+	border-radius: 50%;
+	padding: 0;
+	transition: all 0.3s ease;
+	line-height: 50px;
+	text-align: center;
+}
+
+#navPanelClose:before {
+	content: '\f00d';
+	font-family: 'Font Awesome 5 Free';
+	font-weight: 900;
+	font-size: 1.5rem;
+	color: white;
+	transition: color 0.3s ease;
+	display: block;
+	line-height: 46px;
+}
+
+#navPanelClose:hover {
+	border-color: #8cc9f0;
+	background: rgba(140, 201, 240, 0.1);
+}
+
+#navPanelClose:hover:before {
+	color: #8cc9f0;
+}
+
+body.is-navPanel-visible #navPanelClose {
+	display: block;
 }
 
 /* Nav Button (Hamburger) */
@@ -2217,43 +2264,41 @@ body.is-navPanel-visible #main {
 	text-decoration: none;
 	position: fixed;
 	top: 10px;
-	left: 10px;
-	height: 3em;
-	/* Reduced height */
-	width: 3.5em;
-	/* Narrower but wide enough for touch */
+	left: 5px;
+	height: 50px;
+	width: 50px;
 	z-index: 10001;
 	display: none;
 }
 
 #navButton .toggle {
 	border-bottom: none;
-}
-
-#navButton .toggle:hover {
-	background-color: rgba(0, 0, 0, 0.1);
-}
-
-#navButton .toggle {
 	display: block;
 	height: 100%;
 	width: 100%;
 	position: relative;
 	z-index: 10002;
+	background: rgba(29, 58, 94, 0.15);
+	border-radius: 50%;
+	border: 2px solid rgba(29, 58, 94, 0.3);
+	transition: all 0.3s ease;
+	line-height: 50px;
+	text-align: center;
+}
+
+#navButton .toggle:hover {
+	background: rgba(29, 58, 94, 0.25);
+	border-color: rgba(29, 58, 94, 0.5);
 }
 
 #navButton .toggle:before {
 	content: '\f0c9';
-	/* FontAwesome bars */
 	font-family: 'Font Awesome 5 Free';
 	font-weight: 900;
 	font-size: 1.2rem;
-	/* Smaller icon */
-	color: #424040;
-	position: absolute;
-	top: 60%;
-	left: 30%;
-	transform: translate(-50%, -50%);
+	color: #1d3a5e;
+	display: block;
+	line-height: 46px;
 }
 
 @media screen and (max-width: 980px) {
