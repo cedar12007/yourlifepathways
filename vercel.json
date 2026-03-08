@@ -3,7 +3,10 @@
     "builds": [
         {
             "src": "index.py",
-            "use": "@vercel/python"
+            "use": "@vercel/python",
+            "config": {
+                "maxLambdaSize": "15mb"
+            }
         }
     ],
     "routes": [
@@ -11,5 +14,7 @@
             "src": "/(.*)",
             "dest": "/"
         }
-    ]
+    ],
+    "buildCommand": "pip install -r requirements.txt",
+    "installCommand": "pip install --upgrade pip"
 }
