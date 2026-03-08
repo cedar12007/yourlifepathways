@@ -2191,7 +2191,8 @@ body.is-navPanel-visible #main {
 	color: white;
 	text-decoration: none;
 	padding: 1.2rem 2.5rem;
-	font-size: 1.5rem;
+	font-family: 'Poppins', sans-serif !important;
+    font-size: 1.75rem !important;
 	font-weight: 700;
 	text-align: center;
 	width: 100%;
