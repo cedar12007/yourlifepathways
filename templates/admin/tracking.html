@@ -1,0 +1,355 @@
+{% extends "base.html" %}
+
+{% block extra_head_elements %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/admin.min.css') }}">
+<style>
+    .journey-card {
+        background: white;
+        padding: 1.5rem;
+        border-radius: 8px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        margin: 1rem 0 1rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-left: 4px solid #8cc9f0;
+    }
+
+    .journey-info h3 {
+        margin: 0;
+        font-size: 1.1rem;
+        color: #1d3a5e;
+    }
+
+    .journey-info p {
+        margin: 0;
+        font-size: 0.9rem;
+        color: #636363;
+    }
+
+    .journey-info strong {
+        font-size: inherit;
+        text-transform: none;
+        font-weight: 600;
+        color: #1d3a5e;
+    }
+
+    .journey-stats {
+        text-align: right;
+    }
+
+    .journey-btn {
+        padding: 0.5rem 1rem !important;
+        height: auto !important;
+        line-height: 1 !important;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<section class="main admin-dashboard">
+    <a href="{{ url_for('admin.dashboard') }}" class="admin-back-link">
+        <i class="fa-solid fa-arrow-left"></i> Back to Dashboard
+    </a>
+    <header class="major">
+        <h2>User Analytics</h2>
+    </header>
+
+    <div class="admin-tabs">
+        <a href="{{ url_for('admin.dashboard') }}" class="admin-tab">Blog</a>
+        <a href="{{ url_for('admin.manage_comments') }}" class="admin-tab">Comments</a>
+        <a href="{{ url_for('admin.tracking_stats') }}" class="admin-tab active">Traffic</a>
+        <a href="{{ url_for('admin.security_logs') }}" class="admin-tab">Security</a>
+    </div>
+
+    <div style="margin-bottom: 2rem;">
+        {% if logging_enabled %}
+        <div
+            style="background: #f0fff4; border: 1px solid #c6f6d5; color: #22543d; padding: 0.75rem 1.25rem; border-radius: 50px; display: inline-flex; align-items: center; gap: 0.75rem; font-weight: 600; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
+            <span
+                style="height: 12px; width: 12px; background: #48bb78; border-radius: 50%; box-shadow: 0 0 8px #48bb78;"></span>
+            TRAFFIC LOGGING IS ACTIVE
+        </div>
+        {% else %}
+        <div
+            style="background: #fff5f5; border: 1px solid #fed7d7; color: #822727; padding: 0.75rem 1.25rem; border-radius: 50px; display: inline-flex; align-items: center; gap: 0.75rem; font-weight: 600; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
+            <span
+                style="height: 12px; width: 12px; background: #f56565; border-radius: 50%; box-shadow: 0 0 8px #f56565;"></span>
+            TRAFFIC LOGGING IS DISABLED (KILL SWITCH ON)
+        </div>
+        {% endif %}
+    </div>
+
+    <div
+        style="margin-bottom: 2rem; background: white; padding: 1.5rem; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
+        <form method="GET" action="{{ url_for('admin.tracking_stats') }}" id="filter-form"
+            style="display: flex; gap: 1rem; align-items: flex-end; flex-wrap: wrap;">
+
+            <div class="filter-group">
+                <label
+                    style="display: block; font-size: 0.75rem; font-weight: bold; margin-bottom: 0.5rem; color: #666; text-transform: uppercase;">View
+                    Period</label>
+                <select name="period" id="period-select"
+                    style="height: 40px; padding: 0 0.75rem; border-radius: 4px; border: 1px solid #ddd; font-size: 0.85rem; background: white; width: 160px; color: #333;">
+                    <option value="today" {% if period=='today' %}selected{% endif %}>Today</option>
+                    <option value="yesterday" {% if period=='yesterday' %}selected{% endif %}>Yesterday</option>
+                    <option value="custom" {% if period=='custom' %}selected{% endif %}>Custom Date</option>
+                    <option value="all_time" {% if period=='all_time' %}selected{% endif %}>All Time</option>
+                </select>
+            </div>
+
+            <div class="filter-group" id="custom-date-group"
+                style="display: {% if period == 'custom' %}flex{% else %}none{% endif %}; gap: 0.5rem;">
+                <div>
+                    <label style="display: block; font-size: 0.7rem; color: #888; margin-bottom: 2px;">START</label>
+                    <input type="date" name="start_date" value="{{ start_date }}"
+                        style="height: 40px; padding: 0 0.75rem; border-radius: 4px; border: 1px solid #ddd; background: white; color: #333; font-size: 0.85rem;">
+                </div>
+                <div>
+                    <label style="display: block; font-size: 0.7rem; color: #888; margin-bottom: 2px;">END</label>
+                    <input type="date" name="end_date" value="{{ end_date }}"
+                        style="height: 40px; padding: 0 0.75rem; border-radius: 4px; border: 1px solid #ddd; background: white; color: #333; font-size: 0.85rem;">
+                </div>
+            </div>
+
+            <div class="filter-group">
+                <label
+                    style="display: block; font-size: 0.75rem; font-weight: bold; margin-bottom: 0.5rem; color: #666; text-transform: uppercase;">Sort
+                    By</label>
+                <select name="sort_by"
+                    style="height: 40px; padding: 0 0.75rem; border-radius: 4px; border: 1px solid #ddd; font-size: 0.85rem; background: white; width: 140px; color: #333;">
+                    <option value="recent" {% if sort_by=='recent' %}selected{% endif %}>Most Recent</option>
+                    <option value="views" {% if sort_by=='views' %}selected{% endif %}>Most Views</option>
+                </select>
+            </div>
+
+            <div class="filter-group" style="display: flex; align-items: center; height: 40px;">
+                <input type="checkbox" id="show_all" name="show_all" value="true" {% if show_all %}checked{% endif %}
+                    style="width: 18px; height: 18px; margin: 0 0.5rem 0 0; cursor: pointer;">
+                <label for="show_all"
+                    style="font-size: 0.85rem; color: #1d3a5e; font-weight: 600; cursor: pointer; margin: 0;">Show
+                    Bounces (0s)</label>
+            </div>
+
+            <div class="filter-group" style="display: flex; align-items: center; height: 40px;">
+                <input type="checkbox" id="hide_bots" name="hide_bots" value="true" {% if hide_bots %}checked{% endif %}
+                    style="width: 18px; height: 18px; margin: 0 0.5rem 0 0; cursor: pointer;">
+                <label for="hide_bots"
+                    style="font-size: 0.85rem; color: #1d3a5e; font-weight: 600; cursor: pointer; margin: 0;">Hide
+                    Bots</label>
+            </div>
+
+            <div class="filter-group" style="display: flex; align-items: center; height: 40px;">
+                <input type="checkbox" id="has_referrer" name="has_referrer" value="true" {% if has_referrer %}checked{%
+                    endif %} style="width: 18px; height: 18px; margin: 0 0.5rem 0 0; cursor: pointer;">
+                <label for="has_referrer"
+                    style="font-size: 0.85rem; color: #1d3a5e; font-weight: 600; cursor: pointer; margin: 0;">Has
+                    Referrer</label>
+            </div>
+
+            {% if referrer_filter %}
+            <input type="hidden" name="referrer_filter" value="{{ referrer_filter }}">
+            {% endif %}
+
+            <div class="filter-group" style="display: flex; gap: 0.5rem;">
+                <button type="submit" class="button primary"
+                    style="height: 40px; padding: 0 1.5rem; line-height: 40px; margin: 0; font-size: 0.85rem; text-transform: none; display: inline-block;">Filter</button>
+                <a href="{{ url_for('admin.tracking_stats') }}" class="button"
+                    style="height: 40px; padding: 0 1.5rem; line-height: 40px; background: #f0f0f0; color: #444; border: 1px solid #ccc; margin: 0; font-size: 0.85rem; text-decoration: none; border-radius: 4px; display: inline-block;">Reset</a>
+            </div>
+        </form>
+    </div>
+    </div>
+
+    <script>
+        document.getElementById('period-select').addEventListener('change', function () {
+            const customGroup = document.getElementById('custom-date-group');
+            if (this.value === 'custom') {
+                customGroup.style.display = 'flex';
+            } else {
+                customGroup.style.display = 'none';
+            }
+        });
+    </script>
+
+    <!-- Top Referrers Box -->
+    {% if top_referrers %}
+    <div
+        style="margin-bottom: 2rem; background: white; padding: 1.5rem; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
+        <h3
+            style="margin-top: 0; font-size: 1.1rem; color: #1d3a5e; border-bottom: 2px solid #f0f0f0; padding-bottom: 0.5rem; margin-bottom: 1rem;">
+            Top Referrers
+            <span style="font-size: 0.8rem; color: #666; font-weight: normal; margin-left: 0.5rem;">(For selected
+                period)</span>
+        </h3>
+        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1rem;">
+            {% for ref, count in top_referrers %}
+            <div
+                style="display: flex; justify-content: space-between; align-items: center; padding: 0.5rem 1rem; background: #f8f9fa; border-radius: 4px; border: 1px solid #e9ecef;">
+                <a href="{{ url_for('admin.tracking_stats', period=period, start_date=start_date, end_date=end_date, show_all=('true' if show_all else 'false'), hide_bots=('true' if hide_bots else 'false'), sort_by=sort_by, referrer_filter=ref) }}"
+                    style="color: #3498db; text-decoration: none; word-break: break-all; font-size: 0.9rem; margin-right: 1rem; flex-grow: 1;">
+                    {{ ref|truncate(50) }}
+                </a>
+                <span
+                    style="background: #1d3a5e; color: white; padding: 2px 8px; border-radius: 12px; font-size: 0.75rem; font-weight: bold; min-width: 24px; text-align: center;">{{
+                    count }}</span>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Results Count -->
+    <div
+        style="margin-bottom: 1.5rem; padding: 0.75rem 1.25rem; background: #f8f9fa; border-left: 4px solid #8cc9f0; border-radius: 4px;">
+
+        {% if referrer_filter %}
+        <div
+            style="margin-bottom: 0.75rem; padding-bottom: 0.75rem; border-bottom: 1px dashed #cbd5e0; display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
+            <span style="font-size: 0.85rem; color: #555;">Filtering by Referrer:</span>
+            <span
+                style="background: #e2e8f0; color: #2d3748; padding: 4px 10px; border-radius: 12px; font-size: 0.8rem; font-weight: bold; word-break: break-all;">{{
+                referrer_filter }}</span>
+            <a href="{{ url_for('admin.tracking_stats', period=period, start_date=start_date, end_date=end_date, show_all=('true' if show_all else 'false'), hide_bots=('true' if hide_bots else 'false'), sort_by=sort_by) }}"
+                style="color: #e53e3e; text-decoration: none; font-size: 0.85rem; margin-left: auto;">
+                <i class="fa-solid fa-times-circle"></i> Clear Referrer Filter
+            </a>
+        </div>
+        {% endif %}
+
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem;">
+            <div style="font-size: 0.9rem; color: #1d3a5e;">
+                <strong>Showing {{ showing_count }} of {{ filtered_count }}</strong>
+                {% if not show_all and filtered_count < total_visitors %} ({{ total_visitors - filtered_count }} bounces
+                    hidden) {% endif %} </div>
+                    <div style="font-size: 0.8rem; color: #666;">
+                        {% if period == 'today' %}
+                        Today's visitors
+                        {% elif period == 'yesterday' %}
+                        Yesterday's visitors
+                        {% elif period == 'custom' %}
+                        {% if start_date and end_date %}
+                        {{ start_date }} to {{ end_date }}
+                        {% elif custom_date %}
+                        {{ custom_date }}
+                        {% else %}
+                        Custom range
+                        {% endif %}
+                        {% elif period == 'all_time' %}
+                        All time visitors
+                        {% else %}
+                        All time
+                        {% endif %}
+                        • Ordered by <strong></strong>{% if sort_by == 'views' %}Most Views{% else %}Recency{% endif
+                        %}</strong>
+                        {% if showing_count < filtered_count %} <span style="color: #e67e22;">• Limited to 100
+                            results</span>
+                            {% endif %}
+                    </div>
+            </div>
+        </div>
+
+        <div class="journeys-list">
+            {% if journeys %}
+            {% for ip, location, first_visit, last_visit, page_views, referrers, user_agent, search_term, is_bot,
+            lifetime in journeys %}
+            {% set duration = last_visit - first_visit %}
+            <div class="journey-card" data-ip="{{ ip }}">
+                <div class="journey-info">
+                    <h3>IP: <code>{{ ip }}</code>
+                        {% if is_bot == 'auto' %}
+                        <span
+                            style="background: #e74c3c; color: white; padding: 2px 8px; border-radius: 4px; font-size: 0.7rem; font-weight: bold; vertical-align: middle; margin-left: 8px;"
+                            title="Auto-detected Bot">BOT</span>
+                        {% elif is_bot == 'manual' %}
+                        <span
+                            style="background: #c0392b; color: white; padding: 2px 8px; border-radius: 4px; font-size: 0.7rem; font-weight: bold; vertical-align: middle; margin-left: 8px; border: 1px dotted #ffcccb;"
+                            title="Manually Flagged Bot">BOT (Manual)</span>
+                        {% endif %}
+                        {% if lifetime.days > 1 %}
+                        <span
+                            style="background: #3498db; color: white; padding: 2px 8px; border-radius: 4px; font-size: 0.7rem; font-weight: bold; vertical-align: middle; margin-left: 8px;">RETURN
+                            VISITOR ({{ lifetime.days }} days)</span>
+                        {% endif %}
+                    </h3>
+                    <p><strong>Location:</strong> <span class="location-text" data-ip="{{ ip }}">{{ location or
+                            'Resolving...' }}</span></p>
+                    {% if referrers and referrers|length > 0 %}
+                    <p><strong>Source{% if referrers|length > 1 %}s{% endif %}:</strong>
+                        {% for ref in referrers %}
+                        <a href="{{ ref }}" target="_blank" style="color: #e67e22;">{{ ref|truncate(35) }}</a>{% if not
+                        loop.last %}, {% endif %}
+                        {% endfor %}
+                        {% if search_term %}
+                        <br><span style="font-size: 0.85em; color: #888;">Search: "<b>{{ search_term }}</b>"</span>
+                        {% endif %}
+                    </p>
+                    {% endif %}
+                    <p><strong>Device:</strong> <span style="font-size: 0.85rem; color: #555;">{{
+                            user_agent|truncate(50)
+                            }}</span></p>
+                    <p>Last Activity: <span class="local-time"
+                            data-utc="{{ last_visit.isoformat() if last_visit else '' }}">{{
+                            last_visit.strftime('%Y-%m-%d %H:%M:%S') if last_visit else 'Unknown' }}</span></p>
+                    <p><strong>Total Duration:</strong>
+                        {% if duration.total_seconds() < 60 %} {{ duration.total_seconds()|int }}s {% elif
+                            duration.total_seconds() < 3600 %} {{ (duration.total_seconds() / 60)|int }}m {{
+                            (duration.total_seconds() % 60)|int }}s {% else %} {{ (duration.total_seconds() / 3600)|int
+                            }}h {{ ((duration.total_seconds() % 3600) / 60)|int }}m {% endif %} </p>
+                </div>
+                <div class="journey-stats">
+                    <strong>{{ page_views }} Pages Viewed</strong><br>
+                    <a href="{{ url_for('admin.view_journey', ip=ip, period=period, custom_date=custom_date, show_all=('true' if show_all else 'false'), hide_bots=('true' if hide_bots else 'false'), sort_by=sort_by) }}"
+                        class="button primary journey-btn">View
+                        Journey</a>
+                </div>
+            </div>
+            {% endfor %}
+            {% else %}
+            <p style="text-align: center; padding: 3rem;">No traffic data recorded yet. Start browsing to see activity!
+            </p>
+            {% endif %}
+        </div>
+
+        <script>
+            document.addEventListener('DOMContentLoaded', async function () {
+                const elements = document.querySelectorAll('.location-text');
+
+                for (const el of elements) {
+                    const currentText = el.textContent.trim();
+                    if (!currentText || currentText === 'None' || currentText === 'Resolving...') {
+                        const ip = el.dataset.ip;
+
+                        if (ip === '127.0.0.1' || ip === '::1' || ip.startsWith('192.168.')) {
+                            el.textContent = 'Localhost / Internal';
+                            continue;
+                        }
+
+                        try {
+                            const response = await fetch(`http://ip-api.com/json/${ip}`);
+                            const data = await response.json();
+
+                            if (data.status === 'success') {
+                                const locString = `${data.city}, ${data.regionName}, ${data.country}`;
+                                el.textContent = locString;
+                                el.style.color = '#2e7d32';
+
+                                fetch("{{ url_for('admin.update_ip_location') }}", {
+                                    method: 'POST',
+                                    headers: { 'Content-Type': 'application/json' },
+                                    body: JSON.stringify({ ip: ip, location: locString })
+                                });
+                            } else {
+                                el.textContent = 'Location not found';
+                            }
+                        } catch (error) {
+                            console.error('IP Resolution Error:', error);
+                            el.textContent = 'Lookup failed';
+                        }
+                    }
+                }
+            });
+
+        </script>
+</section>
+{% endblock %}

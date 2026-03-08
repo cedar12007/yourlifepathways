@@ -1,0 +1,454 @@
+/* Admin Dashboard and Management Styles */
+
+.admin-dashboard,
+.admin-comments {
+    padding: 2em 0;
+}
+
+/* Base Font Size for Tables */
+.admin-table-wrapper {
+    overflow-x: auto;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    margin-top: 2em;
+}
+
+.admin-back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    text-decoration: none !important;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #7f8c8d !important;
+    margin-bottom: 2em;
+    transition: color 0.2s;
+}
+
+.admin-back-link:hover {
+    color: #333 !important;
+}
+
+table.admin-table {
+    width: 100%;
+    border-collapse: collapse;
+    color: #333;
+    font-size: 0.9rem;
+    /* Smaller font for the table */
+}
+
+.admin-table th,
+.admin-table td {
+    padding: 12px 15px;
+    /* Slightly tighter padding */
+    text-align: left;
+    border-bottom: 1px solid #eee;
+}
+
+.post-title-link {
+    color: #333;
+    text-decoration: none;
+    font-weight: 600;
+    transition: color 0.2s;
+}
+
+.post-title-link:hover {
+    color: #4a90e2;
+    text-decoration: underline;
+}
+
+.admin-table th {
+    background: #f8f9fa;
+    font-weight: 700;
+    text-transform: uppercase;
+    font-size: 0.75rem;
+    /* Even smaller for headers */
+    letter-spacing: 1px;
+}
+
+.admin-table th.sortable {
+    cursor: pointer;
+    position: relative;
+    padding-right: 25px;
+    /* Space for arrow */
+    transition: background 0.2s;
+}
+
+.admin-table th.sortable:hover {
+    background: #f0f1f2;
+}
+
+.admin-table th.sortable:after {
+    content: '\f0dc';
+    /* font-awesome sort icon */
+    font-family: 'Font Awesome 6 Free';
+    font-weight: 900;
+    position: absolute;
+    right: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    opacity: 0.3;
+    font-size: 0.7rem;
+}
+
+.admin-table th.sortable.sort-asc:after {
+    content: '\f0de';
+    opacity: 0.8;
+}
+
+.admin-table th.sortable.sort-desc:after {
+    content: '\f0dd';
+    opacity: 0.8;
+}
+
+/* Status Badges */
+.post-status,
+.status-badge {
+    padding: 3px 10px;
+    border-radius: 4px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    display: inline-block;
+}
+
+.status-active,
+.status-badge.approved {
+    background: #e3fcef;
+    color: #006644;
+}
+
+.status-deleted,
+.status-badge.deleted {
+    background: #ffebe6;
+    color: #bf2600;
+}
+
+.status-badge.unapproved {
+    background: #fff3cd;
+    color: #856404;
+}
+
+/* Consistent Button Sizing */
+.admin-actions {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.admin-actions form {
+    display: contents;
+    /* Makes the button inside the form a direct flex child of .admin-actions */
+}
+
+.btn-admin,
+.admin-actions button,
+.admin-actions a.btn-admin {
+    padding: 0 15px;
+    height: 32px;
+    line-height: 32px;
+    border-radius: 4px;
+    font-size: 0.75rem !important;
+    text-decoration: none !important;
+    cursor: pointer;
+    border: none;
+    transition: opacity 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 80px;
+    /* Force consistent width */
+    font-weight: 600;
+    margin: 0 !important;
+    box-sizing: border-box;
+}
+
+.btn-edit {
+    background: #4a90e2 !important;
+    color: #fff !important;
+}
+
+.btn-delete,
+.button.btn-delete {
+    background: #ff4d4f !important;
+    color: #fff !important;
+}
+
+.btn-restore,
+.button.btn-restore {
+    background: #52c41a !important;
+    color: #fff !important;
+}
+
+.btn-new {
+    background: #333 !important;
+    color: #fff !important;
+    margin-bottom: 2em !important;
+    display: inline-flex !important;
+    height: 32px;
+    line-height: 32px;
+    padding: 0 20px;
+    border-radius: 4px;
+    font-size: 0.75rem !important;
+    font-weight: 600;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none !important;
+}
+
+.btn-admin:hover,
+.btn-new:hover {
+    opacity: 0.8;
+}
+
+/* Admin Tabs */
+.admin-tabs {
+    display: flex;
+    gap: 20px;
+    margin-bottom: 2em;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 10px;
+}
+
+.admin-tab {
+    text-decoration: none;
+    color: #7f8c8d;
+    font-weight: 600;
+    padding: 5px 10px;
+    font-size: 0.9rem;
+}
+
+.admin-tab.active {
+    color: #333;
+    border-bottom: 2px solid #333;
+}
+
+/* Post/Comment Cards for Moderation */
+.comment-card {
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    margin-bottom: 24px;
+    overflow: hidden;
+    border-left: 5px solid #ddd;
+    font-size: 0.95rem;
+}
+
+.comment-card.unapproved {
+    border-left-color: #f1c40f;
+}
+
+.comment-card.approved {
+    border-left-color: #2ecc71;
+}
+
+.comment-card.deleted {
+    border-left-color: #e74c3c;
+    opacity: 0.7;
+}
+
+.comment-header {
+    padding: 12px 20px;
+    background: #f8f9fa;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #eee;
+}
+
+.comment-body {
+    padding: 15px 20px;
+    color: #333;
+}
+
+.comment-footer {
+    padding: 12px 20px;
+    background: #fdfdfd;
+    display: flex;
+    gap: 10px;
+    border-top: 1px solid #eee;
+}
+
+.comment-info span {
+    color: #7f8c8d;
+    font-size: 0.8rem;
+}
+
+/* Admin Forms */
+.admin-form-container {
+    max-width: 900px;
+    margin: 2em auto;
+    background: #fff;
+    padding: 2.5em;
+    border-radius: 8px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.form-group {
+    margin-bottom: 1.5em;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.5em;
+    font-weight: 700;
+    color: #333;
+    font-size: 0.85rem;
+}
+
+.form-group input,
+.form-group textarea,
+.form-group select,
+.form-group input[type="password"] {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 0.9rem;
+    background-color: white !important;
+    /* Force white background for admin fields */
+}
+
+.form-actions {
+    display: flex;
+    gap: 1em;
+    margin-top: 2em;
+    align-items: center;
+}
+
+.form-actions .button,
+.form-actions button {
+    height: 3.5rem;
+    /* Match standard Stellar button height */
+    line-height: 3.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 2rem;
+    margin: 0 !important;
+    font-size: 0.8rem;
+    box-sizing: border-box;
+}
+
+.form-actions a.button.btn-cancel {
+    background: #eee !important;
+    color: #333 !important;
+    box-shadow: none !important;
+}
+
+.form-actions a.button.btn-cancel:hover {
+    background: #e2e2e2 !important;
+}
+
+.form-group textarea.content-editor {
+    min-height: 400px;
+}
+
+/* --- Mobile Responsiveness (Small Screens) --- */
+@media screen and (max-width: 736px) {
+
+    .admin-dashboard,
+    .admin-comments {
+        padding: 1em;
+    }
+
+    /* 1. Make Tabs Swipable */
+    .admin-tabs {
+        overflow-x: auto;
+        white-space: nowrap;
+        -webkit-overflow-scrolling: touch;
+        gap: 15px;
+        margin-bottom: 1.5em;
+        padding-bottom: 5px;
+    }
+
+    .admin-tab {
+        padding: 5px 5px 10px 5px;
+        font-size: 0.85rem;
+    }
+
+    /* 2. Responsive Tables */
+    .admin-table-wrapper {
+        margin-top: 1em;
+        border-radius: 4px;
+    }
+
+    .admin-table th,
+    .admin-table td {
+        padding: 10px 8px;
+        font-size: 0.8rem;
+    }
+
+    /* Hide less critical columns on mobile for better fit */
+    .admin-table th:nth-child(1),
+    .admin-table td:nth-child(1),
+    /* ID */
+    .admin-table th:nth-child(3),
+    .admin-table td:nth-child(3) {
+        /* Category */
+        display: none;
+    }
+
+    /* 3. Stack Actions and Forms */
+    .admin-actions {
+        flex-direction: column;
+        gap: 5px;
+    }
+
+    .btn-admin,
+    .admin-actions button,
+    .admin-actions a.btn-admin {
+        width: 100%;
+        min-width: unset;
+        font-size: 0.7rem !important;
+        height: 28px;
+    }
+
+    .admin-form-container {
+        padding: 1.5em;
+        margin: 1em 0;
+    }
+
+    .form-actions {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .form-actions .button,
+    .form-actions button {
+        width: 100%;
+    }
+
+    /* 4. Comment Cards */
+    .comment-card {
+        margin-bottom: 15px;
+    }
+
+    .comment-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+
+    .status-badge {
+        font-size: 0.65rem;
+    }
+
+    .comment-footer {
+        flex-direction: column;
+    }
+
+    /* 5. Logic for Backup/Settings stacking */
+    .backup-section .backup-box {
+        padding-left: 0 !important;
+        border-left: none !important;
+        border-top: 1px solid #eee;
+        padding-top: 2em;
+    }
+
+    .backup-section div[style*="grid"] {
+        display: flex !important;
+        flex-direction: column !important;
+    }
+}

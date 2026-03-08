@@ -1,0 +1,279 @@
+<!DOCTYPE HTML>
+<!--
+	Stellar by HTML5 UP
+	html5up.net | @ajlkn
+	Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
+-->
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+    <meta name="description" content="{% block meta_description %}{{ meta_description if meta_description else "
+        Navigate your professional and personal evolution with YourLifePathways. From executive leadership to business
+        scaling and personal mastery, find your path to success." }}{% endblock %}">
+    <meta name="keywords"
+        content="Executive Leadership Coaching, Career Strategy & Growth, Professional Development Mentor, Leadership Presence, Performance Coaching, Career Transition Strategy, Hiring Manager Insider Coaching, Student Leadership Development, Youth Career Mentorship, ICF Certified Coach, Strategic Career Planning, High-Performance Coaching, Emotional Intelligence for Leaders, Career Foundations for Teens, Student Athlete Mentoring, Executive Presence Training, Authentic Leadership Coaching, Workplace Navigation Strategy, Career Milestones Coaching, Goal Achievement Coaching, Erez Asif.">
+    <meta name="author" content="YourLifePathways">
+    <title>{% block title %}YourLifePathways | Business, Executive & Life Coaching{% endblock %}</title>
+    {% if noindex %}
+    <meta name="robots" content="noindex, nofollow">
+    {% endif %}
+    {% if canonical_url %}
+    <link rel="canonical" href="{{ canonical_url }}">
+    {% else %}
+    <link rel="canonical" href="https://www.yourlifepathways.com{{ request.path | replace('/index.html', '/') }}">
+    {% endif %}
+    <link data-n-head="ssr" rel="icon" href="{{ url_for('static', filename='images/favicon.ico') }}"
+        type="image/x-icon">
+
+    <!-- Preconnect to external domains -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com">
+
+    <!-- Critical CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}?v=1.6">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <noscript>
+        <link rel="stylesheet" href="{{ url_for('static', filename='css/noscript.css') }}" />
+    </noscript>
+
+    <!-- Fonts -->
+    <link
+        href="https://fonts.googleapis.com/css2?family=Architects+Daughter&family=Gloria+Hallelujah&family=Nanum+Pen+Script&family=Roboto+Slab:wght@700&family=Lato:ital,wght@0,400;1,400&display=swap"
+        rel="stylesheet">
+
+    <meta name="title"
+        content="{% if page_title %}{{ page_title }}{% else %}Personal, Career Strategy, and Leadership Coaching | Erez Asif{% endif %}">
+    <!-- Duplicate description removed, relying on the one above -->
+
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://www.yourlifepathways.com{{ request.path }}">
+    <meta property="og:title" content="{% block og_title %}{{ meta_title if meta_title else " Personal, Career Strategy,
+        and Leadership Coaching | Erez Asif" }}{% endblock %}">
+    <meta property="og:description" content="{% block og_description %}{{ meta_description if meta_description else "
+        Navigate your professional and personal evolution with YourLifePathways. From executive leadership to business
+        scaling and personal mastery, find your path to success." }}{% endblock %}">
+    <meta property="og:image"
+        content="{% block og_image %}{{ url_for('static', filename='images/og_image.png', _external=True) }}{% endblock %}">
+
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="https://www.yourlifepathways.com{{ request.path }}">
+    <meta property="twitter:title" content="{% block twitter_title %}{{ meta_title if meta_title else " Leadership &
+        Career Strategy from a 20-Year Hiring Manager" }}{% endblock %}">
+    <meta property="twitter:description"
+        content="{% block twitter_description %}{{ meta_description if meta_description else " Navigate your
+        professional and personal evolution with YourLifePathways. From executive leadership to business scaling and
+        personal mastery, find your path to success." }}{% endblock %}">
+    <meta property="twitter:image"
+        content="{% block twitter_image %}{{ url_for('static', filename='images/og_image.png', _external=True) }}{% endblock %}">
+    {% block extra_head_elements %}{% endblock %}
+</head>
+
+
+<body class="is-preload">
+
+    <!-- Wrapper -->
+    <div id="wrapper">
+
+
+        <!-- Nav -->
+        <nav id="nav">
+            <img src="{{ url_for('static', filename='images/logo_yourlifepathways_coaching.png') }}"
+                alt="YourLifePathways Coaching Logo" class="logo"
+                onclick="window.location.href='{{ url_for('main.index') }}';">
+            <ul>
+                <li>
+                    <a href="{% if request.path == '/' %}#intro{% else %}{{ url_for('main.index') }}#intro{% endif %}"
+                        class="scrolly">Overview</a>
+                </li>
+                <li><a href="{{ url_for('main.index') }}#about_me" class="scrolly">About</a></li>
+                <li><a href="{{ url_for('main.index') }}#community" class="scrolly">Community</a></li>
+                <li><a href="{{ url_for('main.index') }}#contact" class="scrolly">Contact</a></li>
+                <li>
+                    <a href="{{ url_for('blog.list_posts') }}"
+                        class="{% if request.endpoint and 'blog' in request.endpoint %}active{% endif %}">Blog</a>
+                </li>
+                {% if current_user.is_authenticated %}
+                <li><a href="{{ url_for('admin.dashboard') }}">Admin</a></li>
+                <li><a href="{{ url_for('admin.logout') }}" title="Logout"><i class="fa-solid fa-xmark"></i></a></li>
+                {% endif %}
+            </ul>
+        </nav>
+
+
+        <!-- Main -->
+        <div id="main">
+            <div id="flash-container">
+                {% with messages = get_flashed_messages() %}
+                {% if messages %}
+                {% for message in messages %}
+                <div class="flash-modal">
+                    <div class="modal-content">{{ message }}</div>
+                    <button class="close-btn" onclick="closeFlash(this.parentElement)">&times;</button>
+                </div>
+                {% endfor %}
+                {% endif %}
+                {% endwith %}
+            </div>
+
+            <!-- Client-side Status Modal (now global) -->
+            <div id="statusModal" class="modal">
+                <div class="modal-content">
+                    <span class="close-btn">&times;</span>
+                    <p id="modalMessage"></p>
+                </div>
+            </div>
+
+            <!-- Resource Preview Modal -->
+            <div id="resourceModal" class="modal">
+                <div class="modal-content large">
+                    <span class="close-btn" onclick="closeResourceModal()">&times;</span>
+                    <iframe id="resourceFrame" src=""
+                        style="width:100%; flex-grow:1; border:none; background:white;"></iframe>
+                    <div style="padding-top: 10px;">
+                        <small>Content not displaying? <a id="resourceLink" href="#" target="_blank"
+                                style="color: #8cc9f0;">Open in new tab</a></small>
+                    </div>
+                </div>
+            </div>
+
+            <script>
+                function openResource(url) {
+                    document.getElementById('resourceFrame').src = url;
+                    document.getElementById('resourceLink').href = url;
+                    document.getElementById('resourceModal').style.display = "block";
+                }
+                function closeResourceModal() {
+                    document.getElementById('resourceModal').style.display = "none";
+                    document.getElementById('resourceFrame').src = "";
+                }
+
+                // Add event listener safely
+                window.addEventListener('click', function (event) {
+                    var resourceModal = document.getElementById('resourceModal');
+                    if (event.target == resourceModal) {
+                        closeResourceModal();
+                    }
+                });
+            </script>
+
+            {% block content %}{% endblock %}
+        </div>
+
+        <!-- Scripts -->
+        <script src="{{ url_for('static', filename='js/jquery.min.js') }}" defer></script>
+        <script src="{{ url_for('static', filename='js/jquery.scrollex.min.js') }}" defer></script>
+        <script src="{{ url_for('static', filename='js/jquery.scrolly.min.js') }}" defer></script>
+        <script src="{{ url_for('static', filename='js/browser.min.js') }}" defer></script>
+        <script src="{{ url_for('static', filename='js/breakpoints.min.js') }}" defer></script>
+        <script src="{{ url_for('static', filename='js/util.min.js') }}" defer></script>
+        <script src="{{ url_for('static', filename='js/modal.min.js') }}" defer></script>
+        <script src="{{ url_for('static', filename='js/admin.min.js') }}" defer></script>
+        <script src="{{ url_for('static', filename='js/main.min.js') }}?v=1.7" defer></script>
+
+
+    </div>
+
+    {% block scripts %}{% endblock %}
+
+    <!-- Google Analytics (async, at bottom) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-RJB6N19SME"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag() { dataLayer.push(arguments); }
+        gtag('js', new Date());
+        gtag('config', 'G-RJB6N19SME');
+    </script>
+
+    {% if scroll_target %}
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            // Scroll to the target element if it exists
+            const target = document.querySelector("{{ scroll_target }}");
+            if (target) {
+                // Determine offset: use a fixed value or calculate from nav height
+                // Here we assume a fixed header height of around 80px (desktop) or 100px (mobile)
+                // Adjust this value based on your actual sticky header height
+                const headerOffset = 100;
+                const elementPosition = target.getBoundingClientRect().top;
+                const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+
+                window.scrollTo({
+                    top: offsetPosition,
+                    behavior: "smooth"
+                });
+            }
+        });
+    </script>
+    {% endif %}
+    <!-- Microsoft Clarity (Lazy Loaded) -->
+    <script type="text/javascript">
+        function loadClarity() {
+            (function (c, l, a, r, i, t, y) {
+                c[a] = c[a] || function () { (c[a].q = c[a].q || []).push(arguments) };
+                t = l.createElement(r); t.async = 1; t.src = "https://www.clarity.ms/tag/" + i;
+                y = l.getElementsByTagName(r)[0]; y.parentNode.insertBefore(t, y);
+            })(window, document, "clarity", "script", "vcuoka7bri");
+        }
+
+        // Delay loading until browser is idle to minimize performance impact
+        if ('requestIdleCallback' in window) {
+            window.requestIdleCallback(function () {
+                setTimeout(loadClarity, 2000);
+            });
+        } else {
+            window.addEventListener('load', function () {
+                setTimeout(loadClarity, 2000);
+            });
+        }
+    </script>
+
+
+    <script>
+        /**
+         * Automatically converts elements with class 'local-time' from UTC to browser local time.
+         * Expects 'data-utc' attribute containing an ISO timestamp.
+         */
+        function convertLocalTimestamps() {
+            document.querySelectorAll('.local-time').forEach(el => {
+                const utcStr = el.getAttribute('data-utc');
+                if (!utcStr) return;
+
+                try {
+                    const date = new Date(utcStr);
+                    if (isNaN(date.getTime())) return;
+
+                    const format = el.getAttribute('data-format') || 'full';
+                    let formatted = '';
+
+                    if (format === 'time') {
+                        formatted = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+                    } else if (format === 'date') {
+                        formatted = date.toLocaleDateString();
+                    } else {
+                        // Custom format: YYYY-MM-DD HH:MM:SS
+                        const pad = (n) => String(n).padStart(2, '0');
+                        formatted = date.getFullYear() + '-' +
+                            pad(date.getMonth() + 1) + '-' +
+                            pad(date.getDate()) + ' ' +
+                            pad(date.getHours()) + ':' +
+                            pad(date.getMinutes()) + ':' +
+                            pad(date.getSeconds());
+                    }
+
+                    el.textContent = formatted;
+                    el.classList.add('converted');
+                } catch (e) {
+                    console.error("Time conversion error:", e);
+                }
+            });
+        }
+
+        // Run on load
+        document.addEventListener('DOMContentLoaded', convertLocalTimestamps);
+    </script>
+</body>
+
+</html>

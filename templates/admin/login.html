@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+
+{% block extra_head_elements %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/admin.min.css') }}">
+{% endblock %}
+
+{% block content %}
+<section class="main">
+    <header class="major">
+        <h2>Administrator Access</h2>
+    </header>
+
+    <div class="admin-form-container" style="max-width: 400px; margin: 4em auto;">
+        <form method="POST">
+            <div class="form-group">
+                <label for="username">Username</label>
+                <input type="text" id="username" name="username" required autocomplete="username">
+            </div>
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" required autocomplete="current-password">
+            </div>
+            <div class="form-actions" style="justify-content: center;">
+                <button type="submit" class="button primary">Enter Gateway</button>
+            </div>
+        </form>
+    </div>
+</section>
+{% endblock %}

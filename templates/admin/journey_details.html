@@ -1,0 +1,349 @@
+{% extends "base.html" %}
+
+{% block extra_head_elements %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/admin.min.css') }}">
+<style>
+    .journey-meta-box {
+        background: #f1f7fd;
+        padding: 1.5rem;
+        border-radius: 10px;
+        border-left: 6px solid #1d3a5e;
+        display: inline-block;
+        text-align: left;
+        margin-bottom: 2rem;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    }
+
+    .journey-meta-box p {
+        margin: 0;
+        line-height: 1.6;
+    }
+
+    .location-label {
+        font-size: 1.2rem;
+        display: block;
+        margin-top: 0.5rem;
+    }
+
+    .journey-timeline {
+        position: relative;
+        max-width: 800px;
+        margin: 2rem auto;
+        padding-left: 40px;
+        border-left: 2px solid #8cc9f0;
+    }
+
+    .timeline-item {
+        position: relative;
+        margin-bottom: 2rem;
+        padding: 1.2rem;
+        background: #fdfdfd;
+        border-radius: 8px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    }
+
+    .timeline-item::before {
+        content: '';
+        position: absolute;
+        left: -48px;
+        top: 20px;
+        width: 14px;
+        height: 14px;
+        background: #1d3a5e;
+        border: 3px solid #8cc9f0;
+        border-radius: 50%;
+    }
+
+    .timeline-date {
+        font-size: 0.8rem;
+        color: #8cc9f0;
+        font-weight: bold;
+        margin-bottom: 0.5rem;
+    }
+
+    .timeline-url {
+        font-family: monospace;
+        word-break: break-all;
+        color: #1d3a5e;
+        font-weight: 600;
+    }
+
+    .ua-box {
+        margin-top: 1rem;
+        padding-top: 0.5rem;
+        border-top: 1px dotted #ddd;
+        font-size: 0.75rem;
+        color: #999;
+    }
+
+    .journey-nav {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+        padding: 1rem;
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+    }
+
+    .journey-nav .button {
+        padding: 0.5rem 1.2rem !important;
+        height: auto !important;
+        line-height: normal !important;
+        text-transform: none !important;
+        font-size: 0.9rem !important;
+    }
+
+    .bot-banner {
+        background: #fff5f5;
+        border: 1px solid #feb2b2;
+        color: #c53030;
+        padding: 1rem;
+        border-radius: 8px;
+        margin-bottom: 2rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        font-weight: 600;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<section class="main admin-dashboard">
+    <a href="{{ url_for('admin.tracking_stats', period=period, custom_date=custom_date, start_date=start_date, end_date=end_date, has_referrer=('true' if has_referrer else 'false'), referrer_filter=referrer_filter, show_all=('true' if show_all else 'false'), hide_bots=('true' if hide_bots else 'false'), sort_by=sort_by) }}"
+        class="admin-back-link">
+        <i class="fa-solid fa-arrow-left"></i> Back to Analytics
+    </a>
+    <header class="major" style="margin-bottom: 1rem;">
+        <h2>User Journey Timeline</h2>
+    </header>
+
+    <!-- Context Navigation -->
+    <div class="journey-nav">
+        {% if prev_ip %}
+        <a href="{{ url_for('admin.view_journey', ip=prev_ip, period=period, custom_date=custom_date, start_date=start_date, end_date=end_date, has_referrer=('true' if has_referrer else 'false'), referrer_filter=referrer_filter, show_all=('true' if show_all else 'false'), hide_bots=('true' if hide_bots else 'false'), sort_by=sort_by) }}"
+            class="button">
+            <i class="fa-solid fa-chevron-left"></i> Previous Journey
+        </a>
+        {% else %}
+        <span></span>
+        {% endif %}
+
+        <div style="text-align: center; color: #636363; font-size: 0.85rem;">
+            Journey Context: <strong>{{ period|capitalize }}</strong><br>
+            <span style="font-size: 0.8em;">(Sorted by {{ 'Views' if sort_by == 'views' else 'Recent' }})</span>
+        </div>
+
+        {% if next_ip %}
+        <a href="{{ url_for('admin.view_journey', ip=next_ip, period=period, custom_date=custom_date, start_date=start_date, end_date=end_date, has_referrer=('true' if has_referrer else 'false'), referrer_filter=referrer_filter, show_all=('true' if show_all else 'false'), hide_bots=('true' if hide_bots else 'false'), sort_by=sort_by) }}"
+            class="button">
+            Next Journey <i class="fa-solid fa-chevron-right"></i>
+        </a>
+        {% else %}
+        <span></span>
+        {% endif %}
+    </div>
+
+    {% if bot_status == 'auto' %}
+    <div class="bot-banner">
+        <i class="fa-solid fa-robot" style="font-size: 1.5rem;"></i>
+        <div>
+            IDENTIFIED AS BOT / AUTOMATED TRAFFIC
+            <div style="font-size: 0.75rem; font-weight: normal; margin-top: 0.2rem;">This activity was auto-detected
+                based on its user agent string.</div>
+        </div>
+    </div>
+    {% elif bot_status == 'manual' %}
+    <div class="bot-banner" style="background-color: #fce4e4; border-color: #c0392b; color: #c0392b;">
+        <i class="fa-solid fa-flag" style="font-size: 1.5rem;"></i>
+        <div>
+            MANUALLY FLAGGED BOT
+            <div style="font-size: 0.75rem; font-weight: normal; margin-top: 0.2rem;">This IP was explicitly marked as
+                bot traffic by an administrator.</div>
+        </div>
+    </div>
+    {% endif %}
+
+    <div class="journey-meta-box" style="width: 100%; box-sizing: border-box; position: relative;">
+        <div style="position: absolute; top: 1.5rem; right: 1.5rem;">
+            <button class="button bot-toggle-btn" data-ip="{{ ip }}"
+                style="font-size: 0.75rem; padding: 0.4rem 0.8rem; background: white; border: 1px solid #e74c3c; color: #e74c3c; border-radius: 4px; cursor: pointer;">
+                <i class="fa-solid fa-flag" style="margin-right: 4px;"></i>
+                <span class="bot-btn-text">{% if bot_status == 'manual' %}Unflag Bot{% else %}Flag as Bot{% endif
+                    %}</span>
+            </button>
+        </div>
+        <p><strong>IP Address:</strong> <code>{{ ip }}</code></p>
+        <p class="location-label">
+            <strong>Location:</strong>
+            <span id="journey-location-span" data-ip="{{ ip }}">
+                {% if visits and visits[0].visitor_location %}
+                {{ visits[0].visitor_location }}
+                {% else %}
+                Resolving...
+                {% endif %}
+            </span>
+        </p>
+        {% if visits %}
+        <p style="margin-top: 0.5rem; word-break: break-word;">
+            <strong>Device Info:</strong> <span style="color: #666; font-size: 0.9em;">{{ visits[0].user_agent
+                }}</span>
+        </p>
+
+        {% if referrers and referrers|length > 0 %}
+        <p style="margin-top: 0.5rem; word-break: break-word;">
+            <strong>Source{% if referrers|length > 1 %}s{% endif %}:</strong>
+            {% for ref in referrers %}
+            <a href="{{ ref }}" target="_blank" style="color: #e67e22;">{{ ref|truncate(50) }}</a>{% if not loop.last
+            %}, {% endif %}
+            {% endfor %}
+            {% if search_term %}
+            <br><span style="font-size: 0.85em; color: #888;">Search: "<b>{{ search_term }}</b>"</span>
+            {% endif %}
+        </p>
+        {% endif %}
+
+        {% set first_visit = visits[0].timestamp %}
+        {% set last_visit = visits[-1].timestamp %}
+        {% set duration = last_visit - first_visit %}
+        <p style="margin-top: 0.5rem;">
+            <strong>Total Duration:</strong>
+            <span style="color: #2e7d32; font-weight: bold;">
+                {% if duration.total_seconds() < 60 %} {{ duration.total_seconds()|int }}s {% elif
+                    duration.total_seconds() < 3600 %} {{ (duration.total_seconds() / 60)|int }}m {{
+                    (duration.total_seconds() % 60)|int }}s {% else %} {{ (duration.total_seconds() / 3600)|int }}h {{
+                    ((duration.total_seconds() % 3600) / 60)|int }}m {% endif %} </span>
+                    <span style="color: #999; font-size: 0.8em; margin-left: 8px;">({{ visits|length }} pages
+                        viewed)</span>
+        </p>
+
+        {% if lifetime.days > 1 %}
+        <div style="margin-top: 1.5rem; padding-top: 1rem; border-top: 1px dashed #cbd5e0;">
+            <p><span
+                    style="background: #f6ad55; color: white; padding: 2px 8px; border-radius: 4px; font-size: 0.7rem; font-weight: bold; vertical-align: middle; margin-right: 8px;">LIFETIME
+                    SUMMARY</span> <strong>Return Visitor</strong></p>
+            <p style="margin-top: 0.5rem; font-size: 0.9rem;">First seen on: <strong>{{
+                    lifetime.first.strftime('%Y-%m-%d') }}</strong></p>
+            <p style="font-size: 0.9rem;">Days visited: <strong>{{ lifetime.days }}</strong> • Total views: <strong>{{
+                    lifetime.views }}</strong></p>
+            <p style="font-size: 0.9rem;">Relationship span:
+                <span style="color: #e67e22; font-weight: bold;">
+                    {% set total_days = (lifetime.duration.total_seconds() / 86400)|int %}
+                    {% if total_days < 1 %} Under 24h {% else %} {{ total_days }} days {% endif %} </span>
+            </p>
+        </div>
+        {% endif %}
+        {% endif %}
+    </div>
+
+    <div class="journey-timeline">
+        {% for visit in visits %}
+        <div class="timeline-item">
+            <div class="timeline-date">
+                <span class="local-time" data-utc="{{ visit.timestamp.isoformat() if visit.timestamp else '' }}">{{
+                    visit.timestamp.strftime('%Y-%m-%d %H:%M:%S') if visit.timestamp else '' }}</span>
+            </div>
+            <div class="timeline-url">{{ visit.url }}</div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Bottom Navigation -->
+    <div class="journey-nav" style="margin-top: 3rem;">
+        {% if prev_ip %}
+        <a href="{{ url_for('admin.view_journey', ip=prev_ip, period=period, custom_date=custom_date, start_date=start_date, end_date=end_date, has_referrer=('true' if has_referrer else 'false'), referrer_filter=referrer_filter, show_all=('true' if show_all else 'false'), hide_bots=('true' if hide_bots else 'false'), sort_by=sort_by) }}"
+            class="button">
+            <i class="fa-solid fa-chevron-left"></i> Previous Journey
+        </a>
+        {% else %}
+        <span></span>
+        {% endif %}
+
+        {% if next_ip %}
+        <a href="{{ url_for('admin.view_journey', ip=next_ip, period=period, custom_date=custom_date, start_date=start_date, end_date=end_date, has_referrer=('true' if has_referrer else 'false'), referrer_filter=referrer_filter, show_all=('true' if show_all else 'false'), hide_bots=('true' if hide_bots else 'false'), sort_by=sort_by) }}"
+            class="button">
+            Next Journey <i class="fa-solid fa-chevron-right"></i>
+        </a>
+        {% else %}
+        <span></span>
+        {% endif %}
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', async function () {
+            const el = document.getElementById('journey-location-span');
+            if (el) {
+                const currentText = el.textContent.trim();
+                const ip = el.dataset.ip;
+
+                if (!currentText || currentText === 'None' || currentText === 'Resolving...') {
+                    if (ip === '127.0.0.1' || ip === '::1' || ip.startsWith('192.168.')) {
+                        el.textContent = 'Localhost / Internal';
+                        return;
+                    }
+
+                    try {
+                        const response = await fetch(`http://ip-api.com/json/${ip}`);
+                        const data = await response.json();
+
+                        if (data.status === 'success') {
+                            const locString = `${data.city}, ${data.regionName}, ${data.country}`;
+                            el.textContent = locString;
+                            el.style.color = '#2e7d32';
+                            el.style.fontWeight = 'bold';
+
+                            // Save it back to our DB
+                            fetch("{{ url_for('admin.update_ip_location') }}", {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ ip: ip, location: locString })
+                            });
+                        } else {
+                            el.textContent = 'Location not found';
+                        }
+                    } catch (error) {
+                        console.error('IP Resolution Error:', error);
+                        el.textContent = 'Lookup failed';
+                    }
+                }
+            }
+        });
+
+        document.querySelectorAll('.bot-toggle-btn').forEach(btn => {
+            btn.addEventListener('click', function (e) {
+                e.preventDefault();
+                const ip = this.getAttribute('data-ip');
+                const textSpan = this.querySelector('.bot-btn-text');
+
+                this.style.opacity = '0.5';
+
+                fetch(`/admin/tracking/bot/toggle/${ip}`, {
+                    method: 'POST',
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        this.style.opacity = '1';
+                        if (data.status === 'success') {
+                            if (data.bot_status === 'manual') {
+                                textSpan.textContent = 'Unflag Bot';
+                            } else {
+                                textSpan.textContent = 'Flag as Bot';
+                            }
+                            // Optionally, one could trigger a window.location.reload() 
+                            // to re-evaluate filters, but for seamless UX we just toggle the button text
+                        }
+                    })
+                    .catch(err => {
+                        this.style.opacity = '1';
+                        alert('An error occurred updating the bot status.');
+                        console.error(err);
+                    });
+            });
+        });
+    </script>
+</section>
+{% endblock %}

@@ -1,0 +1,199 @@
+{% extends "base.html" %}
+
+{% block extra_head_elements %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/admin.min.css') }}">
+{% endblock %}
+
+{% block content %}
+<section class="main">
+    <a href="{{ url_for('admin.dashboard') }}" class="admin-back-link">
+        <i class="fa-solid fa-arrow-left"></i> Back to Admin
+    </a>
+    <header class="major">
+        <h2>Database Resilience</h2>
+    </header>
+
+    <div class="admin-tabs">
+        <a href="{{ url_for('admin.dashboard') }}" class="admin-tab">Blog Posts</a>
+        <a href="{{ url_for('admin.manage_comments') }}" class="admin-tab">Comments</a>
+        <a href="{{ url_for('admin.manage_likes') }}" class="admin-tab">Likes</a>
+        <a href="{{ url_for('admin.security_logs') }}" class="admin-tab">Logs</a>
+        <a href="{{ url_for('admin.change_password') }}" class="admin-tab">Password</a>
+        <a href="{{ url_for('admin.database_resilience') }}" class="admin-tab active">Resilience</a>
+    </div>
+
+    <div class="admin-form-container" style="max-width: 600px; margin: 2em auto;">
+        <div class="backup-section">
+            <header class="major" style="margin-bottom: 2em;">
+                <p style="font-size: 0.85rem; margin-top: -1.5em; color: #666;">Manage your data snapshots. You can
+                    download a full backup or restore your database from a previous JSON file.</p>
+            </header>
+
+            <div style="display: flex; flex-direction: column; gap: 3em;">
+                <div class="backup-box">
+                    <h4 style="font-size: 0.9rem; margin-bottom: 0.5em;">1. Export Data</h4>
+                    <p style="font-size: 0.8rem; color: #7f8c8d; margin-bottom: 1em;">Download a complete snapshot of
+                        all posts, comments, and engagement data.</p>
+                    <a href="{{ url_for('admin.export_data') }}" class="button primary btn-admin btn-edit">Download
+                        Backup (.JSON)</a>
+                </div>
+
+                <div class="backup-box" style="border-top: 1px solid #eee; padding-top: 2em;">
+                    <h4 style="font-size: 0.9rem; margin-bottom: 0.5em;">2. Import Data</h4>
+                    <p style="font-size: 0.8rem; margin-bottom: 1.5em;">
+                        <strong style="color: #c0392b;">Warning:</strong> Importing will wipe current data and replace
+                        it with the backup content.
+                    </p>
+                    <form action="{{ url_for('admin.import_data') }}" method="POST" enctype="multipart/form-data"
+                        style="max-width: 400px;">
+                        <div class="form-group">
+                            <input type="file" name="backup_file" accept=".json" required
+                                style="font-size: 0.75rem; padding: 10px; border: 1px dashed #ccc;">
+                        </div>
+                        <button type="submit" class="button btn-admin btn-delete"
+                            onclick="return confirm('CRITICAL: This will delete ALL current data. Are you absolutely sure?')">Restore
+                            from File</button>
+                    </form>
+                </div>
+
+                <div class="backup-box" style="border-top: 1px solid #eee; padding-top: 2em;">
+                    <h4 style="font-size: 0.9rem; margin-bottom: 0.5em;">3. Database Cleanup</h4>
+                    <p style="font-size: 0.8rem; color: #7f8c8d; margin-bottom: 1em;">
+                        Manage tracking data to keep database size within Supabase free tier limits (500 MB).
+                    </p>
+
+                    <!-- Database Stats -->
+                    <div
+                        style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem; margin-bottom: 1.5rem;">
+                        <div
+                            style="background: #f8f9fa; padding: 1rem; border-radius: 6px; border-left: 3px solid #8cc9f0;">
+                            <div
+                                style="font-size: 0.7rem; color: #666; text-transform: uppercase; margin-bottom: 0.25rem;">
+                                Total Visits</div>
+                            <div style="font-size: 1.2rem; font-weight: bold; color: #1d3a5e;">{{
+                                "{:,}".format(db_stats.total_visits) }}</div>
+                        </div>
+                        <div
+                            style="background: #f8f9fa; padding: 1rem; border-radius: 6px; border-left: 3px solid #8cc9f0;">
+                            <div
+                                style="font-size: 0.7rem; color: #666; text-transform: uppercase; margin-bottom: 0.25rem;">
+                                Post Views</div>
+                            <div style="font-size: 1.2rem; font-weight: bold; color: #1d3a5e;">{{
+                                "{:,}".format(db_stats.total_post_views) }}</div>
+                        </div>
+                        <div
+                            style="background: #f8f9fa; padding: 1rem; border-radius: 6px; border-left: 3px solid {% if db_stats.estimated_mb > 100 %}#e67e22{% elif db_stats.estimated_mb > 50 %}#f39c12{% else %}#27ae60{% endif %};">
+                            <div
+                                style="font-size: 0.7rem; color: #666; text-transform: uppercase; margin-bottom: 0.25rem;">
+                                Est. Size</div>
+                            <div style="font-size: 1.2rem; font-weight: bold; color: #1d3a5e;">{{ db_stats.estimated_mb
+                                }} MB</div>
+                            <div style="font-size: 0.65rem; color: #999;">of 500 MB</div>
+                        </div>
+                    </div>
+
+                    <!-- Old Data Summary -->
+                    <div
+                        style="background: #fff9e6; border: 1px solid #f39c12; padding: 0.75rem; border-radius: 6px; margin-bottom: 1rem; font-size: 0.8rem;">
+                        <strong style="color: #d68910;">🧹 Data by Age:</strong>
+                        <div style="margin-top: 0.5rem; color: #666;">
+                            <div>Older than 12 months: <strong>{{ "{:,}".format(db_stats.older_than_12m) }}</strong>
+                                rows</div>
+                            <div>Older than 6 months: <strong>{{ "{:,}".format(db_stats.older_than_6m) }}</strong> rows
+                            </div>
+                            <div>Older than 3 months: <strong>{{ "{:,}".format(db_stats.older_than_3m) }}</strong> rows
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Cleanup Controls -->
+                    <div style="display: flex; gap: 0.75rem; align-items: center; flex-wrap: wrap;">
+                        <select id="cleanup-months"
+                            style="height: 38px; padding: 0 0.75rem; border-radius: 4px; border: 1px solid #ddd; background: white; color: #333; font-size: 0.85rem;">
+                            <option value="12">Keep last 12 months</option>
+                            <option value="6">Keep last 6 months</option>
+                            <option value="3">Keep last 3 months</option>
+                        </select>
+                        <button onclick="previewCleanup()" class="button"
+                            style="height: 38px; padding: 0 1.25rem; margin: 0; font-size: 0.85rem;">Preview</button>
+                        <button id="execute-cleanup-btn" onclick="executeCleanup()" class="button primary"
+                            style="height: 38px; padding: 0 1.25rem; margin: 0; font-size: 0.85rem; display: none;">Execute
+                            Cleanup</button>
+                    </div>
+
+                    <!-- Preview Results -->
+                    <div id="cleanup-preview"
+                        style="display: none; margin-top: 1rem; padding: 0.75rem; background: #e8f5e9; border: 1px solid #81c784; border-radius: 6px; font-size: 0.85rem;">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        async function previewCleanup() {
+            const months = document.getElementById('cleanup-months').value;
+            const formData = new FormData();
+            formData.append('months', months);
+            formData.append('execute', 'false');
+
+            try {
+                const response = await fetch('/admin/tracking/cleanup', {
+                    method: 'POST',
+                    body: formData
+                });
+                const data = await response.json();
+
+                if (data.success && data.preview) {
+                    const preview = document.getElementById('cleanup-preview');
+                    preview.innerHTML = `
+                        <strong>Preview: Delete data older than ${data.months} months (before ${data.cutoff_date})</strong>
+                        <div style="margin-top: 0.5rem;">
+                            <div>Site Visits to delete: <strong>${data.site_visits.toLocaleString()}</strong></div>
+                            <div>Post Views to delete: <strong>${data.post_views.toLocaleString()}</strong></div>
+                            <div>Total rows: <strong>${data.total.toLocaleString()}</strong></div>
+                            <div>Est. space to reclaim: <strong>~${data.estimated_mb} MB</strong></div>
+                        </div>
+                        <div style="margin-top: 1rem; color: #d68910;">
+                            ⚠️ This action cannot be undone. Click "Execute Cleanup" to proceed.
+                        </div>
+                    `;
+                    preview.style.display = 'block';
+                    document.getElementById('execute-cleanup-btn').style.display = 'inline-block';
+                }
+            } catch (error) {
+                alert('Error: ' + error.message);
+            }
+        }
+
+        async function executeCleanup() {
+            if (!confirm('Are you sure? This will permanently delete old tracking data.')) {
+                return;
+            }
+
+            const months = document.getElementById('cleanup-months').value;
+            const formData = new FormData();
+            formData.append('months', months);
+            formData.append('execute', 'true');
+
+            try {
+                const response = await fetch('/admin/tracking/cleanup', {
+                    method: 'POST',
+                    body: formData
+                });
+                const data = await response.json();
+
+                if (data.success) {
+                    alert(data.message + '\n\nRecommendation: Run VACUUM FULL; in Supabase to reclaim disk space.');
+                    location.reload();
+                } else {
+                    alert('Error: ' + data.error);
+                }
+            } catch (error) {
+                alert('Error: ' + error.message);
+            }
+        }
+    </script>
+
+</section>
+{% endblock %}

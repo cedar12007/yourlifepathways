@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+
+{% block extra_head_elements %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/admin.min.css') }}">
+{% endblock %}
+
+{% block content %}
+<section class="main admin-dashboard">
+    <a href="{{ url_for('admin.dashboard') }}" class="admin-back-link">
+        <i class="fa-solid fa-arrow-left"></i> Back to Admin
+    </a>
+    <header class="major">
+        <h2>Reader Engagement</h2>
+    </header>
+
+    <div class="admin-tabs">
+        <a href="{{ url_for('admin.dashboard') }}" class="admin-tab">Blog Posts</a>
+        <a href="{{ url_for('admin.manage_comments') }}" class="admin-tab">Comments</a>
+        <a href="{{ url_for('admin.manage_likes') }}" class="admin-tab active">Likes</a>
+        <a href="{{ url_for('admin.security_logs') }}" class="admin-tab">Logs</a>
+        <a href="{{ url_for('admin.change_password') }}" class="admin-tab">Settings</a>
+    </div>
+
+    <div class="admin-table-wrapper">
+        <table class="admin-table">
+            <thead>
+                <tr>
+                    <th class="sortable">Date & Time</th>
+                    <th class="sortable">Post Title</th>
+                    <th class="sortable">Visitor IP</th>
+                    <th class="sortable">Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% if likes %}
+                {% for like, post_title, post_slug in likes %}
+                <tr>
+                    <td><span class="local-time"
+                            data-utc="{{ like.timestamp.isoformat() if like.timestamp else '' }}">{{
+                            like.timestamp.strftime('%Y-%m-%d %H:%M') if like.timestamp else 'N/A' }}</span></td>
+                    <td><a href="{{ url_for('blog.view_post', slug=post_slug) }}" target="_blank"
+                            class="post-title-link">{{ post_title }}</a></td>
+                    <td><code>{{ like.visitor_ip }}</code></td>
+                    <td>
+                        <span
+                            class="post-status {% if like.is_deleted %}status-deleted{% else %}status-active{% endif %}">
+                            {{ 'Unliked' if like.is_deleted else 'Liked' }}
+                        </span>
+                    </td>
+                </tr>
+                {% endfor %}
+                {% else %}
+                <tr>
+                    <td colspan="4" style="text-align: center; padding: 2em;">No likes recorded yet.</td>
+                </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+</section>
+{% endblock %}

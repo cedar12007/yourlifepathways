@@ -1,0 +1,687 @@
+/* Container styling */
+.blog-container {
+    max-width: 95%;
+    /* Allows the container to grow with the screen */
+    margin: 40px auto;
+    padding: 20px;
+    font-family: 'Arial', sans-serif;
+}
+
+
+.blog-grid {
+    display: grid;
+    /* This will automatically add more columns as the screen gets wider */
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 2rem;
+    /* Increased gap looks better on very wide screens */
+    padding: 1rem 0;
+    margin: 0;
+    /* Remove the 20px margin to prevent off-centering */
+}
+
+.blog-title {
+    text-align: center;
+    margin-bottom: 40px;
+    color: #333;
+}
+
+/* 1. Make the Grid tighter */
+.blog-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 1.5rem;
+    padding: 1rem 0;
+    margin: 20px;
+}
+
+/* 2. Shrink the Card internal space + Added Hover Prep */
+.blog-card {
+    background: #fff;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    display: flex;
+    flex-direction: column;
+    font-size: 0.9rem;
+
+    /* --- NEW HOVER PREP --- */
+    opacity: 1 !important;
+    /* Ensures card is always visible */
+    visibility: visible !important;
+    /* Overrides Stellar's fade-in effects */
+    transform: translateY(0);
+    /* Sets starting position */
+    transition: transform 0.4s ease, box-shadow 0.4s ease;
+    /* Smoothes the lift */
+
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    position: relative;
+    cursor: pointer;
+}
+
+/* The magic: expands the link to the nearest relative parent */
+.stretched-link::after {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 1;
+    content: "";
+}
+
+/* --- NEW SUBTLE HOVER EFFECT --- */
+.blog-card:hover {
+    transform: translateY(-5px);
+    /* Soft upward move */
+    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.12);
+    /* Softer, larger shadow */
+    /* Visual feedback on hover */
+    background-color: rgba(255, 255, 255, 0.05);
+    /* Slight highlight */
+}
+
+/* Ensure buttons/other links stay on top of the stretched link */
+.blog-card .button {
+    position: relative;
+    z-index: 2;
+}
+
+.blog-content {
+    padding: 1rem;
+    flex: 1 0 auto;
+    /* This forces the content to take up all available space */
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+}
+
+.blog-content h3 {
+    font-size: 1.1rem;
+    margin-bottom: 0.5rem;
+}
+
+.read-more {
+    margin-top: auto;
+    /* Pushes the link to the bottom of the content area */
+    padding-top: 10px;
+    font-size: 0.85rem;
+    font-weight: bold;
+    text-decoration: none !important;
+    /* Removes standard underline */
+    border-bottom: none !important;
+    /* Removes Stellar's custom border underline */
+    box-shadow: none !important;
+    /* Some templates use a bottom box-shadow */
+    color: #085a8d;
+}
+
+.blog-footer {
+    margin-top: 0;
+    padding: 0.75rem 1rem;
+    border-top: 1px solid #f0f0f0;
+    position: relative;
+    /* Brings it into the stacking context */
+    z-index: 10;
+    /* Pulls it ABOVE the invisible card link */
+}
+
+
+
+.blog-image {
+    width: 100%;
+    height: 150px;
+    /* Adjust this height to your preference */
+    overflow: hidden;
+    /* Clips any image bleed */
+    background: #f0f0f0;
+    /* Placeholder color while image loads */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.blog-image img {
+    width: 100%;
+    height: 100%;
+    /* This is the magic line: it fills the box without stretching */
+    object-fit: cover;
+    /* This ensures the 'important' part of the image stays centered */
+    object-position: center;
+    display: block;
+}
+
+/* Centered and tight icons */
+.interaction-group {
+    display: flex;
+    gap: 20px;
+    align-items: center;
+    justify-content: center;
+    /* Changed from space-evenly to keep them centered */
+}
+
+/* Strip all button styling */
+.icon-only {
+    background: none !important;
+    border: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    box-shadow: none !important;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: #888;
+    transition: color 0.2s ease, transform 0.1s ease;
+
+    width: auto !important;
+    min-width: 0 !important;
+    max-width: fit-content !important;
+    flex: 0 1 auto !important;
+    margin-right: 0 !important;
+    text-align: left !important;
+}
+
+.icon-only i {
+    font-size: 1.1rem;
+    min-width: 1.1rem;
+    min-height: 1.1rem;
+    display: inline-block;
+}
+
+.icon-only .count {
+    font-size: 0.85rem;
+    font-family: inherit;
+}
+
+/* Icon-specific Hover & Active States */
+.icon-only:hover {
+    color: #085a8d;
+}
+
+.icon-only:active {
+    transform: scale(0.9);
+}
+
+/* The base icon style */
+.like-btn {
+    transition: transform 0.2s ease, color 0.2s ease;
+    display: inline-block !important;
+    cursor: pointer;
+    position: relative;
+    z-index: 11;
+    /* Ensures the button is the highest element */
+}
+
+
+/* Ensure the button can actually move */
+.like-btn {
+    display: inline-block !important;
+    transition: transform 0.2s ease;
+}
+
+@keyframes shake {
+    0% {
+        transform: translateX(0);
+    }
+
+    25% {
+        transform: translateX(-5px);
+    }
+
+    50% {
+        transform: translateX(5px);
+    }
+
+    75% {
+        transform: translateX(-5px);
+    }
+
+    100% {
+        transform: translateX(0);
+    }
+}
+
+/* Use a stronger selector to ensure it triggers */
+button.like-btn.already-liked {
+    animation: shake 0.4s ease-in-out !important;
+    color: #e74c3c !important;
+    /* Keep it red to show it's already liked */
+}
+
+.like-btn:hover {
+    transform: scale(1.2);
+    color: #3498db;
+    /* Blue on hover */
+}
+
+/* The animation when clicked */
+.like-btn.clicked {
+    animation: pop 0.3s ease-out;
+}
+
+@keyframes pop {
+    0% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.4);
+    }
+
+    100% {
+        transform: scale(1);
+    }
+}
+
+/* Style for when it has been liked */
+.like-btn i.fa-solid {
+    color: #e74c3c;
+}
+
+
+.like-btn.voted i {
+    color: #e74c3c;
+}
+
+
+.action-share {
+    transition: all 0.3s ease;
+    cursor: pointer;
+    background: none;
+    border: none;
+    padding: 0;
+    display: flex !important;
+    position: relative;
+    z-index: 11;
+}
+
+.share-success {
+    background-color: #d4edda !important;
+    /* Light green */
+    border-color: #c3e6cb !important;
+    color: #155724 !important;
+}
+
+/* Optional: Make the "Copied" text pop */
+.action-share i.fa-check {
+    animation: popIn 0.3s ease;
+}
+
+@keyframes popIn {
+    0% {
+        transform: scale(0);
+    }
+
+    100% {
+        transform: scale(1);
+    }
+}
+
+
+.breadcrumb {
+    margin-bottom: 0.5rem;
+    font-size: 0.9rem;
+    overflow: hidden;
+}
+
+
+
+.breadcrumb ol {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.breadcrumb li {
+    display: flex;
+    align-items: center;
+}
+
+/* Add a separator (chevron) between items */
+.breadcrumb li:not(:last-child)::after {
+    content: "\f105";
+    /* FontAwesome Right Chevron */
+    font-family: "Font Awesome 5 Free";
+    font-weight: 900;
+    margin: 0 10px;
+    color: #ccc;
+}
+
+.breadcrumb li a {
+    text-decoration: none;
+    border-bottom: none;
+    /* Removes the default Stellar underline if desired */
+    color: #888;
+    transition: color 0.2s;
+}
+
+.breadcrumb li a:hover {
+    color: #58c3ad;
+    /* Matches Stellar's primary color */
+}
+
+.breadcrumb li.active {
+    color: #333;
+    font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+#nav+#main {
+    background-color: white;
+    padding: 2em;
+}
+
+@media screen and (max-width: 980px) {
+    #main {
+        width: 100% !important;
+        max-width: 100% !important;
+        margin-top: 100px !important;
+        border-radius: 0 !important;
+        padding: 1em !important;
+    }
+}
+
+.image.main img {
+    width: 50%;
+    display: block;
+    /* Required for margin: auto to work */
+    margin-left: auto;
+    margin-right: auto;
+}
+
+
+/* This overrides the global strong tag only within the blog post */
+.post-detail strong {
+    color: #2c3e50;
+    /* Darker, distinct color */
+    font-weight: 800;
+    /* Extra bold */
+    display: inline-block;
+    /* Optional: gives it a bit more "weight" */
+    text-transform: none;
+}
+
+
+/* 1. Space out the rows */
+form div,
+.form-group {
+    margin-bottom: 20px !important;
+    /* Creates a 20px gap between each row */
+}
+
+/* 2. Stop the button from stretching */
+#main input[type="submit"],
+#main button[type="submit"] {
+    width: auto !important;
+    /* 📏 Stops it from being 100% wide */
+    align-self: flex-start;
+    /* 📍 If in a flexbox, keeps it to the left */
+    margin-top: 20px !important;
+    /* Gives the button a nice shape */
+    display: inline-block !important;
+}
+
+.blog_comment {
+    margin: 10px;
+    font-size: 15px;
+}
+
+.blog_comment strong {
+    text-transform: none !important;
+}
+
+/* Styles the superscript asterisk link */
+sup a {
+    text-decoration: none;
+    color: #007bff;
+    /* You can change this to your brand color */
+    font-weight: bold;
+    padding: 0 2px;
+}
+
+sup a:hover {
+    text-decoration: underline;
+}
+
+#source-note,
+.footnote,
+#source-note p,
+.footnote p,
+#source-note strong,
+.footnote strong {
+    font-size: 1.1rem !important;
+    color: #888;
+    line-height: 1.5;
+}
+
+#source-note p:first-child strong {
+    font-size: 1.25rem !important;
+    color: #333;
+    display: block;
+    margin-bottom: 5px;
+}
+
+#source-note {
+    margin-top: 40px;
+    padding-top: 20px;
+    border-top: 1px solid #eee;
+}
+
+
+#source-note strong {
+    color: #333;
+    /* Keeps bold text readable */
+}
+
+#source-note a {
+    font-size: 0.7em;
+    text-transform: uppercase;
+    text-decoration: none;
+    color: #999;
+}
+
+#source-note a:hover {
+    color: #333;
+}
+
+/* This is the secret sauce */
+/* It ensures the 'back to text' doesn't get stuck under a menu */
+#source-ref {
+    scroll-margin-top: 120px;
+    /* Adjust this number based on your header height */
+
+}
+
+
+@keyframes highlight {
+    0% {
+        background-color: rgba(255, 255, 0, 0.5);
+    }
+
+    100% {
+        background-color: transparent;
+    }
+}
+
+/* Style reply buttons to be more subtle, like links */
+.reply-btn {
+    background: none;
+    border: none;
+    color: #007bff;
+    text-decoration: underline;
+    cursor: pointer;
+    font-size: 0.9rem;
+    padding: 1;
+    margin: 0 5px;
+    font-family: inherit;
+    display: inline;
+    line-height: inherit;
+    width: auto;
+    height: auto;
+    min-width: 0;
+    box-sizing: border-box;
+}
+
+.reply-btn:hover {
+    color: #0056b3;
+    text-decoration: none;
+}
+
+/* Navigation arrow buttons */
+.nav-arrow {
+    border: none;
+    background: #333;
+    font-size: 20px;
+    padding: 0;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+    margin-bottom: 20px;
+}
+
+.nav-arrow i {
+    color: white;
+    font-weight: 900;
+}
+
+.nav-arrow:hover {
+    background-color: #333;
+}
+
+.nav-arrow:active {
+    transform: scale(0.95);
+}
+
+.centered-nav {
+    display: flex;
+    justify-content: center;
+    gap: 40px;
+}
+
+.logo {
+    cursor: pointer;
+}
+
+/* Responsive sizing for small displays */
+@media (max-width: 768px) {
+    .nav-arrow {
+        width: 40px;
+        height: 40px;
+        font-size: 16px;
+    }
+
+    .breadcrumb ol {
+        flex-wrap: nowrap;
+    }
+
+    .breadcrumb li.active span {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        display: block;
+    }
+
+    .breadcrumb li.active {
+        flex: 0 1 120px;
+        max-width: 120px;
+        min-width: 0;
+    }
+
+    .image.main img {
+        width: 100%;
+    }
+}
+
+/* --- 3. SMALL MOBILE DEVICES (Max 480px) --- */
+@media screen and (max-width: 480px) {
+    .post-detail header h1 {
+        font-size: 1.5em !important;
+    }
+
+}
+
+/* Submit buttons */
+.btn-submit {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    padding: 0px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.3s;
+}
+
+.btn-submit:hover {
+    background-color: #0056b3;
+}
+
+/* Moderation buttons */
+.approve-btn,
+.reject-btn {
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    margin: 0 5px;
+}
+
+.approve-btn {
+    background-color: #28a745;
+}
+
+.approve-btn:hover {
+    background-color: #218838;
+}
+
+.reject-btn {
+    background-color: #dc3545;
+}
+
+.reject-btn:hover {
+    background-color: #c82333;
+}
+
+/* Blog detail fonts */
+.post-detail header h1 {
+    font-family: 'Roboto Slab', serif;
+    font-size: 2.5rem;
+    font-weight: 700;
+    line-height: 1.2;
+}
+
+.summary {
+    font-family: 'Lato', sans-serif;
+    font-style: italic;
+    font-weight: 400;
+    font-size: 1.60rem;
+    line-height: 1.4;
+}
+
+.post-detail p.content {
+    font-family: 'Georgia', serif;
+    font-size: 1rem;
+    line-height: 1.6;
+    font-weight: 400;
+}
+
+.external-link-symbol {
+    font-size: 0.7em;
+    vertical-align: middle;
+}

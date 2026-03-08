@@ -1,0 +1,115 @@
+{% extends "base.html" %}
+
+{% block extra_head_elements %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/admin.min.css') }}">
+{% endblock %}
+
+{% block content %}
+<section class="main admin-comments">
+    <a href="{{ url_for('admin.dashboard') }}" class="admin-back-link">
+        <i class="fa-solid fa-arrow-left"></i> Back to Admin
+    </a>
+    <header class="major">
+        <h2>Moderation</h2>
+    </header>
+
+    <div class="admin-tabs">
+        <a href="{{ url_for('admin.dashboard') }}" class="admin-tab">Blog Posts</a>
+        <a href="{{ url_for('admin.manage_comments') }}" class="admin-tab active">Comments</a>
+        <a href="{{ url_for('admin.manage_likes') }}" class="admin-tab">Likes</a>
+        <a href="{{ url_for('admin.security_logs') }}" class="admin-tab">Logs</a>
+        <a href="{{ url_for('admin.change_password') }}" class="admin-tab">Password</a>
+        <a href="{{ url_for('admin.database_resilience') }}" class="admin-tab">Resilience</a>
+    </div>
+
+    <div class="comments-list">
+        {% if comments %}
+        {% for comment in comments %}
+        <div id="comment-card-{{ comment.id }}"
+            class="comment-card {% if comment.is_deleted %}deleted{% elif not comment.is_approved %}unapproved{% else %}approved{% endif %}">
+            <div class="comment-header">
+                <div class="comment-info">
+                    <strong>{{ comment.name }}</strong>
+                    <span>({{ comment.email or 'No email' }})</span>
+                    <br>
+                    <span class="local-time"
+                        data-utc="{{ comment.date_created.isoformat() if comment.date_created else '' }}">{{
+                        comment.date_created.strftime('%Y-%m-%d %H:%M') if comment.date_created else '' }}</span>
+                </div>
+                <div>
+                    <span
+                        class="status-badge {% if comment.is_deleted %}deleted{% elif not comment.is_approved %}unapproved{% else %}approved{% endif %}">
+                        {% if comment.is_deleted %}Deleted{% elif not comment.is_approved %}Pending{% else %}Approved{%
+                        endif %}
+                    </span>
+                    <br>
+                    <a href="{{ url_for('blog.view_post', slug=comment.post.slug) }}#comments" class="post-link"
+                        target="_blank">
+                        View context
+                    </a>
+                </div>
+            </div>
+            <div class="comment-body">
+                <p>{{ comment.content }}</p>
+                <small>On post: <a href="{{ url_for('blog.view_post', slug=comment.post.slug) }}" target="_blank"
+                        class="post-title-link"><strong>{{ comment.post.title }}</strong></a></small>
+            </div>
+            <div class="comment-footer admin-actions">
+                {% if not comment.is_deleted %}
+                <button type="button" class="btn-admin btn-edit"
+                    onclick="toggleReplyForm({{ comment.id }})">Reply</button>
+
+                <form action="{{ url_for('admin.toggle_approve_comment', comment_id=comment.id) }}" method="POST"
+                    onsubmit="handleAjaxAction(event, this);">
+                    {% if comment.is_approved %}
+                    <button type="submit" class="btn-admin btn-restore">Unapprove</button>
+                    {% else %}
+                    <button type="submit" class="btn-admin btn-restore">Approve</button>
+                    {% endif %}
+                </form>
+                {% endif %}
+                <form action="{{ url_for('admin.toggle_delete_comment', comment_id=comment.id) }}" method="POST"
+                    onsubmit="handleAjaxAction(event, this);">
+                    {% if comment.is_deleted %}
+                    <button type="submit" class="btn-admin btn-edit">Restore</button>
+                    {% else %}
+                    <button type="submit" class="btn-admin btn-delete">Archive</button>
+                    {% endif %}
+                </form>
+            </div>
+
+            <!-- Inline Reply Form -->
+            <div id="reply-form-{{ comment.id }}" class="admin-reply-form"
+                style="display: none; padding: 1.5em; background: #f9f9f9; border-top: 1px solid #eee;">
+                <form action="{{ url_for('admin.reply_to_comment', comment_id=comment.id) }}" method="POST">
+                    <div class="form-group" style="margin-bottom: 1em;">
+                        <label style="font-size: 0.75rem;">Responding as <strong>Erez Asif</strong>:</label>
+                        <textarea name="reply_content" placeholder="Type your response..." required
+                            style="min-height: 100px; font-size: 0.85rem;"></textarea>
+                    </div>
+                    <div class="form-actions" style="margin-top: 0; justify-content: flex-start; gap: 10px;">
+                        <button type="submit" class="btn-admin btn-restore" style="height: 32px; min-width: 100px;">Post
+                            Response</button>
+                        <button type="button" class="btn-admin btn-cancel" onclick="toggleReplyForm({{ comment.id }})"
+                            style="height: 32px; background: #eee; color: #333;">Cancel</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        {% endfor %}
+        {% else %}
+        <p>No comments to moderate yet.</p>
+        {% endif %}
+    </div>
+
+    <script>
+        function toggleReplyForm(commentId) {
+            const form = document.getElementById(`reply-form-${commentId}`);
+            form.style.display = form.style.display === 'none' ? 'block' : 'none';
+            if (form.style.display === 'block') {
+                form.querySelector('textarea').focus();
+            }
+        }
+    </script>
+</section>
+{% endblock %}

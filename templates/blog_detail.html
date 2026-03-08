@@ -1,0 +1,279 @@
+{% extends "base.html" %}
+{% block title %}{{ meta_title }}{% endblock %}
+{% block meta_description %}{{ meta_description }}{% endblock %}
+
+{% block og_title %}{{ meta_title }}{% endblock %}
+{% block og_description %}{{ meta_description }}{% endblock %}
+{% block og_image %}{{ url_for('static', filename='images/' + post.image_file, _external=True) }}{% endblock %}
+
+{% block twitter_title %}{{ meta_title }}{% endblock %}
+{% block twitter_description %}{{ meta_description }}{% endblock %}
+{% block twitter_image %}{{ url_for('static', filename='images/' + post.image_file, _external=True) }}{% endblock %}
+
+{% block extra_head_elements %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/blog.min.css') }}" />
+
+
+<!-- JSON-LD Structured Data -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "headline": "{{ post.title }}",
+  "description": "{{ post.summary }}",
+  "image": "{{ url_for('static', filename='images/' + post.image_file, _external=True) }}",
+  "datePublished": "{{ post.date_created.strftime('%Y-%m-%dT%H:%M:%S') }}",
+  "dateModified": "{{ post.date_created.strftime('%Y-%m-%dT%H:%M:%S') }}",
+  "author": {
+    "@type": "Person",
+    "name": "Erez Asif"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "YourLifePathways",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "{{ url_for('static', filename='images/logo_yourlifepathways_coaching.png', _external=True) }}"
+    }
+  },
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "{{ canonical_url }}"
+  }
+}
+</script>
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "Home",
+      "item": "{{ url_for('main.index', _external=True) }}"
+    },
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "Blog",
+      "item": "{{ url_for('blog.list_posts', _external=True) }}"
+    },
+    {
+      "@type": "ListItem",
+      "position": 3,
+      "name": "{{ post.title }}",
+      "item": "{{ canonical_url }}"
+    }
+  ]
+}
+</script>
+{% endblock %}
+
+{% block content %}
+{% macro render_comment(comment, depth=0) %}
+<div class="blog_comment" style="margin-left: {{ 20 * depth }}px;">
+    {% if comment.is_deleted %}
+    <div class="comment-removed-placeholder" style="padding: 10px 0; border-bottom: 1px solid #f0f0f0;">
+        <p style="font-style: italic; color: #999; margin: 0; font-size: 0.9em;">[Comment Removed]</p>
+    </div>
+    {% else %}
+    <strong>{{ comment.name }}</strong> <small>{{ comment.date_created.strftime('%Y-%m-%d %H:%M') }}</small>
+    <p>{{ comment.content }}</p>
+    <button class="reply-btn" data-comment-id="{{ comment.id }}">Reply</button>
+    <!-- Reply form, hidden initially -->
+    <div class="reply-form" id="reply-form-{{ comment.id }}" style="display:none;">
+        <form action="{{ url_for('blog.add_comment', slug=post.slug) }}" method="POST" id="replyForm-{{ comment.id }}">
+            <input type="hidden" name="parent_id" value="{{ comment.id }}">
+            <div class="form-group" style="padding-top: 20px;">
+                <input type="text" name="name" placeholder="Name (Required)" required class="form-control">
+            </div>
+            <div class="form-group">
+                <input type="email" name="email" placeholder="Email (Optional)" class="form-control">
+            </div>
+            <textarea name="content" placeholder="Share your thoughts..." required class="form-control"></textarea>
+            <input type="hidden" name="g-recaptcha-response" id="g-recaptcha-response-reply-{{ comment.id }}">
+            <button type="submit" class="btn-submit">Submit Reply</button>
+        </form>
+    </div>
+    {% endif %}
+
+    {% if comment.active_replies_list %}
+    {% for reply in comment.active_replies_list %}
+    {{ render_comment(reply, depth + 1) }}
+    {% endfor %}
+    {% endif %}
+</div>
+{% endmacro %}
+
+<nav class="breadcrumb" aria-label="Breadcrumb" style="display: flex; align-items: center;">
+    <ol style="flex: 1;">
+        <li><a href="{{ url_for('blog.list_posts') }}">Blog</a></li>
+        <li class="active" aria-current="page"><span>{{ post.title }}</span></li>
+    </ol>
+    <div class="interaction-group">
+        <button class="icon-only like-btn" data-id="{{ post.id }}" title="Like this post">
+            <i class="fa-regular fa-heart"></i>
+            <span class="count">{{ likes_count }}</span>
+        </button>
+
+        <button class="icon-only" title="Comment">
+            <i class="fa-regular fa-comment"></i>
+            <span class="count">{{ approved_count }}</span>
+        </button>
+
+        <button class="icon-only action-share" data-id="{{ post.id }}" title="Share this post">
+            <i class="fa-solid fa-share-nodes"></i>
+            <span class="count">{{ shares_count }}</span>
+        </button>
+    </div>
+</nav>
+<div class="centered-nav" style="display: flex; justify-content: center; gap: 40px;">
+    <div class="nav-arrow" {% if not prev_post %}style="visibility: hidden;" {% endif %}
+        onclick="{% if prev_post %}window.location.href='{{ url_for('blog.view_post', slug=prev_post.slug) }}'{% endif %}">
+        <i class="fa-solid fa-chevron-left"></i>
+    </div>
+    <div class="nav-arrow" onclick="window.location.href='{{ url_for('blog.list_posts') }}'"><i
+            class="fa-solid fa-home"></i></div>
+    <div class="nav-arrow" {% if not next_post %}style="visibility: hidden;" {% endif %}
+        onclick="{% if next_post %}window.location.href='{{ url_for('blog.view_post', slug=next_post.slug) }}'{% endif %}">
+        <i class="fa-solid fa-chevron-right"></i>
+    </div>
+</div>
+
+
+<article class="post-detail">
+    <header>
+        <h1>{{ post.title }}</h1>
+    </header>
+
+    <div class="image main">
+        <img src="{{ url_for('static', filename='images/' + post.image_file) }}" alt="{{ post.title }}"
+            fetchpriority="high" decoding="async" />
+    </div>
+
+    <div class="content">
+        <div class="blog-summary"
+            style="background-color: #f9f9f9; padding: 20px; border-left: 5px solid #333; margin-bottom: 30px; font-style: italic;">
+            {{ post.summary }}
+        </div>
+
+        <p class="content">{{ post.content | safe }}</p>
+    </div>
+
+    <div class="blog-footer detail-interactions">
+        <div class="interaction-group">
+            <button class="icon-only like-btn" data-id="{{ post.id }}" title="Like this post">
+                <i class="fa-regular fa-heart"></i>
+                <span class="count">{{ likes_count }}</span>
+            </button>
+
+            <button class="icon-only" title="Comment">
+                <i class="fa-regular fa-comment"></i>
+                <span class="count">{{ approved_count }}</span>
+            </button>
+
+            <button class="icon-only action-share" data-id="{{ post.id }}" title="Share this post">
+                <i class="fa-solid fa-share-nodes"></i>
+                <span class="count">{{ shares_count }}</span>
+            </button>
+        </div>
+    </div>
+
+</article>
+
+<h3 id="comments">Comments</h3>
+{% if comments %}
+{% for comment in comments %}
+{{ render_comment(comment) }}
+{% endfor %}
+{% else %}
+<p>No comments yet. Be the first to comment!</p>
+{% endif %}
+
+<form action="{{ url_for('blog.add_comment', slug=post.slug) }}" method="POST" id="commentForm">
+    <h4>Leave a Comment</h4>
+    <div class="form-group">
+        <input type="text" name="name" placeholder="Name (Required)" required class="form-control">
+    </div>
+    <div class="form-group">
+        <input type="email" name="email" placeholder="Email (Optional - will not be published)" class="form-control">
+    </div>
+    <textarea name="content" placeholder="Share your thoughts..." required class="form-control"></textarea>
+
+    <div style="display:none;">
+        <input type="text" name="honeypot" tabindex="-1">
+    </div>
+
+    <input type="hidden" name="g-recaptcha-response" id="g-recaptcha-response">
+
+    <button type="submit" class="btn-submit">Submit Comment</button>
+</form>
+
+
+
+<script src="https://www.google.com/recaptcha/api.js?render=6LcNsTosAAAAAB2KM98xPajFLETT5g2uNw_W4JyE"></script>
+<script>
+    function handleFormSubmit(formId) {
+        const form = document.getElementById(formId);
+        form.addEventListener("submit", function (e) {
+            e.preventDefault();
+            grecaptcha.execute("6LcNsTosAAAAAB2KM98xPajFLETT5g2uNw_W4JyE", { action: 'submit' }).then(async function (token) {
+                const recaptchaField = form.querySelector('input[name="g-recaptcha-response"]');
+                recaptchaField.value = token;
+
+                const formData = new FormData(form);
+
+                try {
+                    const response = await fetch(form.action, {
+                        method: 'POST',
+                        body: formData
+                    });
+
+                    if (response.ok) {
+                        const data = await response.json();
+                        if (data.success && typeof gtag === 'function') {
+                            gtag('event', 'blog_comment_submit', {
+                                'post_title': document.querySelector('h1')?.innerText || 'Unknown'
+                            });
+                        }
+                        showModal(data.message, data.success);
+                    } else {
+                        showModal("Something went wrong. Please try again.", false);
+                    }
+
+                } catch (error) {
+                    console.error("Error:", error);
+                    showModal("An error occurred. Please try again.", false);
+                }
+            });
+        });
+    }
+
+    handleFormSubmit("commentForm");
+    // Handle reply forms
+    document.querySelectorAll('.reply-form form').forEach(form => {
+        handleFormSubmit(form.id);
+    });
+</script>
+
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/blog.min.js') }}"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const replyBtns = document.querySelectorAll('.reply-btn');
+        replyBtns.forEach(btn => {
+            btn.addEventListener('click', function () {
+                const commentId = this.getAttribute('data-comment-id');
+                const form = document.getElementById('reply-form-' + commentId);
+                if (form) {
+                    form.style.display = form.style.display === 'none' ? 'block' : 'none';
+                }
+            });
+        });
+    });
+</script>
+{% endblock %}

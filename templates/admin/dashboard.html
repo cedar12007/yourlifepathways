@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+
+{% block extra_head_elements %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/admin.min.css') }}">
+{% endblock %}
+
+{% block content %}
+<section class="main admin-dashboard">
+    <a href="{{ url_for('main.index') }}" class="admin-back-link">
+        <i class="fa-solid fa-arrow-left"></i> Back to Website
+    </a>
+    <header class="major">
+        <h2>Blog Management</h2>
+    </header>
+
+    <div class="admin-tabs">
+        <a href="{{ url_for('admin.dashboard') }}" class="admin-tab active">Blog Posts</a>
+        <a href="{{ url_for('admin.manage_comments') }}" class="admin-tab">Comments</a>
+        <a href="{{ url_for('admin.manage_likes') }}" class="admin-tab">Likes</a>
+        <a href="{{ url_for('admin.tracking_stats') }}" class="admin-tab">Traffic</a>
+        <a href="{{ url_for('admin.security_logs') }}" class="admin-tab">Logs</a>
+        <a href="{{ url_for('admin.change_password') }}" class="admin-tab">Password</a>
+        <a href="{{ url_for('admin.database_resilience') }}" class="admin-tab">Resilience</a>
+    </div>
+
+    <a href="{{ url_for('admin.new_post') }}" class="button primary btn-new">Add New Post</a>
+
+    <div class="admin-table-wrapper">
+        <table class="admin-table">
+            <thead>
+                <tr>
+                    <th class="sortable">ID</th>
+                    <th class="sortable">Title</th>
+                    <th class="sortable">Category</th>
+                    <th class="sortable">Date</th>
+                    <th class="sortable">Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for post in posts %}
+                <tr>
+                    <td>{{ post.id }}</td>
+                    <td><a href="{{ url_for('blog.view_post', slug=post.slug) }}" target="_blank"
+                            class="post-title-link">{{ post.title }}</a></td>
+                    <td>{{ post.category }}</td>
+                    <td><span class="local-time"
+                            data-utc="{{ post.date_created.isoformat() if post.date_created else '' }}"
+                            data-format="date">{{ post.date_created.strftime('%Y-%m-%d') if post.date_created else ''
+                            }}</span></td>
+                    <td>
+                        <span
+                            class="post-status {% if post.is_deleted %}status-deleted{% else %}status-active{% endif %}">
+                            {{ 'Deleted' if post.is_deleted else 'Active' }}
+                        </span>
+                    </td>
+                    <td class="admin-actions">
+                        <a href="{{ url_for('admin.edit_post', post_id=post.id) }}" class="btn-admin btn-edit">Edit</a>
+                        <form action="{{ url_for('admin.toggle_delete', post_id=post.id) }}" method="POST"
+                            onsubmit="handleAjaxAction(event, this);">
+                            {% if post.is_deleted %}
+                            <button type="submit" class="btn-admin btn-restore">Restore</button>
+                            {% else %}
+                            <button type="submit" class="btn-admin btn-delete">Archive</button>
+                            {% endif %}
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</section>
+{% endblock %}

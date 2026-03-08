@@ -1,0 +1,485 @@
+{% extends "base.html" %}
+
+{% block extra_head_elements %}
+{% endblock %}
+
+
+{% block content %}
+<!-- Introduction -->
+<section id="intro" class="main">
+	<div class="spotlight">
+		<div class="content">
+			<header class="major">
+				<h1>Navigating the pathways of growth and transition. My coaching helps career professionals and
+					growth-minded individuals reclaim their spark and live with purpose.</h1>
+			</header>
+
+			<P></P>
+			<div class="hero-container">
+				<p>We all hit those points where we know we’re capable of more, but we just
+					aren't sure how to get there. Whether you're navigating a transition at
+					work or chasing a personal goal, I’m here to help you find your way.</p>
+
+				<p>My coaching is pretty simple: we figure out exactly where you want to go, identify what's holding you
+					back, and
+					create a path to get you moving.</p>
+				<P>My practice is rooted in the ICF (International Coaching Federation) Core Competencies. This means
+					our partnership is built on a foundation of strict confidentiality, ethical practice, and a
+					"thought-provoking" process designed to maximize your potential.
+				</P>
+				<div class="hero-image">
+					<img src="{{ url_for('static', filename='images/profile_head_shot.jpg') }}" alt="Erez Asif"
+						fetchpriority="high" decoding="async" width="400" height="400">
+				</div>
+
+				<h2 class="mantra">Less overthinking, more doing.</h2>
+
+				<p>If you're ready to level up your career and your life, <a href="#contact" class="cta-flow">let's
+						talk*.</a> </p>
+				<p>* I offer a free, no obligation, 30-minute discovery call.</p>
+
+				<p class="signature">- Erez Asif</p>
+
+			</div>
+		</div>
+	</div>
+</section>
+
+
+<!-- About Me -->
+<section id="about_me" class="main">
+	<div class="spotlight">
+		<div class="content">
+			<header class="major">
+				<h2>About Me</h2>
+			</header>
+			<p>
+				For over 25 years, I have worked in companies spanning from startups and education technology to
+				consulting and large multinational software companies. With over two decades of experience as a leader,
+				managing teams of upwards of 40 employees, and working directly with C-level executives, I have
+				acquired a keen awareness of what it takes to grow and achieve career goals at every level of an
+				organization.
+			</p>
+			<p>As the head of a global platform engineering organization at SAP, I lead teams building highly-secure
+				cloud platforms for the world's most regulated industries. Beyond the technology, I am deeply committed
+				to the professional development of our talent—mentoring everyone from interns and early-career
+				individuals to experienced professionals and leaders. In
+				parallel, I serve as an <b>SAP Global Coach</b>, helping individuals navigate and scale their own
+				professional journeys.
+			</p>
+			<p>
+				As a father of three, a long-time youth sports coach, and a Big Brothers Big Sisters volunteer,
+				I’ve spent much of my life helping young people find their footing. Whether it's on a court or in an
+				office, my goal is the same: to help someone see their own potential and then give them the tools to
+				reach it.
+			</p>
+
+			<div style="margin-bottom: 0.5em; text-align: left; font-size: .8em;">
+				<a href="https://www.linkedin.com/in/erez-asif" target="_blank" style="text-decoration: none;">
+					<img src="{{ url_for('static', filename='images/linkedin_logo.jpg') }}" width="22px"
+						style="vertical-align: middle; margin-right: 5px;" alt="LinkedIn Logo" />
+					<span style="vertical-align: middle;">https://www.linkedin.com/in/erez-asif</span>
+				</a>
+			</div>
+			<div style="margin-bottom: 0.5em; text-align: left; font-size: .8em;">
+				<a href="https://www.linkedin.com/company/yourlifepathways-coaching/" target="_blank"
+					style="text-decoration: none;">
+					<img src="{{ url_for('static', filename='images/linkedin_logo.jpg') }}" width="22px"
+						style="vertical-align: middle; margin-right: 5px;" alt="LinkedIn Logo" />
+					<span
+						style="vertical-align: middle;">https://www.linkedin.com/company/yourlifepathways-coaching/</span>
+				</a>
+			</div>
+			<br>
+			<p>
+				As an <a href="#" id="erickson-cert-link" class="link-preview">Erickson Coaching International Trained
+					Coach<span class="thumbnail-preview"><img
+							src="{{ url_for('static', filename='images/erickson_acc_coaching_certificate.png') }}"
+							alt="Erickson Certificate"></span></a>,
+				I uphold the International Coaching Federation (ICF) standards,
+				ensuring my practice is built upon professional principles.
+			</p>
+
+			<!-- Erickson Certificate Modal -->
+			<div id="ericksonCertModal" class="modal">
+				<div class="modal-content large" style="padding: 10px; overflow: auto;">
+					<button class="close-btn" id="ericksonCertClose"
+						style="position: absolute; top: 8px; right: 15px; z-index: 1; font-size: 32px; color: white; background: rgba(0,0,0,0.5); border-radius: 50%; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;">&times;</button>
+					<img src="{{ url_for('static', filename='images/erickson_acc_coaching_certificate.png') }}"
+						alt="Erickson ACC Coaching Certificate"
+						style="width: 100%; height: auto; border-radius: 4px; display: block;">
+				</div>
+			</div>
+
+			<script>
+				(function () {
+					var link = document.getElementById('erickson-cert-link');
+					var modal = document.getElementById('ericksonCertModal');
+					var closeBtn = document.getElementById('ericksonCertClose');
+
+					link.addEventListener('click', function (e) {
+						e.preventDefault();
+						modal.style.display = 'block';
+					});
+
+					closeBtn.addEventListener('click', function () {
+						modal.style.display = 'none';
+					});
+
+					modal.addEventListener('click', function (e) {
+						if (e.target === modal) {
+							modal.style.display = 'none';
+						}
+					});
+				})();
+			</script>
+
+		</div>
+		<span class="image"><img src="{{ url_for('static', filename='images/profile_pic.jpg') }}" alt="Profile Pic"
+				loading="lazy" decoding="async" /></span>
+	</div>
+</section>
+
+
+
+<!-- Service Section -->
+<section id="community" class="main">
+	<header class="major">
+		<h2>Community and Mentorship</h2>
+	</header>
+	<p>I strongly believe that being involved in the community and giving back not only helps me "pay it forward", but
+		also brings personal fulfillment and satisfaction that inspires my actions in my personal, professional, and
+		coaching life. Engaging with diverse perspectives through mentorship allows me to see the many 'pathways' people
+		navigate. It keeps my coaching lens wide and ensures I’m bringing fresh, real-world empathy to every session.
+	</p>
+	<div class="highlight-box">
+		<p style="margin: 0">Currently, my involvement includes offering <b>pro-bono</b> transition/career coaching
+			sessions for
+			high-school students and new college graduates. These experiences provide a sense of purpose that fuels my
+			work with every client I serve.</p>
+	</div>
+
+	<p><strong>Youth Sports Coaching:</strong></p>
+	<P>I've spent over a decade coaching youth sports, including <a href="#" id="soccer-coaching-link"
+			class="link-preview">soccer<span class="thumbnail-preview"><img
+					src="{{ url_for('static', filename='images/soccer_coaching.jpg') }}"
+					alt="Soccer Coaching"></span></a> and <a href="#" id="volleyball-coaching-link"
+			class="link-preview">volleyball<span class="thumbnail-preview"><img
+					src="{{ url_for('static', filename='images/volleyball_coaching.jpeg') }}"
+					alt="Volleyball Coaching"></span></a> from elementary to high school.
+		It was a once-in-a-lifetime opportunity to spend quality time with my children in unique high-pressure and
+		social settings. My passion went beyond being a "parent coach"—it was to help young athletes develop their
+		skills, confidence, and sportsmanship.</P>
+
+	<!-- Soccer Coaching Modal -->
+	<div id="soccerCoachingModal" class="modal">
+		<div class="modal-content large" style="padding: 10px; overflow: auto;">
+			<button class="close-btn" id="soccerCoachingClose"
+				style="position: absolute; top: 8px; right: 15px; z-index: 1; font-size: 32px; color: white; background: rgba(0,0,0,0.5); border-radius: 50%; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;">&times;</button>
+			<img src="{{ url_for('static', filename='images/soccer_coaching.jpg') }}" alt="Soccer Coaching"
+				style="width: 100%; height: auto; border-radius: 4px; display: block;">
+		</div>
+	</div>
+
+	<!-- Volleyball Coaching Modal -->
+	<div id="volleyballCoachingModal" class="modal">
+		<div class="modal-content large" style="padding: 10px; overflow: auto;">
+			<button class="close-btn" id="volleyballCoachingClose"
+				style="position: absolute; top: 8px; right: 15px; z-index: 1; font-size: 32px; color: white; background: rgba(0,0,0,0.5); border-radius: 50%; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;">&times;</button>
+			<img src="{{ url_for('static', filename='images/volleyball_coaching.jpeg') }}" alt="Volleyball Coaching"
+				style="width: 100%; height: auto; border-radius: 4px; display: block;">
+		</div>
+	</div>
+
+	<script>
+		(function () {
+			function setupModal(linkId, modalId, closeId) {
+				var link = document.getElementById(linkId);
+				var modal = document.getElementById(modalId);
+				var closeBtn = document.getElementById(closeId);
+
+				link.addEventListener('click', function (e) {
+					e.preventDefault();
+					modal.style.display = 'block';
+				});
+				closeBtn.addEventListener('click', function () {
+					modal.style.display = 'none';
+				});
+				modal.addEventListener('click', function (e) {
+					if (e.target === modal) {
+						modal.style.display = 'none';
+					}
+				});
+			}
+			setupModal('soccer-coaching-link', 'soccerCoachingModal', 'soccerCoachingClose');
+			setupModal('volleyball-coaching-link', 'volleyballCoachingModal', 'volleyballCoachingClose');
+		})();
+	</script>
+	<P>My commitment has always been to stay prepared and keep learning myself. Earning my <a href="#"
+			id="soccer-license-link" class="link-preview">US Soccer D Coaching
+			License<span class="thumbnail-preview"><img
+					src="{{ url_for('static', filename='images/us_soccer_national_D_license.png') }}"
+					alt="US Soccer License"></span></a> was more than just a credential; it represents a formal
+		commitment to learn how to
+		instruct,
+		motivate, and lead young players effectively.</P>
+
+	<!-- US Soccer License Modal -->
+	<div id="soccerLicenseModal" class="modal">
+		<div class="modal-content large" style="padding: 10px; overflow: auto;">
+			<button class="close-btn" id="soccerLicenseClose"
+				style="position: absolute; top: 8px; right: 15px; z-index: 1; font-size: 32px; color: white; background: rgba(0,0,0,0.5); border-radius: 50%; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;">&times;</button>
+			<img src="{{ url_for('static', filename='images/us_soccer_national_D_license.png') }}"
+				alt="US Soccer National D License"
+				style="width: 100%; height: auto; border-radius: 4px; display: block;">
+		</div>
+	</div>
+
+	<script>
+		(function () {
+			var link = document.getElementById('soccer-license-link');
+			var modal = document.getElementById('soccerLicenseModal');
+			var closeBtn = document.getElementById('soccerLicenseClose');
+
+			link.addEventListener('click', function (e) {
+				e.preventDefault();
+				modal.style.display = 'block';
+			});
+
+			closeBtn.addEventListener('click', function () {
+				modal.style.display = 'none';
+			});
+
+			modal.addEventListener('click', function (e) {
+				if (e.target === modal) {
+					modal.style.display = 'none';
+				}
+			});
+		})();
+	</script>
+	<div class="coaching-experience-container">
+		<table class="coaching-table">
+			<thead>
+				<tr>
+					<th>Year</th>
+					<th>Sport</th>
+					<th>Level / Age Group</th>
+					<th>Role</th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr>
+					<td>2023–2024</td>
+					<td>Volleyball</td>
+					<td>High School</td>
+					<td>Head Coach</td>
+				</tr>
+				<tr>
+					<td>2021–2022</td>
+					<td>Volleyball</td>
+					<td>Middle School</td>
+					<td>Head Coach</td>
+				</tr>
+				<tr>
+					<td>2018–2022</td>
+					<td>Soccer</td>
+					<td>U10 – U16 Girls</td>
+					<td>Head Coach (Licensed)</td>
+				</tr>
+				<tr>
+					<td>2016–2017</td>
+					<td>Soccer</td>
+					<td>U8 – U10 Girls</td>
+					<td>Head Coach</td>
+				</tr>
+				<tr>
+					<td>2010–2012</td>
+					<td>Basketball & Baseball</td>
+					<td>U7 – U8 Boys</td>
+					<td>Assistant Coach</td>
+				</tr>
+			</tbody>
+		</table>
+	</div>
+
+	<p><strong>Big Brothers Big Sisters Of America (BBBS):</strong></p>
+	<P>As my children have grown more independent, I’ve shifted my focus toward community mentorship. Serving the
+		Washington DC Metropolitan area as a volunteer with Big Brothers Big Sisters as a mentor, I aim to provide
+		consistency, safety, and the same intentional support and guidance I brought to the sports field—helping the
+		mentee child build the confidence to navigate their own paths.</P>
+
+
+	<p><strong>Interview Prep Service:</strong></p>
+	<p>I believe that the "insider knowledge" of the corporate world should be accessible to everyone, regardless of
+		their starting point. That’s why I dedicate a portion of my practice to providing pro-bono interview prep
+		workshops and 1-on-1 coaching for students at select local schools. Additional information is available at <a
+			href="https://www.prepforinterviews.com/" target="_blank">www.PrepForInterviews.com</a></p>
+</section>
+
+<!-- Cost
+						<section id="cost" class="main">
+							<header class="major">
+								<h2>Cost</h2>
+							</header>
+
+							<ul >
+
+
+						<div class="section-pricing">
+								<div class="pricing-item">
+									<div class="pricing-description">
+										<strong>IN-PERSON Sessions:</strong>
+									</div>
+									<span class="pricing-cost">$50</span>
+								</div>
+								<div class="pricing-comment">Meeting at a convenient public setting!</div>
+								<div class="pricing-item">
+									<div class="pricing-description">
+										<strong>VIRTUAL Sessions:</strong>
+									</div>
+									<div class="pricing-cost">$40</div>
+								</div>
+							<div class="pricing-comment">Connect via Zoom/Teams/Google Meets for a meeting!</div>
+					</div>
+
+							</ul>
+						</section>
+-->
+
+<!-- Testimonials Section
+						<section id="testimonials" class="main">
+							<header class="major">
+								<h2>Testimonials:</h2>
+							</header>
+							<P><i>"Before working with Interview Prep Service, I was struggling with how to
+								structure my
+								answers
+								and speak confidently in my college interviews. I worked with Erez, and he was very supportive throughout the process. His mock sessions and detailed feedback helped me refine my responses, highlight my strengths, and feel more prepared.
+<BR><BR>
+I especially appreciated the personalized coaching and expert guidance. Thanks to his support, I went into my
+								interviews with confidence. I highly recommend this service to anyone preparing for college or job interviews to build confidence!"
+<BR><BR>
+— Siona, Student</i>
+							</P>
+	<BR> <hr style="border: .5px solid #ddd; margin: 0 auto;" width="80%" > <BR>
+							<p>
+								<I>"This interview prep service made such a difference! I used to get super nervous and
+								stumble over	my answers, but after a few sessions, I felt so much more confident.
+								Erez gave me intuitive helpful feedback that helped me feel more relaxed and
+								very prepared. I
+								ended up
+									getting a job offer! Totally worth it."</I><BR><BR>
+— Jamie, Software Developer
+							</p>
+
+							<BR> <hr style="border: .5px solid #ddd; margin: 0 auto;" width="80%" > <BR>
+
+							<P><I>"The interview prep online sessions with Erez really helped improve my confidence and
+								sharpen
+								my
+								responses. I felt ready going into my interviews after a couple of sessions. I Highly
+								recommend it!"</I>
+								<BR><BR>
+— Jason</P>
+						</section>
+						-->
+
+<!-- Service Section -->
+<section id="contact" class="main">
+	<header class="major">
+		<h2>Contact Me:</h2>
+	</header>
+	<P>Don't hesitate to contact me to schedule your first session, ask for more details, or arrange a free
+		no-obligation consultation.
+	</P>
+	<P>
+		<B>Email:</B>&nbsp;&nbsp; <a href="mailto:erez.asif.coaching@gmail.com">erez.asif.coaching@gmail.com</a>
+		<BR>
+		<B>Phone:</B> <a href="tel:5713588898">(571) 358-8898</a>
+	</P>
+
+	<header class="major">
+		<form action="#" method="post" id="contactForm">
+			<input type="text" name="honeypot" id="honeypot" style="display: none;">
+			<label for="name">Name</label>
+			<input type="text" id="name" name="name" placeholder="Name (Required)" required>
+
+			<label for="email">Email</label>
+			<input type="email" id="email" name="email" placeholder="Email (Required)" required>
+
+			<label for="message">Message</label>
+			<textarea id="message" name="message" placeholder="Message (Required)" rows="5" required></textarea>
+
+			<label for="submit_btn" />
+			<button type="submit" id="submit_btn">Submit</button>
+		</form>
+
+
+
+		<script src="https://www.google.com/recaptcha/api.js?render=6LcNsTosAAAAAB2KM98xPajFLETT5g2uNw_W4JyE"></script>
+		<script>
+			// Contact Form Specific Logic interacting with the shared Modal
+			document.getElementById("contactForm").addEventListener("submit", async function (e) {
+				e.preventDefault();
+				grecaptcha.execute("6LcNsTosAAAAAB2KM98xPajFLETT5g2uNw_W4JyE", { action: "submit" }).then(async function (token) {
+					const formData = {
+						name: document.getElementById("name").value,
+						email: document.getElementById("email").value,
+						message: document.getElementById("message").value,
+						honeypot: document.getElementById("honeypot").value,
+						"g-recaptcha-response": token,
+					};
+
+					try {
+						const response = await fetch("/validate-captcha", {
+							method: "POST",
+							headers: { "Content-Type": "application/json" },
+							body: JSON.stringify(formData),
+						});
+						const result = await response.json();
+
+						if (result.success) {
+							if (typeof gtag === 'function') {
+								gtag('event', 'contact_form_submit', {
+									'form_id': 'contactForm'
+								});
+							}
+							showModal(result.message, true);
+						} else {
+							showModal(result.message, false);
+						}
+					} catch (error) {
+						console.error("Error:", error);
+						showModal("There was an error submitting the form.", false);
+					}
+				});
+			});
+		</script>
+	</header>
+</section>
+
+<!-- Latest Blog Posts Section -->
+<section id="latest-blog-posts" class="main">
+	<header class="major">
+		<h2>Latest Blog Posts</h2>
+	</header>
+	<div class="blog-slider">
+		<div class="blog-slider-container">
+			{% for post in latest_posts %}
+			<a href="{{ url_for('blog.view_post', slug=post.slug) }}" class="blog-slider-card">
+				{% if post.image_file %}
+				<img src="{{ url_for('static', filename='images/' + post.image_file) }}" alt="{{ post.title }}"
+					loading="lazy" decoding="async">
+				{% endif %}
+				<h3>{{ post.title }}</h3>
+				<p>{{ post.summary[:100] }}...</p>
+				<span>Read More...</span>
+			</a>
+			{% endfor %}
+		</div>
+		<div class="explore-more">
+			<a href="{{ url_for('blog.list_posts') }}">Explore More Blog Posts</a>
+		</div>
+	</div>
+</section>
+{% endblock %}

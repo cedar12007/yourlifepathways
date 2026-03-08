@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+
+{% block extra_head_elements %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/admin.min.css') }}">
+{% endblock %}
+
+{% block content %}
+<section class="main admin-dashboard">
+    <a href="{{ url_for('admin.dashboard') }}" class="admin-back-link">
+        <i class="fa-solid fa-arrow-left"></i> Back to Admin
+    </a>
+    <header class="major">
+        <h2>Security Monitoring</h2>
+    </header>
+
+    <div class="admin-tabs">
+        <a href="{{ url_for('admin.dashboard') }}" class="admin-tab">Blog Posts</a>
+        <a href="{{ url_for('admin.manage_comments') }}" class="admin-tab">Comments</a>
+        <a href="{{ url_for('admin.manage_likes') }}" class="admin-tab">Likes</a>
+        <a href="{{ url_for('admin.security_logs') }}" class="admin-tab active">Logs</a>
+        <a href="{{ url_for('admin.change_password') }}" class="admin-tab">Settings</a>
+    </div>
+
+    <div class="admin-table-wrapper">
+        <table class="admin-table">
+            <thead>
+                <tr>
+                    <th class="sortable">Login Date</th>
+                    <th class="sortable">IP</th>
+                    <th class="sortable">Attempted Username</th>
+                    <th class="sortable">Status</th>
+                    <th class="sortable">User Agent</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% if logs %}
+                {% for log in logs %}
+                <tr>
+                    <td><span class="local-time" data-utc="{{ log.timestamp.isoformat() if log.timestamp else '' }}">{{
+                            log.timestamp.strftime('%Y-%m-%d %H:%M:%S') if log.timestamp else 'N/A' }}</span></td>
+                    <td><code>{{ log.ip_address or 'Unknown' }}</code></td>
+                    <td><strong>{{ log.username_attempted }}</strong></td>
+                    <td>
+                        <span
+                            class="post-status {% if log.status == 'success' %}status-active{% else %}status-deleted{% endif %}">
+                            {{ log.status | upper }}
+                        </span>
+                    </td>
+                    <td title="{{ log.user_agent }}"><small>{{ log.user_agent[:40] }}...</small></td>
+                </tr>
+                {% endfor %}
+                {% else %}
+                <tr>
+                    <td colspan="5" style="text-align: center; padding: 2em;">No security logs recorded yet.</td>
+                </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+</section>
+{% endblock %}

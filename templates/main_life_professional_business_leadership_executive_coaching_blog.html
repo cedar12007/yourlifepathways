@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block extra_head_elements %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/blog.css') }}" />
+{% endblock %}
+
+{% block content %}
+<h1>Coaching Blog</h1>
+
+<div class="blog-grid">
+    {% for post in posts %}
+    <article class="blog-card" id="post-{{ post.id }}">
+        <div class="blog-image">
+            <img src="{{ url_for('static', filename='images/' + post.image_file) }}" alt="{{ post.title }}">
+        </div>
+        <div class="blog-content">
+            <h3>{{ post.title }}</h3>
+            <p>{{ post.summary | truncate(150) }}</p>
+            <a href="{{ url_for('blog.view_post', slug=post.slug) }}" class="read-more stretched-link">
+                Read Full Blog
+            </a>
+        </div>
+        <div class="blog-footer">
+            <div class="interaction-group">
+                <button class="icon-only like-btn" title="Like" data-id="{{ post.id }}">
+                    <i class="fa-regular fa-heart"></i>
+                    <span class="count">{{ post.num_likes }}</span>
+                </button>
+
+                <a href="{{ url_for('blog.view_post', slug=post.slug) }}#comments" class="icon-only" title="Comment">
+                    <i class="fa-regular fa-comment"></i>
+                    <span class="count">{{ post.num_comments }}</span>
+                </a>
+
+                <button class="icon-only action-share" data-id="{{ post.id }}" title="Share this post">
+                    <i class="fa-solid fa-share-nodes"></i>
+                    <span class="count">{{ post.num_shares }}</span>
+                </button>
+            </div>
+        </div>
+    </article>
+    {% endfor %}
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/blog.js') }}"></script>
+{% endblock %}
