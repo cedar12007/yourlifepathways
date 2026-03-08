@@ -3,7 +3,6 @@
 templates/blog_test.html
 static/images/the-power-of-first-step.png
 static/images/the-power-of-first-step-original.png
-static/images/og_image.png
 
 # Python
 __pycache__/

@@ -56,7 +56,10 @@
         Navigate your professional and personal evolution with YourLifePathways. From executive leadership to business
         scaling and personal mastery, find your path to success." }}{% endblock %}">
     <meta property="og:image"
-        content="{% block og_image %}{{ url_for('static', filename='images/og_image.png', _external=True) }}{% endblock %}">
+        content="{% block og_image %}{{ url_for('static', filename='images/logo_yourlifepathways_coaching_white_background.png', _external=True) }}{% endblock %}">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:image:alt" content="YourLifePathways Coaching - Professional Life and Leadership Coaching">
 
     <meta property="twitter:card" content="summary_large_image">
     <meta property="twitter:url" content="https://www.yourlifepathways.com{{ request.path }}">
@@ -67,7 +70,7 @@
         professional and personal evolution with YourLifePathways. From executive leadership to business scaling and
         personal mastery, find your path to success." }}{% endblock %}">
     <meta property="twitter:image"
-        content="{% block twitter_image %}{{ url_for('static', filename='images/og_image.png', _external=True) }}{% endblock %}">
+        content="{% block twitter_image %}{{ url_for('static', filename='images/logo_yourlifepathways_coaching_white_background.png', _external=True) }}{% endblock %}">
     {% block extra_head_elements %}{% endblock %}
 </head>
 
