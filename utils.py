@@ -17,7 +17,7 @@ if REDIS_ENABLED:
         token=os.getenv("redis_token")
     )
 
-RECAPTCHA_SECRET_KEY = os.getenv("recaptcha_secret_key")
+RECAPTCHA_SECRET_KEY = os.getenv("RECAPTCHA_SECRET_KEY")
 GMAIL_USER = os.getenv("doar_ktovet")
 GMAIL_PASSWORD = os.getenv("doar_sisma")
 
