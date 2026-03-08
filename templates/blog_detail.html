@@ -213,13 +213,13 @@
 
 
 
-<script src="https://www.google.com/recaptcha/api.js?render=6LcNsTosAAAAAB2KM98xPajFLETT5g2uNw_W4JyE"></script>
+<script src="https://www.google.com/recaptcha/enterprise.js?render=6LeveDosAAAAAOmFMrZUbWcdg9Sg_WEvhQP_p7NV"></script>
 <script>
     function handleFormSubmit(formId) {
         const form = document.getElementById(formId);
         form.addEventListener("submit", function (e) {
             e.preventDefault();
-            grecaptcha.execute("6LcNsTosAAAAAB2KM98xPajFLETT5g2uNw_W4JyE", { action: 'submit' }).then(async function (token) {
+            grecaptcha.execute("6LeveDosAAAAAOmFMrZUbWcdg9Sg_WEvhQP_p7NV", { action: 'submit' }).then(async function (token) {
                 const recaptchaField = form.querySelector('input[name="g-recaptcha-response"]');
                 recaptchaField.value = token;
 
