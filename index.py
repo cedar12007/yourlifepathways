@@ -26,6 +26,8 @@ app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL', 'sqlite:///sit
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'dev-key')
+app.config['RECAPTCHA_SITE_KEY'] = os.getenv('RECAPTCHA_SITE_KEY', '')
+app.config['RECAPTCHA_SECRET_KEY'] = os.getenv('RECAPTCHA_SECRET_KEY', '')
 
 # Initialize the extensions with the app
 db.init_app(app)
@@ -43,6 +45,13 @@ with app.app_context():
 app.register_blueprint(blog)
 app.register_blueprint(main_bp)
 app.register_blueprint(admin_bp)
+
+# Make reCAPTCHA site key available to all templates
+@app.context_processor
+def inject_recaptcha():
+    return {
+        'recaptcha_site_key': app.config.get('RECAPTCHA_SITE_KEY', '')
+    }
 
 from flask import request
 from models import SiteVisit, PostView, Post

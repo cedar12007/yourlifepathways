@@ -1,8 +1,14 @@
 import requests
+import os
 
 def verify_recaptcha(token):
     print("hi recaptcha")
-    secret_key = "6LeveDosAAAAAOmFMrZUbWcdg9Sg_WEvhQP_p7NV"  # Your secret key from Google reCAPTCHA admin console
+    secret_key = os.environ.get("RECAPTCHA_SECRET_KEY")
+    
+    if not secret_key:
+        print("ERROR: RECAPTCHA_SECRET_KEY not found in environment variables")
+        return str({"success": False, "error": "Server configuration error"})
+    
     url = "https://www.google.com/recaptcha/api/siteverify"
     payload = {"secret": secret_key, "response": token}
 
