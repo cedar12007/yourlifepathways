@@ -48,16 +48,20 @@ def vercel_edge_cache(s_maxage=1, swr=86400):
                 status_code = result[1]
             else:
                 response = make_response(result)
-                status_code = 200
+                status_code = response.status_code
 
+            # If it's a redirect (301, 302, 307, 308), we should typically not cache it 
+            # or cache it differently. For now, let's just ensure the status code is preserved.
+            
             # If user is admin (logged in), NEVER cache
             if current_user.is_authenticated:
                 response.headers['Cache-Control'] = 'no-store, no-cache, must-revalidate, max-age=0'
                 return response, status_code
                 
-            # Apply Vercel Edge caching headers
-            # Note: We use s-maxage=1 for "near-real-time" but instant feel
-            response.headers['Cache-Control'] = f'public, s-maxage={s_maxage}, stale-while-revalidate={swr}'
+            # Apply Vercel Edge caching headers for successful responses
+            if 200 <= status_code < 300:
+                response.headers['Cache-Control'] = f'public, s-maxage={s_maxage}, stale-while-revalidate={swr}'
+            
             return response, status_code
         return decorated_function
     return decorator

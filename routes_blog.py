@@ -97,19 +97,21 @@ def get_threaded_comments(post_id, include_unapproved=False):
     return [c for c in top_level if check_visibility(c)]
 
 
-@blog.route('/blog')
 @blog.route('/main_life_professional_business_leadership_executive_coaching_blog')
+def list_posts_old():
+    """Redirect old SEO-heavy blog URL to the new clean /blog URL"""
+    return redirect(url_for('blog.list_posts'), code=301)
+
+
+@blog.route('/blog')
 @vercel_edge_cache(s_maxage=1, swr=86400)
 def list_posts():
     """Displays the grid of blog blocks"""
-    if 'main_life_professional_business_leadership' in request.path:
-        return redirect(url_for('blog.list_posts'), code=301)
-        
     # 1. Query all active posts, sorted by newest first
     all_posts = get_active_posts()
     return render_template('main_life_professional_business_leadership_executive_coaching_blog.html',
                            posts=all_posts,
-                           canonical_url=url_for('blog.list_posts', _external=True))
+                           canonical_url="https://www.yourlifepathways.com" + url_for('blog.list_posts'))
 
 
 @blog.route('/blog_test')

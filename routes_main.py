@@ -34,7 +34,7 @@ def discovery_call():
         page_title="Book a Free Discovery Call | YourLifePathways",
         page_description="Schedule your free, no-obligation 30-minute discovery call with Erez Asif. Start your journey to professional and personal growth today.",
         scroll_target="#contact",
-        canonical_url=url_for('main.index', _external=True) + "#contact"
+        canonical_url="https://www.yourlifepathways.com" + url_for('main.index') + "#contact"
     )
 
 
@@ -47,7 +47,7 @@ def overview():
         page_title="Executive & Life Coaching Overview | YourLifePathways",
         page_description="Helping career professionals and growth-minded individuals reclaim their spark and live with purpose.",
         scroll_target="#intro",
-        canonical_url=url_for('main.index', _external=True) + "#intro"
+        canonical_url="https://www.yourlifepathways.com" + url_for('main.index') + "#intro"
     )
 
 
@@ -60,7 +60,7 @@ def about():
         page_title="About Erez Asif | YourLifePathways",
         page_description="Learn about Erez Asif's 25 years of experience in leadership, hiring, and coaching.",
         scroll_target="#about_me",
-        canonical_url=url_for('main.index', _external=True) + "#about_me"
+        canonical_url="https://www.yourlifepathways.com" + url_for('main.index') + "#about_me"
     )
 
 
@@ -71,9 +71,9 @@ def community_involvement_and_mentorship():
         'index.html',
         latest_posts=Post.query.filter_by(is_deleted=False).order_by(Post.date_created.desc()).limit(3).all(),
         page_title="Community & Mentorship | YourLifePathways",
-        page_description="Giving back through Big Brothers Big Sisters, youth coaching, and pro-bono interview prep interview prep services.",
+        page_description="Giving back through Big Brothers Big Sisters, youth coaching, and pro-bono interview prep services.",
         scroll_target="#community",
-        canonical_url=url_for('main.index', _external=True) + "#community"
+        canonical_url="https://www.yourlifepathways.com" + url_for('main.index') + "#community"
     )
 
 
