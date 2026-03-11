@@ -102,10 +102,14 @@ def get_threaded_comments(post_id, include_unapproved=False):
 @vercel_edge_cache(s_maxage=1, swr=86400)
 def list_posts():
     """Displays the grid of blog blocks"""
+    if 'main_life_professional_business_leadership' in request.path:
+        return redirect(url_for('blog.list_posts'), code=301)
+        
     # 1. Query all active posts, sorted by newest first
     all_posts = get_active_posts()
     return render_template('main_life_professional_business_leadership_executive_coaching_blog.html',
-                           posts=all_posts)
+                           posts=all_posts,
+                           canonical_url=url_for('blog.list_posts', _external=True))
 
 
 @blog.route('/blog_test')

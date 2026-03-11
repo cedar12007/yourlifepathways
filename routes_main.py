@@ -34,7 +34,7 @@ def discovery_call():
         page_title="Book a Free Discovery Call | YourLifePathways",
         page_description="Schedule your free, no-obligation 30-minute discovery call with Erez Asif. Start your journey to professional and personal growth today.",
         scroll_target="#contact",
-        canonical_url=url_for('main.discovery_call', _external=True)
+        canonical_url=url_for('main.index', _external=True) + "#contact"
     )
 
 
@@ -47,7 +47,7 @@ def overview():
         page_title="Executive & Life Coaching Overview | YourLifePathways",
         page_description="Helping career professionals and growth-minded individuals reclaim their spark and live with purpose.",
         scroll_target="#intro",
-        canonical_url=url_for('main.overview', _external=True)
+        canonical_url=url_for('main.index', _external=True) + "#intro"
     )
 
 
@@ -60,7 +60,7 @@ def about():
         page_title="About Erez Asif | YourLifePathways",
         page_description="Learn about Erez Asif's 25 years of experience in leadership, hiring, and coaching.",
         scroll_target="#about_me",
-        canonical_url=url_for('main.about', _external=True)
+        canonical_url=url_for('main.index', _external=True) + "#about_me"
     )
 
 
@@ -73,7 +73,7 @@ def community_involvement_and_mentorship():
         page_title="Community & Mentorship | YourLifePathways",
         page_description="Giving back through Big Brothers Big Sisters, youth coaching, and pro-bono interview prep interview prep services.",
         scroll_target="#community",
-        canonical_url=url_for('main.community_involvement_and_mentorship', _external=True)
+        canonical_url=url_for('main.index', _external=True) + "#community"
     )
 
 
@@ -132,11 +132,7 @@ def sitemap():
     # Static pages
     urls = [
         {"loc": f"{base_url}/", "lastmod": "2026-02-02", "changefreq": "monthly", "priority": "1.0"},
-        {"loc": f"{base_url}/overview", "lastmod": "2026-02-02", "changefreq": "monthly", "priority": "0.8"},
-        {"loc": f"{base_url}/about", "lastmod": "2026-02-02", "changefreq": "monthly", "priority": "0.8"},
-        {"loc": f"{base_url}/community-involvement-and-mentorship", "lastmod": "2026-02-02", "changefreq": "monthly", "priority": "0.8"},
-        {"loc": f"{base_url}/discovery-call", "lastmod": "2026-02-02", "changefreq": "monthly", "priority": "0.9"},
-        {"loc": f"{base_url}/main_life_professional_business_leadership_executive_coaching_blog", "lastmod": "2026-02-02", "changefreq": "weekly", "priority": "0.8"},
+        {"loc": f"{base_url}/blog", "lastmod": "2026-02-02", "changefreq": "weekly", "priority": "0.8"},
     ]
 
     # Add blog posts

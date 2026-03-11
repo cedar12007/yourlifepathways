@@ -1318,15 +1318,12 @@ body.is-preload #header.alt .logo {
 /* Nav */
 
 #nav {
-	/* Change this line */
-	position: -webkit-sticky;
-	/* Support for Safari */
-	position: sticky;
+	position: fixed;
 	top: 0;
-	z-index: 1000;
-	/* Keeps it above the content */
-
-	/* Keep your existing styles */
+	left: 0;
+	right: 0;
+	z-index: 1001;
+	/* High enough to stay on top */
 	display: flex;
 	align-items: center;
 	gap: 20px;
@@ -1385,7 +1382,8 @@ body.is-preload #header.alt .logo {
 }
 
 #nav+#main {
-	padding-top: 1.0em;
+	padding-top: 130px;
+	/* Offset for fixed nav, matching JS scrolly offset */
 	background-color: white;
 }
 
@@ -1790,7 +1788,8 @@ label {
 @media screen and (max-width: 980px) {
 
 	/* Prevent horizontal scrolling on mobile */
-	html, body {
+	html,
+	body {
 		overflow-x: hidden !important;
 		width: 100% !important;
 		position: relative !important;
@@ -1834,7 +1833,7 @@ label {
 		max-width: 90% !important;
 		object-fit: contain !important;
 	}
-	
+
 	#nav .logo img {
 		max-width: 100% !important;
 		height: auto !important;
@@ -2206,7 +2205,7 @@ body.is-navPanel-visible #main {
 	text-decoration: none;
 	padding: 1.2rem 2.5rem;
 	font-family: 'Poppins', sans-serif !important;
-    font-size: 1.75rem !important;
+	font-size: 1.75rem !important;
 	font-weight: 700;
 	text-align: center;
 	width: 100%;
