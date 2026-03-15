@@ -1850,6 +1850,12 @@ label {
 		padding: 0 !important;
 	}
 
+	/* Override the padding-top for #nav+#main on mobile */
+	#nav+#main {
+		padding-top: 100px !important;
+		/* Match the mobile nav height */
+	}
+
 
 
 	/* 5. Clean up the About Me section */

@@ -376,15 +376,21 @@ button.like-btn.already-liked {
 #nav+#main {
     background-color: white;
     padding: 2em;
+    padding-top: 110px !important;
+    /* Extra padding on desktop to prevent breadcrumb cutoff */
 }
 
 @media screen and (max-width: 980px) {
-    #main {
+    #main,
+    #nav+#main {
         width: 100% !important;
         max-width: 100% !important;
-        margin-top: 100px !important;
+        margin-top: 0 !important;
+        padding-top: 100px !important;
         border-radius: 0 !important;
-        padding: 1em !important;
+        padding-left: 1em !important;
+        padding-right: 1em !important;
+        padding-bottom: 1em !important;
     }
 }
 
