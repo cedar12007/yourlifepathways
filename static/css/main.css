@@ -2330,6 +2330,7 @@ body.is-navPanel-visible #navPanelClose {
 /* Blog Slider Styles */
 .blog-slider {
 	padding: 0 0 2em;
+	margin-bottom: 30px;
 }
 
 .blog-slider-container {
@@ -2413,13 +2414,15 @@ body.is-navPanel-visible #navPanelClose {
 
 .explore-more a {
 	color: #183656;
-	text-decoration: none;
+	text-decoration: underline;
 	font-weight: bold;
 	font-size: .8em;
+	transition: color 0.2s ease;
 }
 
 .explore-more a:hover {
-	text-decoration: underline;
+	color: #4169E1;
+	text-decoration: none;
 }
 
 #latest-blog-posts {

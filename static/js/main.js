@@ -672,46 +672,59 @@ $(document).ready(function () {
 
 	// Scrollspy logic
 	$(window).on('scroll', function () {
-		var scrollTop = $(window).scrollTop() + 130; // Match scroll-margin-top
+		var scrollTop = $(window).scrollTop() + 150; // Increased buffer for detection
 		var currentSection = null;
-		var $sections = $main.children('section');
-		$sections.each(function () {
-			var $section = $(this);
-			var sectionTop = $section.offset().top - 130; // Adjust for scroll-margin-top
-			var sectionBottom = sectionTop + $section.outerHeight();
-			if (scrollTop >= sectionTop && scrollTop < sectionBottom) {
-				currentSection = $section;
-				return false; // break
-			}
-		});
-		// If no section found (e.g., at bottom), check if past last section
-		if (!currentSection) {
-			var $lastSection = $sections.last();
-			if (scrollTop >= $lastSection.offset().top - 130) {
-				currentSection = $lastSection;
-			}
-		}
+		var $sections = $main.children('section[id]');
+		
+		// 1. Check if we're at the bottom of the page
+		var isAtBottom = (window.innerHeight + window.pageYOffset) >= document.body.offsetHeight - 50;
 
-		// Always remove active
-		$navLinks.removeClass('active');
-		if (currentSection) {
-			var id = currentSection.attr('id');
-			$navLinks.each(function () {
-				var href = $(this).attr('href');
-				if (href && href.includes('#' + id)) {
-					$(this).addClass('active');
+		if (isAtBottom) {
+			currentSection = $sections.last();
+		} else {
+			// 2. Otherwise find the section currently in view
+			$sections.each(function () {
+				var $section = $(this);
+				var sectionTop = $section.offset().top - 130;
+				var sectionBottom = sectionTop + $section.outerHeight();
+				if (scrollTop >= sectionTop && scrollTop < sectionBottom) {
+					currentSection = $section;
+					return false;
 				}
 			});
 
-			// TRACKING LOGIC: Log section view if stayed for > 0.5 seconds
+			// 3. Fallback for the space between sections or past last section
+			if (!currentSection) {
+				var $lastSection = $sections.last();
+				if (scrollTop >= $lastSection.offset().top - 130) {
+					currentSection = $lastSection;
+				}
+			}
+		}
+
+		// Update active classes
+		$navLinks.removeClass('active');
+		if (currentSection) {
+			var id = currentSection.attr('id');
+			var foundMatch = false;
+			$navLinks.each(function () {
+				var $link = $(this);
+				var href = $link.attr('href');
+				// Match both relative anchors and full path anchors
+				if (href && (href === '#' + id || href.endsWith('#' + id))) {
+					$link.addClass('active');
+					foundMatch = true;
+				}
+			});
+
+			// Log section view
 			if (id !== trackedSectionId) {
 				if (sectionTimer) clearTimeout(sectionTimer);
 				sectionTimer = setTimeout(function () {
 					trackedSectionId = id;
 					var fullUrl = window.location.origin + window.location.pathname + '#' + id;
-					console.log("Logging section view:", fullUrl);
 					fetch('/log_event?url=' + encodeURIComponent(fullUrl) + '&_cb=' + Date.now());
-				}, 500); // 0.5 second dwell time
+				}, 500);
 			}
 		}
 	});

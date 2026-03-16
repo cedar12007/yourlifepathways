@@ -34,7 +34,7 @@
     <link rel="preconnect" href="https://cdnjs.cloudflare.com">
 
     <!-- Critical CSS -->
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}?v=1.6">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}?v=1.7">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <noscript>
         <link rel="stylesheet" href="{{ url_for('static', filename='css/noscript.css') }}" />
@@ -94,8 +94,8 @@
                 <li><a href="{{ url_for('main.index') }}#community" class="scrolly">Community</a></li>
                 <li><a href="{{ url_for('main.index') }}#contact" class="scrolly">Contact</a></li>
                 <li>
-                    <a href="{{ url_for('blog.list_posts') }}"
-                        class="{% if request.endpoint and 'blog' in request.endpoint %}active{% endif %}">Blog</a>
+                    <a href="{% if request.path == '/' %}#latest-blog-posts{% else %}{{ url_for('blog.list_posts') }}{% endif %}"
+                        class="{% if request.endpoint and 'blog' in request.endpoint %}active{% endif %} {% if request.path == '/' %}scrolly{% endif %}">Blog</a>
                 </li>
                 {% if current_user.is_authenticated %}
                 <li><a href="{{ url_for('admin.dashboard') }}">Admin</a></li>
@@ -173,7 +173,7 @@
         <script src="{{ url_for('static', filename='js/util.min.js') }}" defer></script>
         <script src="{{ url_for('static', filename='js/modal.min.js') }}" defer></script>
         <script src="{{ url_for('static', filename='js/admin.min.js') }}" defer></script>
-        <script src="{{ url_for('static', filename='js/main.min.js') }}?v=1.7" defer></script>
+        <script src="{{ url_for('static', filename='js/main.min.js') }}?v=1.8" defer></script>
 
 
     </div>
