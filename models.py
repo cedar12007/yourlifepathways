@@ -6,6 +6,7 @@ from flask_login import UserMixin
 
 
 class User(db.Model, UserMixin):
+    __tablename__ = 'ylp_user'
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(150), unique=True, nullable=False)
     password_hash = db.Column(db.String(255), nullable=False)
@@ -13,9 +14,9 @@ class User(db.Model, UserMixin):
 
 
 class LoginHistory(db.Model):
-    __tablename__ = 'login_history'
+    __tablename__ = 'ylp_login_history'
     id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('ylp_user.id'), nullable=True)
     username_attempted = db.Column(db.String(150))
     ip_address = db.Column(db.String(45))
     user_agent = db.Column(db.Text)
@@ -24,7 +25,7 @@ class LoginHistory(db.Model):
 
 
 class Post(db.Model):
-    __tablename__ = 'posts'
+    __tablename__ = 'ylp_posts'
     __table_args__ = {'extend_existing': True}
 
     id = db.Column(db.Integer, primary_key=True)
@@ -59,34 +60,35 @@ class Post(db.Model):
             self.slug = slugify(self.title)
 
 class PostLike(db.Model):
-    __tablename__ = 'post_likes'
+    __tablename__ = 'ylp_post_likes'
     id = db.Column(db.Integer, primary_key=True)
-    post_id = db.Column(db.Integer, db.ForeignKey('posts.id'), nullable=False)
+    post_id = db.Column(db.Integer, db.ForeignKey('ylp_posts.id'), nullable=False)
     visitor_ip = db.Column(db.String(45))
     timestamp = db.Column(db.DateTime(timezone=True), server_default=func.now())
     is_deleted = db.Column(db.Boolean, default=False, index=True)
 
 
 class PostShare(db.Model):
-    __tablename__ = 'post_shares'
+    __tablename__ = 'ylp_post_shares'
     id = db.Column(db.Integer, primary_key=True)
-    post_id = db.Column(db.Integer, db.ForeignKey('posts.id'), nullable=False)
+    post_id = db.Column(db.Integer, db.ForeignKey('ylp_posts.id'), nullable=False)
     visitor_ip = db.Column(db.String(45))
     user_agent = db.Column(db.Text)
     timestamp = db.Column(db.DateTime(timezone=True), server_default=func.now())
 
 
 class PostView(db.Model):
-    __tablename__ = 'post_views'
+    __tablename__ = 'ylp_post_views'
     id = db.Column(db.Integer, primary_key=True)
-    post_id = db.Column(db.Integer, db.ForeignKey('posts.id'), nullable=False)
+    post_id = db.Column(db.Integer, db.ForeignKey('ylp_posts.id'), nullable=False)
     visitor_ip = db.Column(db.String(45))
     visitor_location = db.Column(db.String(255))
     user_agent = db.Column(db.Text)
     timestamp = db.Column(db.DateTime(timezone=True), server_default=func.now())
 
+
 class SiteVisit(db.Model):
-    __tablename__ = 'site_visits'
+    __tablename__ = 'ylp_site_visits'
     id = db.Column(db.Integer, primary_key=True)
     url = db.Column(db.String(500))
     visitor_ip = db.Column(db.String(45))
@@ -96,6 +98,7 @@ class SiteVisit(db.Model):
     timestamp = db.Column(db.DateTime(timezone=True), server_default=func.now())
 
 class Comment(db.Model):
+    __tablename__ = 'ylp_comment'
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False)
     email = db.Column(db.String(120), nullable=True)  # Added optional email
@@ -103,15 +106,15 @@ class Comment(db.Model):
     date_created = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
     is_approved = db.Column(db.Boolean, default=False)
     is_deleted = db.Column(db.Boolean, default=False, index=True)
-    post_id = db.Column(db.Integer, db.ForeignKey('posts.id'), nullable=False)
-    parent_id = db.Column(db.Integer, db.ForeignKey('comment.id'), nullable=True)
+    post_id = db.Column(db.Integer, db.ForeignKey('ylp_posts.id'), nullable=False)
+    parent_id = db.Column(db.Integer, db.ForeignKey('ylp_comment.id'), nullable=True)
 
     # Relationship for replies
     replies = db.relationship('Comment', backref=db.backref('parent', remote_side=[id]), lazy='dynamic')
 
 
 class ManualBot(db.Model):
-    __tablename__ = 'manual_bots'
+    __tablename__ = 'ylp_manual_bots'
     id = db.Column(db.Integer, primary_key=True)
     ip_address = db.Column(db.String(45), unique=True, nullable=False, index=True)
     notes = db.Column(db.Text)

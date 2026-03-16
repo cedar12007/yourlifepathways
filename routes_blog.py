@@ -4,6 +4,7 @@ from flask import Blueprint, render_template, jsonify, abort, make_response, req
 from flask_login import current_user
 
 from models import Post, db, Comment, PostLike, PostShare
+from extensions import executor
 from utils import slugify, verify_recaptcha, send_email_notification, get_client_ip, vercel_edge_cache
 
 
@@ -176,20 +177,16 @@ def like_post(post_id):
                 db.session.commit()
                 print("Like soft-deleted")
 
-                # Send email notification for unlike
-                try:
-                    message=''
-                    send_email_notification(
-                        name="Anonymous User",
-                        email=None,
-                        message=f"A like was removed for the post: {post.title} from IP: {get_client_ip()}",
-                        recaptcha_result={"success": True},  # No recaptcha for unlikes
-                        subject=f"Unlike on Post: {post.title}",
-                        ip_address=get_client_ip()
-                    )
-                    print("message: " + message)
-                except Exception as e:
-                    print(f"Failed to send unlike notification: {e}")
+                # Send email notification for unlike in background
+                executor.submit(
+                    send_email_notification,
+                    name="Anonymous User",
+                    email=None,
+                    message=f"A like was removed for the post: {post.title} from IP: {get_client_ip()}",
+                    recaptcha_result={"success": True},
+                    subject=f"Unlike on Post: {post.title}",
+                    ip_address=get_client_ip()
+                )
 
             new_count = post.likes_data.filter_by(is_deleted=False).count()
             response = make_response(jsonify({"success": True, "new_count": new_count, "liked": False}))
@@ -216,20 +213,16 @@ def like_post(post_id):
             new_count = post.likes_data.filter_by(is_deleted=False).count()
             print(f"Like count updated, new_count: {new_count}")
 
-            # Send email notification for new like
-            try:
-                message=''
-                send_email_notification(
-                    name="Anonymous User",
-                    email=None,
-                    message=f"A new like was received for the post: {post.title} from IP: {get_client_ip()}",
-                    recaptcha_result={"success": True},  # No recaptcha for likes
-                    subject=f"New Like on Post: {post.title}",
-                    ip_address=get_client_ip()
-                )
-                print("message: " + message)
-            except Exception as e:
-                print(f"Failed to send like notification: {e}")
+            # Send email notification for new like in background
+            executor.submit(
+                send_email_notification,
+                name="Anonymous User",
+                email=None,
+                message=f"A new like was received for the post: {post.title} from IP: {get_client_ip()}",
+                recaptcha_result={"success": True},
+                subject=f"New Like on Post: {post.title}",
+                ip_address=get_client_ip()
+            )
 
             response = make_response(jsonify({"success": True, "new_count": new_count, "liked": True}))
             response.set_cookie(cookie_name, 'true', max_age=31536000)
@@ -260,20 +253,16 @@ def share_post(post_id):
         db.session.add(new_share)
         db.session.commit()
 
-    # Send email notification when share button is clicked
-    try:
-        message=''
-        send_email_notification(
-            name="Anonymous User",
-            email=None,
-            message=f"A share was clicked for the post: {post.title} from IP: {get_client_ip()}",
-            recaptcha_result={"success": True},  # No recaptcha for shares
-            subject=f"Share Click on Post: {post.title}",
-            ip_address=get_client_ip()
-        )
-        print("message: " + message)
-    except Exception as e:
-        print(f"Failed to send share notification: {e}")
+    # Send email notification for share in background
+    executor.submit(
+        send_email_notification,
+        name="Anonymous User",
+        email=None,
+        message=f"A share was clicked for the post: {post.title} from IP: {get_client_ip()}",
+        recaptcha_result={"success": True},
+        subject=f"Share Click on Post: {post.title}",
+        ip_address=get_client_ip()
+    )
 
     response = make_response(jsonify({"success": True, "new_count": post.shares_data.count()}))
     response.set_cookie(cookie_name, 'true', max_age=31536000)  # Cookie expires in 1 year
@@ -318,18 +307,16 @@ def add_comment(slug):
         db.session.add(new_comment)
         db.session.commit()
         
-        # Send email notification
-        try:
-            send_email_notification(
-                name=name,
-                email=email,
-                message=content,
-                recaptcha_result=recaptcha_result,
-                subject=f"New Blog Comment: {post.title}",
-                ip_address=get_client_ip()
-            )
-        except Exception as e:
-            print(f"Failed to send comment notification: {e}")
+        # Send email notification in background
+        executor.submit(
+            send_email_notification,
+            name=name,
+            email=email,
+            message=content,
+            recaptcha_result=recaptcha_result,
+            subject=f"New Blog Comment: {post.title}",
+            ip_address=get_client_ip()
+        )
 
         return jsonify({"success": True, "message": "Thank you! Your comment has been submitted for moderation."})
 

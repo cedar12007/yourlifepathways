@@ -65,7 +65,7 @@ All templates now use minified assets:
 
 Updated database to reference optimized images:
 ```sql
-UPDATE posts 
+UPDATE ylp_posts 
 SET image_file = REPLACE(image_file, '.png', '.jpg') 
 WHERE image_file LIKE '%.png';
 ```

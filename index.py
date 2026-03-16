@@ -8,7 +8,7 @@ from flask import Flask, render_template
 from flask import redirect, url_for
 from flask_login import LoginManager, current_user
 
-from extensions import db
+from extensions import db, executor
 
 app = Flask(__name__)
 
@@ -57,9 +57,7 @@ from flask import request
 from models import SiteVisit, PostView, Post
 from utils import get_client_ip
 
-from concurrent.futures import ThreadPoolExecutor
-# Keep thread pool small to avoid exceeding Supabase connection limits
-executor = ThreadPoolExecutor(max_workers=2)
+# Using executor from extensions.py
 
 @app.before_request
 def log_visit():

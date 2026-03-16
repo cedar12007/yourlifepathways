@@ -1,1 +1,1 @@
-ALTER TABLE posts DROP COLUMN likes;
+ALTER TABLE ylp_posts DROP COLUMN likes;
