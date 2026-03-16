@@ -11,7 +11,7 @@
 {% block twitter_image %}{{ url_for('static', filename='images/' + post.image_file, _external=True) }}{% endblock %}
 
 {% block extra_head_elements %}
-<link rel="stylesheet" href="{{ url_for('static', filename='css/blog.min.css') }}" />
+<link rel="stylesheet" href="{{ url_for('static', filename='css/blog.min.css') }}?v=1.1" />
 
 
 <!-- JSON-LD Structured Data -->
@@ -123,7 +123,7 @@
             <span class="count">{{ approved_count }}</span>
         </button>
 
-        <button class="icon-only action-share" data-id="{{ post.id }}" title="Share this post">
+        <button class="icon-only action-share" data-id="{{ post.id }}" data-url="{{ url_for('blog.view_post', slug=post.slug, _external=True) }}" title="Share this post">
             <i class="fa-solid fa-share-nodes"></i>
             <span class="count">{{ shares_count }}</span>
         </button>
@@ -174,7 +174,7 @@
                 <span class="count">{{ approved_count }}</span>
             </button>
 
-            <button class="icon-only action-share" data-id="{{ post.id }}" title="Share this post">
+            <button class="icon-only action-share" data-id="{{ post.id }}" data-url="{{ url_for('blog.view_post', slug=post.slug, _external=True) }}" title="Share this post">
                 <i class="fa-solid fa-share-nodes"></i>
                 <span class="count">{{ shares_count }}</span>
             </button>
@@ -261,7 +261,7 @@
 {% endblock %}
 
 {% block scripts %}
-<script src="{{ url_for('static', filename='js/blog.min.js') }}"></script>
+<script src="{{ url_for('static', filename='js/blog.min.js') }}?v=1.1"></script>
 <script>
     document.addEventListener('DOMContentLoaded', function () {
         const replyBtns = document.querySelectorAll('.reply-btn');

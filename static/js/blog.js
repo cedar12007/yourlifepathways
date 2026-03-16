@@ -192,8 +192,8 @@ document.addEventListener('click', function (event) {
                         });
                     }
 
-                    // Get the current page URL
-                    const url = window.location.href;
+                    // Get the specific post URL from data-url attribute
+                    const url = shareBtn.getAttribute('data-url') || window.location.href;
 
                     // Use the Browser Clipboard API
                     navigator.clipboard.writeText(url).then(() => {
@@ -217,7 +217,7 @@ document.addEventListener('click', function (event) {
                     countSpan.innerText = currentCount;
                     shareBtn.classList.remove('shared');
 
-                    const url = window.location.href;
+                    const url = shareBtn.getAttribute('data-url') || window.location.href;
                     navigator.clipboard.writeText(url).then(() => {
                         shareBtn.innerHTML = '<i class="fa-solid fa-check"></i> <span>Copied!</span>';
                         shareBtn.classList.add('share-success');

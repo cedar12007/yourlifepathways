@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 {% block extra_head_elements %}
-<link rel="stylesheet" href="{{ url_for('static', filename='css/blog.css') }}" />
+<link rel="stylesheet" href="{{ url_for('static', filename='css/blog.min.css') }}?v=1.1" />
 {% endblock %}
 
 {% block content %}
@@ -31,7 +31,7 @@
                     <span class="count">{{ post.num_comments }}</span>
                 </a>
 
-                <button class="icon-only action-share" data-id="{{ post.id }}" title="Share this post">
+                <button class="icon-only action-share" data-id="{{ post.id }}" data-url="{{ url_for('blog.view_post', slug=post.slug, _external=True) }}" title="Share this post">
                     <i class="fa-solid fa-share-nodes"></i>
                     <span class="count">{{ post.num_shares }}</span>
                 </button>
@@ -43,5 +43,5 @@
 {% endblock %}
 
 {% block scripts %}
-<script src="{{ url_for('static', filename='js/blog.js') }}"></script>
+<script src="{{ url_for('static', filename='js/blog.min.js') }}?v=1.1"></script>
 {% endblock %}
