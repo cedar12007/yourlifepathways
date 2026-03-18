@@ -52,6 +52,14 @@
             </div>
 
             <div class="form-group">
+                <label for="canonical_url">Canonical URL (Optional - for syndicated content)</label>
+                <input type="url" id="canonical_url" name="canonical_url" 
+                    value="{{ post.canonical_url if post and post.canonical_url else '' }}"
+                    placeholder="https://example.com/original-article">
+                <small style="color: #666;">Leave empty to use this site's URL. Set this if the post was originally published elsewhere (e.g., Substack, Medium)</small>
+            </div>
+
+            <div class="form-group">
                 <label for="summary">Summary (Search Engine Snippet)</label>
                 <textarea id="summary" name="summary" required>{{ post.summary if post else '' }}</textarea>
             </div>

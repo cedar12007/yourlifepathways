@@ -746,6 +746,7 @@ def new_post():
         content = request.form.get('content')
         image_file = request.form.get('image_file', 'default.jpg')
         category = request.form.get('category')
+        canonical_url = request.form.get('canonical_url', '').strip() or None
         
         # Ensure we have a valid slug
         final_slug = slugify(slug if slug else title)
@@ -756,7 +757,8 @@ def new_post():
             summary=summary,
             content=content,
             image_file=image_file,
-            category=category
+            category=category,
+            canonical_url=canonical_url
         )
         db.session.add(post)
         db.session.commit()
@@ -776,6 +778,7 @@ def edit_post(post_id):
         post.content = request.form.get('content')
         post.image_file = request.form.get('image_file')
         post.category = request.form.get('category')
+        post.canonical_url = request.form.get('canonical_url', '').strip() or None
         post.slug = slugify(slug if slug else post.title)
         
         db.session.commit()

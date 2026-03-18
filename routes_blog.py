@@ -155,7 +155,8 @@ def view_post(slug):
     meta_description = post.summary[:155] + "..." if post.summary and len(post.summary) > 155 else post.summary
     if not meta_description:
         meta_description = f"Read {post.title} on the YourLifePathways blog. Insightful coaching and leadership advice by Erez Asif."
-    canonical_url = f"https://www.yourlifepathways.com/blog/{post.slug}"
+    # Use post's canonical_url if set (for syndicated content), otherwise use our site's URL
+    canonical_url = post.canonical_url or f"https://www.yourlifepathways.com/blog/{post.slug}"
 
     return render_template('blog_detail.html', post=post, comments=comments, approved_count=approved_count, likes_count=likes_count, shares_count=shares_count, is_admin=is_admin(), prev_post=prev_post, next_post=next_post, meta_title=meta_title, meta_description=meta_description, canonical_url=canonical_url)
 
