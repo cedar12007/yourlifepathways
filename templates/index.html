@@ -83,12 +83,21 @@
 			</div>
 			<br>
 			<p>
-				As an <a href="#" id="erickson-cert-link" class="link-preview">Erickson Coaching International Trained
+				<img src="{{ url_for('static', filename='images/erickson_logo.png') }}" width="25px"
+						style="vertical-align: middle; margin-right: 5px;" alt="Erickson Logo" /><a href="#" id="erickson-cert-link" class="link-preview">Erickson Coaching International Trained
 					Coach<span class="thumbnail-preview"><img
 							src="{{ url_for('static', filename='images/erickson_acc_coaching_certificate.png') }}"
-							alt="Erickson Certificate"></span></a>,
-				I uphold the International Coaching Federation (ICF) standards,
+							alt="Erickson Certificate"></span></a>:
+				As an Erickson trained coach, I uphold the International Coaching Federation (ICF) standards,
 				ensuring my practice is built upon professional principles.
+			</p>
+
+			<p>
+				<img src="{{ url_for('static', filename='images/sap_logo.png') }}" width="25px"
+						style="vertical-align: middle; margin-right: 5px;" alt="SAP Logo" /><a href="#" id="sap-global-coach-link" class="link-preview">SAP Global Coach<span class="thumbnail-preview"><img
+							src="{{ url_for('static', filename='images/sap_global_coach.png') }}"
+							alt="SAP Global Coach Certificate"></span></a> (<a href="https://www.credly.com/badges/f0c77125-87ed-4ce2-9c6e-4c153ff211cb/public_url" target="_blank" rel="noopener noreferrer">Verify on Credly</a>):
+							At SAP, I help clients to maximize self-awareness and soft skills, through asking thought-provoking questions and fostering self-reflection. The coaching process focuses on topics that include: Leadership, Conflicts, Skill/Career Development, Diversity, Change, Life Balance and others.
 			</p>
 
 			<!-- Erickson Certificate Modal -->
@@ -102,26 +111,39 @@
 				</div>
 			</div>
 
+			<!-- SAP Global Coach Modal -->
+			<div id="sapGlobalCoachModal" class="modal">
+				<div class="modal-content large" style="padding: 10px; overflow: auto;">
+					<button class="close-btn" id="sapGlobalCoachClose"
+						style="position: absolute; top: 8px; right: 15px; z-index: 1; font-size: 32px; color: white; background: rgba(0,0,0,0.5); border-radius: 50%; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;">&times;</button>
+					<img src="{{ url_for('static', filename='images/sap_global_coach.png') }}"
+						alt="SAP Global Coach Certificate"
+						style="width: 100%; height: auto; border-radius: 4px; display: block;">
+				</div>
+			</div>
+
 			<script>
 				(function () {
-					var link = document.getElementById('erickson-cert-link');
-					var modal = document.getElementById('ericksonCertModal');
-					var closeBtn = document.getElementById('ericksonCertClose');
+					function setupModal(linkId, modalId, closeId) {
+						var link = document.getElementById(linkId);
+						var modal = document.getElementById(modalId);
+						var closeBtn = document.getElementById(closeId);
 
-					link.addEventListener('click', function (e) {
-						e.preventDefault();
-						modal.style.display = 'block';
-					});
-
-					closeBtn.addEventListener('click', function () {
-						modal.style.display = 'none';
-					});
-
-					modal.addEventListener('click', function (e) {
-						if (e.target === modal) {
+						link.addEventListener('click', function (e) {
+							e.preventDefault();
+							modal.style.display = 'block';
+						});
+						closeBtn.addEventListener('click', function () {
 							modal.style.display = 'none';
-						}
-					});
+						});
+						modal.addEventListener('click', function (e) {
+							if (e.target === modal) {
+								modal.style.display = 'none';
+							}
+						});
+					}
+					setupModal('erickson-cert-link', 'ericksonCertModal', 'ericksonCertClose');
+					setupModal('sap-global-coach-link', 'sapGlobalCoachModal', 'sapGlobalCoachClose');
 				})();
 			</script>
 
