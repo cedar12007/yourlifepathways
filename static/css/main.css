@@ -647,7 +647,8 @@ input[type="button"].primary,
 button.primary,
 .button.primary {
 	background-color: #8cc9f0;
-	color: #ffffff !important;
+	color: #1d3a5e !important;
+	font-weight: bold;
 	box-shadow: none;
 }
 
@@ -672,7 +673,7 @@ input[type="reset"].primary.icon:before,
 input[type="button"].primary.icon:before,
 button.primary.icon:before,
 .button.primary.icon:before {
-	color: #ffffff !important;
+	color: #1d3a5e !important;
 }
 
 /* Form */
@@ -1547,7 +1548,8 @@ body.is-preload #header.alt .logo {
 #main button.primary,
 #main .button.primary {
 	background-color: #8cc9f0;
-	color: #ffffff !important;
+	color: #1d3a5e !important;
+	font-weight: bold;
 	box-shadow: none;
 }
 
@@ -1572,7 +1574,7 @@ body.is-preload #header.alt .logo {
 #main input[type="button"].primary.icon:before,
 #main button.primary.icon:before,
 #main .button.primary.icon:before {
-	color: #ffffff !important;
+	color: #1d3a5e !important;
 }
 
 
@@ -1852,8 +1854,8 @@ label {
 
 	/* Override the padding-top for #nav+#main on mobile */
 	#nav+#main {
-		padding-top: 100px !important;
-		/* Match the mobile nav height */
+		padding-top: 20px !important;
+		/* Reduced to close the large gap, since margin-top already clears the nav */
 	}
 
 
@@ -2448,6 +2450,7 @@ body.is-navPanel-visible #navPanelClose {
 	border-radius: 12px;
 	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 	margin: 1em 0 1em 0;
+	font-size: .9em;
 }
 
 #error .button.primary,

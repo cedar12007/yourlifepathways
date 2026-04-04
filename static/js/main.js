@@ -606,10 +606,17 @@ $(document).ready(function () {
 
 
 
-	// 1. Highlight "Blog" if we are on a blog page/subpage
-	if (window.location.pathname.includes('blog')) {
+	var isProBonoPage = window.location.pathname.includes('educational-institutions') || window.location.pathname.includes('non-profits');
+	var isBlogPage = window.location.pathname.includes('blog');
+
+	// 1. Highlight proper nav if we are on a subpage that shouldn't use scrollspy
+	if (isBlogPage || isProBonoPage) {
 		$navLinks.removeClass('active');
-		$navLinks.filter('[href*="blog"]').addClass('active');
+		if (isBlogPage) {
+			$navLinks.filter('[href*="blog"]').addClass('active');
+		} else if (isProBonoPage) {
+			$navLinks.filter('[href*="#community"]').addClass('active');
+		}
 
 		// Nav Button.
 		$navButton = $(

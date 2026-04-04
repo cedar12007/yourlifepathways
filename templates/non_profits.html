@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+
+{% block title %}Non-Profits & Mission-Driven Organizations | YourLifePathways{% endblock %}
+{% block meta_description %}Community-rooted, empathetic, and impact-driven strategic leadership sessions for local
+non-profit and Mission-Driven organizations and leaders in the Washington DC Metro.{% endblock %}
+
+{% block content %}
+<section id="non-profits" class="main">
+	<div style="font-size: 0.9em; margin-bottom: 2em; color: #888; display: flex; justify-content: space-between; flex-wrap: wrap; gap: 10px;">
+		<div><a href="{{ url_for('main.index') }}" style="color: inherit; text-decoration: none; border-bottom: 1px dotted;">&larr; Back to Home</a></div>
+		<div><a href="{{ url_for('main.educational_institutions') }}" style="color: inherit; text-decoration: none; border-bottom: 1px dotted;">Educational Institutions &rarr;</a></div>
+	</div>
+	<header class="major" style="position: relative;">
+		<h1>Non-Profits & Mission-Driven Organizations</h1>
+		<img src="{{ url_for('static', filename='images/mission_oriented_orgs_logo.png') }}" alt="Mission Oriented Orgs Logo" style="position: absolute; right: 0; top: 50%; transform: translateY(-50%); max-width: 100px; height: auto; border-radius: 8px;" />
+	</header>
+	<div class="content">
+		<h2>Community-rooted, empathetic, and impact-driven.</h2>
+		<div class="highlight-box">
+			I am currently offering a limited number of pro-bono 'Strategic Leadership Sessions' (3 sessions) to local
+			non-profit and mission-driven organizations and leaders in the Washington DC Metro area. My goal is to
+			support
+			the DC community while expanding my
+			portfolio in the
+			mission-driven sector.
+		</div>
+		<p>
+			Focusing primarily on the Washington DC Metro area, I aim to empower those who dedicate their lives to
+			helping others. In the non-profit and mission-driven sector, leadership requires a unique blend of empathy
+			and strategic
+			foresight. I provide an intentional space for mission-driven leaders to unpack organizational challenges,
+			build effective leadership habits, and scale their impact.
+		</p>
+		<p>
+			These strategic leadership sessions are constructed to address the real-world complexities non-profit
+			leaders face daily—from board management and resource limitations to team motivation and personal burnout.
+		</p>
+
+		<hr>
+		<h3>Structure of the 3 Strategic Leadership Sessions</h3>
+		<p>The engagement is structured to deliver immediate, practical value to mission-driven leadership:</p>
+		<ul>
+			<li><strong>Targeted Objectives:</strong> By the end of our 3 sessions, you will walk away with a clear
+				90-day action plan addressing your most pressing leadership challenge.</li>
+			<li><strong>Executive Insight:</strong> We will tackle topics such as effective board communication,
+				retaining top talent on a budget, and avoiding leader burnout.</li>
+			<li><strong>Team Workshops:</strong> Beyond one-on-one sessions, I am available to host "Strategic
+				Leadership" lunch-and-learns for your broader team, offering impactful insights to multiple members of
+				your organization simultaneously.</li>
+		</ul>
+
+		<p><i>As part of this pro-bono initiative, my only request is a professional testimonial or the opportunity to
+				develop a brief case study detailing our success, allowing us to showcase the value of our work to the
+				broader community.</i></p>
+		<br>
+
+		<p>
+			If you are a non-profit or mission-driven organization leader in the Washington DC Metro area interested in
+			these pro-bono sessions, <a href="{{ url_for('main.index') }}#contact">I’d love to connect</a> to see how I
+			can support your
+			mission.
+		</p>
+
+		<div style="font-size: 0.9em; margin-top: 3em; padding-top: 1.5em; padding-bottom: 2em; border-top: solid 1px rgba(0, 0, 0, 0.15); color: #888; display: flex; justify-content: space-between; flex-wrap: wrap; gap: 10px;">
+			<div><a href="{{ url_for('main.index') }}" style="color: inherit; text-decoration: none; border-bottom: 1px dotted;">&larr; Back to Home</a></div>
+			<div><a href="{{ url_for('main.educational_institutions') }}" style="color: inherit; text-decoration: none; border-bottom: 1px dotted;">Educational Institutions &rarr;</a></div>
+		</div>
+	</div>
+</section>
+{% endblock %}

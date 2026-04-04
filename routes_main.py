@@ -77,6 +77,32 @@ def community_involvement_and_mentorship():
     )
 
 
+@main_bp.route('/educational-institutions')
+@vercel_edge_cache(s_maxage=1, swr=86400)
+def educational_institutions():
+    return render_template(
+        'educational_institutions.html',
+        latest_posts=Post.query.filter_by(is_deleted=False).order_by(Post.date_created.desc()).limit(3).all(),
+        page_title="Educational Institutions | YourLifePathways",
+        page_description="Mentorship-focused, academic, and supportive coaching for educational institutions.",
+        meta_title="Educational Institutions | YourLifePathways",
+        meta_description="Mentorship-focused, academic, and supportive coaching for educational institutions."
+    )
+
+
+@main_bp.route('/non-profits-and-mission-driven-organizations')
+@vercel_edge_cache(s_maxage=1, swr=86400)
+def non_profits_and_mission_driven_organizations():
+    return render_template(
+        'non_profits.html',
+        latest_posts=Post.query.filter_by(is_deleted=False).order_by(Post.date_created.desc()).limit(3).all(),
+        page_title="Non-Profits & Mission-Driven Orgs | YourLifePathways",
+        page_description="Community-rooted, empathetic, and impact-driven strategic leadership sessions for local non-profit and mission-driven leaders.",
+        meta_title="Non-Profits & Mission-Driven Orgs | YourLifePathways",
+        meta_description="Community-rooted, empathetic, and impact-driven strategic leadership sessions for local non-profit and mission-driven leaders."
+    )
+
+
 @main_bp.route("/validate-captcha", methods=["POST"])
 def validate_captcha():
     data = request.json
@@ -133,6 +159,8 @@ def sitemap():
     urls = [
         {"loc": f"{base_url}/", "lastmod": "2026-02-02", "changefreq": "monthly", "priority": "1.0"},
         {"loc": f"{base_url}/blog", "lastmod": "2026-02-02", "changefreq": "weekly", "priority": "0.8"},
+        {"loc": f"{base_url}/educational-institutions", "lastmod": "2026-04-04", "changefreq": "monthly", "priority": "0.7"},
+        {"loc": f"{base_url}/non-profits-and-mission-driven-organizations", "lastmod": "2026-04-04", "changefreq": "monthly", "priority": "0.7"},
     ]
 
     # Add blog posts

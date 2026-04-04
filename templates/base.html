@@ -91,7 +91,7 @@
                         class="scrolly">Overview</a>
                 </li>
                 <li><a href="{{ url_for('main.index') }}#about_me" class="scrolly">About</a></li>
-                <li><a href="{{ url_for('main.index') }}#community" class="scrolly">Community</a></li>
+                <li><a href="{{ url_for('main.index') }}#community" class="scrolly {% if request.endpoint in ['main.educational_institutions', 'main.non_profits_and_mission_driven_organizations'] %}active{% endif %}">Community</a></li>
                 <li><a href="{{ url_for('main.index') }}#contact" class="scrolly">Contact</a></li>
                 <li>
                     <a href="{% if request.path == '/' %}#latest-blog-posts{% else %}{{ url_for('blog.list_posts') }}{% endif %}"
@@ -173,7 +173,7 @@
         <script src="{{ url_for('static', filename='js/util.min.js') }}" defer></script>
         <script src="{{ url_for('static', filename='js/modal.min.js') }}" defer></script>
         <script src="{{ url_for('static', filename='js/admin.min.js') }}" defer></script>
-        <script src="{{ url_for('static', filename='js/main.min.js') }}?v=1.8" defer></script>
+        <script src="{{ url_for('static', filename='js/main.min.js') }}?v=1.9" defer></script>
 
 
     </div>

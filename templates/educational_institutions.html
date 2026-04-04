@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+
+{% block title %}Educational Institutions | YourLifePathways{% endblock %}
+{% block meta_description %}Mentorship-focused, academic, and supportive coaching for educational institutions.{%
+endblock %}
+
+{% block content %}
+<section id="educational-institutions" class="main">
+	<div style="font-size: 0.9em; margin-bottom: 2em; color: #888; display: flex; justify-content: space-between; flex-wrap: wrap; gap: 10px;">
+		<div><a href="{{ url_for('main.index') }}" style="color: inherit; text-decoration: none; border-bottom: 1px dotted;">&larr; Back to Home</a></div>
+		<div><a href="{{ url_for('main.non_profits_and_mission_driven_organizations') }}" style="color: inherit; text-decoration: none; border-bottom: 1px dotted;">Mission-Driven Orgs &rarr;</a></div>
+	</div>
+	<header class="major" style="position: relative;">
+		<h1>Educational Institutions</h1>
+		<img src="{{ url_for('static', filename='images/educational_enlightenment_logo.png') }}" alt="Educational Enlightenment Logo" style="position: absolute; right: 0; top: 50%; transform: translateY(-50%); max-width: 100px; height: auto; border-radius: 8px;" />
+	</header>
+	<div class="content">
+		<h2>Mentorship-focused, academic, and supportive.</h2>
+		<div class="highlight-box">
+			Each academic semester, I allocate time for two pro-bono Resume, Career, and Interview Workshops, and a
+			select number
+			of 1-on-1 early-career strategy sessions for graduating students.
+		</div>
+		<p>
+			As part of my commitment to community and mentorship, I work with educational institutions to provide
+			specialized support for students and academic professionals. My focus is on delivering pro-bono transition
+			and career coaching sessions that equip students with the practical skills needed to confidently step into
+			the professional world.
+		</p>
+		<p>
+			Whether it's preparing for college interviews, transitioning from university to the corporate sector, or
+			establishing strong leadership foundations early on, my approach is designed to be highly academic yet
+			deeply supportive.
+		</p>
+
+		<hr>
+		<h3>Practical Appeal: Resume, Career, and Interview Workshops & Coaching</h3>
+		<p>To maximize the impact of our partnership, we focus on highly practical topics that stand out for students
+			and young professionals. Potential session structures include:</p>
+		<ul>
+			<li><b>Navigating the First 90 Days:</b> Beyond the interview, how to establish a strong
+				reputation, understand workplace dynamics, and build early career momentum.</li>
+			<li><b>Strategic Negotiation:</b> Teaching practical negotiation skills for first salaries, roles,
+				and early promotions.</li>
+			<li><b>Alumni Engagement & Keynotes:</b> Pro-bono workshops or keynotes for alumni networks,
+				bridging the gap between recent graduates and the professional working community.</li>
+		</ul>
+		<br>
+
+		<p>
+			If you represent an educational institution and are looking to bring practical, real-world career strategy
+			into your academic environment, <a href="{{ url_for('main.index') }}#contact">please reach out to me</a>.
+			Let's discuss how we can partner to help your students reach their fullest potential.
+		</p>
+
+		<div style="font-size: 0.9em; margin-top: 3em; padding-top: 1.5em; padding-bottom: 2em; border-top: solid 1px rgba(0, 0, 0, 0.15); color: #888; display: flex; justify-content: space-between; flex-wrap: wrap; gap: 10px;">
+			<div><a href="{{ url_for('main.index') }}" style="color: inherit; text-decoration: none; border-bottom: 1px dotted;">&larr; Back to Home</a></div>
+			<div><a href="{{ url_for('main.non_profits_and_mission_driven_organizations') }}" style="color: inherit; text-decoration: none; border-bottom: 1px dotted;">Mission-Driven Orgs &rarr;</a></div>
+		</div>
+	</div>
+</section>
+{% endblock %}
