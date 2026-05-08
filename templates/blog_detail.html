@@ -81,7 +81,13 @@
     {% else %}
     <strong>{{ comment.name }}</strong> <small>{{ comment.date_created.strftime('%Y-%m-%d %H:%M') }}</small>
     <p>{{ comment.content }}</p>
-    <button class="reply-btn" data-comment-id="{{ comment.id }}">Reply</button>
+    <div class="comment-actions">
+        <button class="icon-only like-btn comment-like-btn" data-id="{{ comment.id }}">
+            <i class="fa-regular fa-heart"></i>
+            <span class="count">{{ comment.likes_count }}</span>
+        </button>
+        <button class="reply-btn" data-comment-id="{{ comment.id }}">Reply</button>
+    </div>
     <!-- Reply form, hidden initially -->
     <div class="reply-form" id="reply-form-{{ comment.id }}" style="display:none;">
         <form action="{{ url_for('blog.add_comment', slug=post.slug) }}" method="POST" id="replyForm-{{ comment.id }}">

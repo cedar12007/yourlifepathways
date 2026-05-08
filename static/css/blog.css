@@ -197,8 +197,20 @@
 }
 
 /* Icon-specific Hover & Active States */
-.icon-only:hover {
+.icon-only:hover,
+#main .icon-only:hover {
     color: #085a8d;
+    background-color: transparent !important;
+    background: none !important;
+    border-color: transparent !important;
+    box-shadow: none !important;
+    transform: scale(1.1) !important;
+}
+
+/* Like button colour override on hover */
+.like-btn:hover,
+#main .like-btn:hover {
+    color: #3498db !important;
 }
 
 .icon-only:active {

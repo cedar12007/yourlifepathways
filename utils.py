@@ -1,6 +1,8 @@
 import re
 import time
 import os
+import ssl
+import certifi
 import requests
 import smtplib
 from redis import Redis
@@ -171,13 +173,66 @@ def send_email_notification(name, email, message, recaptcha_result, subject="New
     msg.attach(MIMEText(body, "plain"))
 
     try:
-        with smtplib.SMTP("smtp.gmail.com", 587) as server:
-            server.starttls()
+        with smtplib.SMTP_SSL("smtp.gmail.com", 465, context=ssl.create_default_context(cafile=certifi.where()), timeout=10) as server:
             server.login(GMAIL_USER, GMAIL_PASSWORD)
             server.sendmail(GMAIL_USER, GMAIL_USER, msg.as_string())
         print("Email sent successfully.")
     except Exception as e:
         print(f"Failed to send email: {e}")
+
+def send_comment_approval_email(name, email, post_title, post_slug):
+    if not GMAIL_USER or not GMAIL_PASSWORD or not email:
+        return
+    post_url = f"https://www.yourlifepathways.com/blog/{post_slug}"
+    subject = f"Your comment on \"{post_title}\" has been approved!"
+    body = f"""Hi {name},
+
+Thank you for your engagement! Your comment on "{post_title}" has been approved and is now visible on the blog.
+
+You can view it here: {post_url}
+
+Best,
+
+Erez
+"""
+    msg = MIMEMultipart()
+    msg["From"] = GMAIL_USER
+    msg["To"] = email
+    msg["Subject"] = subject
+    msg.attach(MIMEText(body, "plain"))
+    try:
+        with smtplib.SMTP_SSL("smtp.gmail.com", 465, context=ssl.create_default_context(cafile=certifi.where()), timeout=10) as server:
+            server.login(GMAIL_USER, GMAIL_PASSWORD)
+            server.sendmail(GMAIL_USER, email, msg.as_string())
+    except Exception as e:
+        print(f"Error sending approval email: {e}")
+
+def send_comment_like_notification(name, email, post_title, post_slug):
+    if not GMAIL_USER or not GMAIL_PASSWORD or not email:
+        return
+    post_url = f"https://www.yourlifepathways.com/blog/{post_slug}"
+    subject = f"Someone liked your comment on \"{post_title}\"!"
+    body = f"""Hi {name},
+
+Someone just liked your comment on "{post_title}" — nice contribution!
+
+Read the post here: {post_url}
+
+Best,
+
+Erez
+"""
+    msg = MIMEMultipart()
+    msg["From"] = GMAIL_USER
+    msg["To"] = email
+    msg["Subject"] = subject
+    msg.attach(MIMEText(body, "plain"))
+    try:
+        with smtplib.SMTP_SSL("smtp.gmail.com", 465, context=ssl.create_default_context(cafile=certifi.where()), timeout=10) as server:
+            server.login(GMAIL_USER, GMAIL_PASSWORD)
+            server.sendmail(GMAIL_USER, email, msg.as_string())
+    except Exception as e:
+        print(f"Error sending comment like notification: {e}")
 
 def is_bot(ua_string):
     """

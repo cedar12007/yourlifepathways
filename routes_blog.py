@@ -3,9 +3,9 @@ import re
 from flask import Blueprint, render_template, jsonify, abort, make_response, request, redirect, flash, url_for
 from flask_login import current_user
 
-from models import Post, db, Comment, PostLike, PostShare
+from models import Post, db, Comment, PostLike, PostShare, CommentLike
 from extensions import executor
-from utils import slugify, verify_recaptcha, send_email_notification, get_client_ip, vercel_edge_cache
+from utils import slugify, verify_recaptcha, send_email_notification, send_comment_like_notification, get_client_ip, vercel_edge_cache
 
 
 def is_admin():
@@ -232,6 +232,54 @@ def like_post(post_id):
         print(f"Error in like_post: {e}")
         import traceback
         traceback.print_exc()
+        return jsonify({"success": False, "message": str(e)}), 500
+
+
+@blog.route('/like/comment/<int:comment_id>', methods=['POST'])
+def like_comment(comment_id):
+    cookie_name = f'liked_comment_{comment_id}'
+    try:
+        comment = Comment.query.filter_by(id=comment_id, is_approved=True, is_deleted=False).first_or_404()
+        post = Post.query.get_or_404(comment.post_id)
+        visitor_ip = get_client_ip()
+
+        existing = CommentLike.query.filter_by(comment_id=comment_id, visitor_ip=visitor_ip).first()
+        send_notification = False
+
+        if existing and not existing.is_deleted:
+            if request.cookies.get(cookie_name):
+                existing.is_deleted = True
+                liked = False
+                max_age = 0
+            else:
+                liked = True
+                max_age = 31536000
+        elif existing and existing.is_deleted:
+            existing.is_deleted = False
+            liked = True
+            max_age = 31536000
+            if not existing.notification_sent:
+                existing.notification_sent = True
+                send_notification = True
+        else:
+            new_like = CommentLike(comment_id=comment_id, visitor_ip=visitor_ip, notification_sent=True)
+            db.session.add(new_like)
+            liked = True
+            max_age = 31536000
+            send_notification = True
+
+        db.session.commit()
+
+        new_count = CommentLike.query.filter_by(comment_id=comment_id, is_deleted=False).count()
+
+        if send_notification and comment.email:
+            executor.submit(send_comment_like_notification, comment.name, comment.email, post.title, post.slug)
+
+        response = make_response(jsonify({"success": True, "new_count": new_count, "liked": liked}))
+        response.set_cookie(cookie_name, 'true' if liked else '', max_age=max_age)
+        return response
+    except Exception as e:
+        print(f"Error in like_comment: {e}")
         return jsonify({"success": False, "message": str(e)}), 500
 
 

@@ -9,10 +9,20 @@ document.addEventListener('DOMContentLoaded', function () {
         console.log("Share button opacity:", getComputedStyle(shareBtn).opacity);
     }
 
-    document.querySelectorAll('.like-btn').forEach(btn => {
+    document.querySelectorAll('.like-btn:not(.comment-like-btn)').forEach(btn => {
         const postId = btn.getAttribute('data-id');
         // Check if a cookie exists for this post
         if (document.cookie.includes(`liked_post_${postId}=`)) {
+            const icon = btn.querySelector('i');
+            if (icon) icon.classList.replace('fa-regular', 'fa-solid');
+            btn.style.color = "#e74c3c";
+            btn.classList.add('voted');
+        }
+    });
+
+    document.querySelectorAll('.comment-like-btn').forEach(btn => {
+        const commentId = btn.getAttribute('data-id');
+        if (document.cookie.includes(`liked_comment_${commentId}=`)) {
             const icon = btn.querySelector('i');
             if (icon) icon.classList.replace('fa-regular', 'fa-solid');
             btn.style.color = "#e74c3c";
@@ -33,7 +43,7 @@ document.addEventListener('DOMContentLoaded', function () {
 document.addEventListener('click', function (event) {
     const btn = event.target.closest('.like-btn');
 
-    if (btn) {
+    if (btn && !btn.classList.contains('comment-like-btn')) {
         event.preventDefault();
         event.stopPropagation();
 
@@ -147,6 +157,64 @@ document.addEventListener('click', function (event) {
                 }
                 // Re-enable button
                 btn.disabled = false;
+            });
+    }
+
+    // Check for Comment Like Button Click
+    const commentLikeBtn = event.target.closest('.comment-like-btn');
+    if (commentLikeBtn) {
+        event.preventDefault();
+        event.stopPropagation();
+
+        const commentId = commentLikeBtn.getAttribute('data-id');
+        const countSpan = commentLikeBtn.querySelector('.count');
+        const icon = commentLikeBtn.querySelector('i');
+        const wasLiked = commentLikeBtn.classList.contains('voted');
+        const currentCount = parseInt(countSpan.innerText, 10);
+
+        if (wasLiked) {
+            countSpan.innerText = currentCount - 1;
+            if (icon) icon.classList.replace('fa-solid', 'fa-regular');
+            commentLikeBtn.style.color = "";
+            commentLikeBtn.classList.remove('voted');
+        } else {
+            countSpan.innerText = currentCount + 1;
+            if (icon) icon.classList.replace('fa-regular', 'fa-solid');
+            commentLikeBtn.style.color = "#e74c3c";
+            commentLikeBtn.classList.add('voted');
+        }
+
+        commentLikeBtn.disabled = true;
+
+        fetch('/like/comment/' + commentId, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' }
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    countSpan.innerText = data.new_count;
+                    if (data.liked) {
+                        if (icon) icon.classList.replace('fa-regular', 'fa-solid');
+                        commentLikeBtn.style.color = "#e74c3c";
+                        commentLikeBtn.classList.add('voted');
+                    } else {
+                        if (icon) icon.classList.replace('fa-solid', 'fa-regular');
+                        commentLikeBtn.style.color = "";
+                        commentLikeBtn.classList.remove('voted');
+                    }
+                } else {
+                    countSpan.innerText = currentCount;
+                    if (wasLiked) { if (icon) icon.classList.replace('fa-regular', 'fa-solid'); commentLikeBtn.style.color = "#e74c3c"; commentLikeBtn.classList.add('voted'); }
+                    else { if (icon) icon.classList.replace('fa-solid', 'fa-regular'); commentLikeBtn.style.color = ""; commentLikeBtn.classList.remove('voted'); }
+                }
+                commentLikeBtn.disabled = false;
+            })
+            .catch(() => {
+                countSpan.innerText = currentCount;
+                if (wasLiked) { if (icon) icon.classList.replace('fa-regular', 'fa-solid'); commentLikeBtn.style.color = "#e74c3c"; commentLikeBtn.classList.add('voted'); }
+                else { if (icon) icon.classList.replace('fa-solid', 'fa-regular'); commentLikeBtn.style.color = ""; commentLikeBtn.classList.remove('voted'); }
+                commentLikeBtn.disabled = false;
             });
     }
 

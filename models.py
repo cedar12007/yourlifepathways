@@ -113,6 +113,20 @@ class Comment(db.Model):
     # Relationship for replies
     replies = db.relationship('Comment', backref=db.backref('parent', remote_side=[id]), lazy='dynamic')
 
+    @property
+    def likes_count(self):
+        return CommentLike.query.filter_by(comment_id=self.id, is_deleted=False).count()
+
+
+class CommentLike(db.Model):
+    __tablename__ = 'ylp_comment_likes'
+    id = db.Column(db.Integer, primary_key=True)
+    comment_id = db.Column(db.Integer, db.ForeignKey('ylp_comment.id'), nullable=False)
+    visitor_ip = db.Column(db.String(45))
+    is_deleted = db.Column(db.Boolean, default=False, index=True)
+    notification_sent = db.Column(db.Boolean, default=False)
+    timestamp = db.Column(db.DateTime(timezone=True), server_default=func.now())
+
 
 class ManualBot(db.Model):
     __tablename__ = 'ylp_manual_bots'

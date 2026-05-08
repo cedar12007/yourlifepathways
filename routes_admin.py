@@ -1,8 +1,9 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash, abort, jsonify, make_response
 from datetime import timedelta
 from models import Post, Comment, User, LoginHistory, db, SiteVisit, PostView
-from utils import slugify, parse_user_agent
+from utils import slugify, parse_user_agent, send_comment_approval_email
 from routes_blog import is_admin
+from extensions import executor
 from functools import wraps
 from flask_login import login_user, logout_user, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -812,10 +813,16 @@ def manage_comments():
 @admin_required
 def toggle_approve_comment(comment_id):
     comment = Comment.query.get_or_404(comment_id)
+    was_approved = comment.is_approved
     comment.is_approved = not comment.is_approved
     db.session.commit()
     status = 'approved' if comment.is_approved else 'unapproved'
     message = f'Comment {status}!'
+
+    if comment.is_approved and not was_approved and comment.email:
+        post = Post.query.get(comment.post_id)
+        if post:
+            executor.submit(send_comment_approval_email, comment.name, comment.email, post.title, post.slug)
 
     if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
         return jsonify({"success": True, "message": message})
