@@ -61,6 +61,15 @@ from utils import get_client_ip
 
 @app.before_request
 def log_visit():
+    # Fallback redirect if an external crawler/cache requests a moved blog image at /static/images/<file>
+    if request.path.startswith('/static/images/'):
+        rel_name = request.path[len('/static/images/'):]
+        if rel_name and '/' not in rel_name:
+            direct_path = os.path.join(app.root_path, 'static', 'images', rel_name)
+            blog_path = os.path.join(app.root_path, 'static', 'images', 'blog', rel_name)
+            if not os.path.exists(direct_path) and os.path.exists(blog_path):
+                return redirect(f'/static/images/blog/{rel_name}', code=301)
+
     # 0. Check if logging is enabled via environment variable
     if os.getenv('TRAFFIC_LOGGING', 'no').lower() != 'yes':
         return

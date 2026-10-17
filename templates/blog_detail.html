@@ -4,11 +4,11 @@
 
 {% block og_title %}{{ meta_title }}{% endblock %}
 {% block og_description %}{{ meta_description }}{% endblock %}
-{% block og_image %}{{ url_for('static', filename='images/' + post.image_file, _external=True) }}{% endblock %}
+{% block og_image %}{{ url_for('static', filename='images/blog/' + post.image_file, _external=True) }}{% endblock %}
 
 {% block twitter_title %}{{ meta_title }}{% endblock %}
 {% block twitter_description %}{{ meta_description }}{% endblock %}
-{% block twitter_image %}{{ url_for('static', filename='images/' + post.image_file, _external=True) }}{% endblock %}
+{% block twitter_image %}{{ url_for('static', filename='images/blog/' + post.image_file, _external=True) }}{% endblock %}
 
 {% block extra_head_elements %}
 <link rel="stylesheet" href="{{ url_for('static', filename='css/blog.min.css') }}?v=1.1" />
@@ -21,7 +21,7 @@
   "@type": "Article",
   "headline": "{{ post.title }}",
   "description": "{{ post.summary }}",
-  "image": "{{ url_for('static', filename='images/' + post.image_file, _external=True) }}",
+  "image": "{{ url_for('static', filename='images/blog/' + post.image_file, _external=True) }}",
   "datePublished": "{{ post.date_created.strftime('%Y-%m-%dT%H:%M:%S') }}",
   "dateModified": "{{ post.date_created.strftime('%Y-%m-%dT%H:%M:%S') }}",
   "author": {
@@ -155,7 +155,7 @@
     </header>
 
     <div class="image main">
-        <img src="{{ url_for('static', filename='images/' + post.image_file) }}" alt="{{ post.title }}"
+        <img src="{{ url_for('static', filename='images/blog/' + post.image_file) }}" alt="{{ post.title }}"
             fetchpriority="high" decoding="async" />
     </div>
 

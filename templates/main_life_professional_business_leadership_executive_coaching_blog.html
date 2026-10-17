@@ -10,7 +10,7 @@
     {% for post in posts %}
     <article class="blog-card" id="post-{{ post.id }}">
         <div class="blog-image">
-            <img src="{{ url_for('static', filename='images/' + post.image_file) }}" alt="{{ post.title }}">
+            <img src="{{ url_for('static', filename='images/blog/' + post.image_file) }}" alt="{{ post.title }}">
         </div>
         <div class="blog-content">
             <h3>{{ post.title }}</h3>

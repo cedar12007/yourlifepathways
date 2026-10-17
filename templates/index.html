@@ -331,15 +331,21 @@
 			</thead>
 			<tbody>
 				<tr>
+					<td>2026</td>
+					<td>Volleyball</td>
+					<td>High School JV Boys</td>
+					<td>Head Coach</td>
+				</tr>
+				<tr>
 					<td>2023–2024</td>
 					<td>Volleyball</td>
-					<td>High School</td>
+					<td>High School Girls</td>
 					<td>Head Coach</td>
 				</tr>
 				<tr>
 					<td>2021–2022</td>
 					<td>Volleyball</td>
-					<td>Middle School</td>
+					<td>Middle School Girls</td>
 					<td>Head Coach</td>
 				</tr>
 				<tr>
@@ -525,7 +531,7 @@ I especially appreciated the personalized coaching and expert guidance. Thanks t
 			{% for post in latest_posts %}
 			<a href="{{ url_for('blog.view_post', slug=post.slug) }}" class="blog-slider-card">
 				{% if post.image_file %}
-				<img src="{{ url_for('static', filename='images/' + post.image_file) }}" alt="{{ post.title }}"
+				<img src="{{ url_for('static', filename='images/blog/' + post.image_file) }}" alt="{{ post.title }}"
 					loading="lazy" decoding="async">
 				{% endif %}
 				<h3>{{ post.title }}</h3>
@@ -538,5 +544,34 @@ I especially appreciated the personalized coaching and expert guidance. Thanks t
 			<a href="{{ url_for('blog.list_posts') }}">Explore More Blog Posts</a>
 		</div>
 	</div>
+	<script>
+		(function () {
+			var container = document.querySelector('#latest-blog-posts .blog-slider-container');
+			if (!container) return;
+			var cards = Array.prototype.slice.call(container.querySelectorAll('.blog-slider-card'));
+			if (cards.length <= 3) return;
+
+			function updateVisibleCards() {
+				// On mobile/touch carousel, allow swiping through all cards
+				if (window.innerWidth <= 768) {
+					cards.forEach(function (card) { card.style.display = ''; });
+					return;
+				}
+				var style = window.getComputedStyle(container);
+				var padLeft = parseFloat(style.paddingLeft) || 0;
+				var padRight = parseFloat(style.paddingRight) || 0;
+				var gap = parseFloat(style.gap || style.columnGap) || 18;
+				var availableWidth = container.clientWidth - padLeft - padRight;
+				var cardWidth = 200;
+				var maxFit = Math.max(3, Math.floor((availableWidth + gap) / (cardWidth + gap)));
+				cards.forEach(function (card, idx) {
+					card.style.display = idx < maxFit ? '' : 'none';
+				});
+			}
+
+			updateVisibleCards();
+			window.addEventListener('resize', updateVisibleCards);
+		})();
+	</script>
 </section>
 {% endblock %}

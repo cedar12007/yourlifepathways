@@ -15,7 +15,7 @@ main_bp = Blueprint('main', __name__)
 @main_bp.route('/')
 @vercel_edge_cache(s_maxage=1, swr=86400)
 def index():
-    latest_posts = Post.query.filter_by(is_deleted=False).order_by(Post.date_created.desc()).limit(3).all()
+    latest_posts = Post.query.filter_by(is_deleted=False).order_by(Post.date_created.desc()).limit(8).all()
     return render_template('index.html', latest_posts=latest_posts)
 
 
@@ -30,7 +30,7 @@ def discovery_call():
     # Render the index page but with specific SEO title/desc and auto-scroll
     return render_template(
         'index.html',
-        latest_posts=Post.query.filter_by(is_deleted=False).order_by(Post.date_created.desc()).limit(3).all(),
+        latest_posts=Post.query.filter_by(is_deleted=False).order_by(Post.date_created.desc()).limit(8).all(),
         page_title="Book a Free Discovery Call | YourLifePathways",
         page_description="Schedule your free, no-obligation 30-minute discovery call with Erez Asif. Start your journey to professional and personal growth today.",
         scroll_target="#contact",
@@ -43,7 +43,7 @@ def discovery_call():
 def overview():
     return render_template(
         'index.html',
-        latest_posts=Post.query.filter_by(is_deleted=False).order_by(Post.date_created.desc()).limit(3).all(),
+        latest_posts=Post.query.filter_by(is_deleted=False).order_by(Post.date_created.desc()).limit(8).all(),
         page_title="Executive & Life Coaching Overview | YourLifePathways",
         page_description="Helping career professionals and growth-minded individuals reclaim their spark and live with purpose.",
         scroll_target="#intro",
@@ -56,7 +56,7 @@ def overview():
 def about():
     return render_template(
         'index.html',
-        latest_posts=Post.query.filter_by(is_deleted=False).order_by(Post.date_created.desc()).limit(3).all(),
+        latest_posts=Post.query.filter_by(is_deleted=False).order_by(Post.date_created.desc()).limit(8).all(),
         page_title="About Erez Asif | YourLifePathways",
         page_description="Learn about Erez Asif's 25 years of experience in leadership, hiring, and coaching.",
         scroll_target="#about_me",
@@ -69,7 +69,7 @@ def about():
 def community_involvement_and_mentorship():
     return render_template(
         'index.html',
-        latest_posts=Post.query.filter_by(is_deleted=False).order_by(Post.date_created.desc()).limit(3).all(),
+        latest_posts=Post.query.filter_by(is_deleted=False).order_by(Post.date_created.desc()).limit(8).all(),
         page_title="Community & Mentorship | YourLifePathways",
         page_description="Giving back through Big Brothers Big Sisters, youth coaching, and pro-bono interview prep services.",
         scroll_target="#community",
@@ -82,7 +82,7 @@ def community_involvement_and_mentorship():
 def educational_institutions():
     return render_template(
         'educational_institutions.html',
-        latest_posts=Post.query.filter_by(is_deleted=False).order_by(Post.date_created.desc()).limit(3).all(),
+        latest_posts=Post.query.filter_by(is_deleted=False).order_by(Post.date_created.desc()).limit(8).all(),
         page_title="Educational Institutions | YourLifePathways",
         page_description="Mentorship-focused, academic, and supportive coaching for educational institutions.",
         meta_title="Educational Institutions | YourLifePathways",
@@ -95,7 +95,7 @@ def educational_institutions():
 def non_profits_and_mission_driven_organizations():
     return render_template(
         'non_profits.html',
-        latest_posts=Post.query.filter_by(is_deleted=False).order_by(Post.date_created.desc()).limit(3).all(),
+        latest_posts=Post.query.filter_by(is_deleted=False).order_by(Post.date_created.desc()).limit(8).all(),
         page_title="Non-Profits & Mission-Driven Orgs | YourLifePathways",
         page_description="Community-rooted, empathetic, and impact-driven strategic leadership sessions for local non-profit and mission-driven leaders.",
         meta_title="Non-Profits & Mission-Driven Orgs | YourLifePathways",
