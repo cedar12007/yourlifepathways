@@ -25,7 +25,7 @@
     {% else %}
     <link rel="canonical" href="https://www.yourlifepathways.com{{ request.path | replace('/index.html', '/') }}">
     {% endif %}
-    <link data-n-head="ssr" rel="icon" href="{{ url_for('static', filename='images/favicon.ico') }}"
+    <link data-n-head="ssr" rel="icon" href="{{ url_for('static', filename='images/favicon.ico') }}?v=2.5"
         type="image/x-icon">
 
     <!-- Preconnect to external domains -->
@@ -34,7 +34,7 @@
     <link rel="preconnect" href="https://cdnjs.cloudflare.com">
 
     <!-- Critical CSS -->
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}?v=1.7">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}?v=2.1">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <noscript>
         <link rel="stylesheet" href="{{ url_for('static', filename='css/noscript.css') }}" />
@@ -82,9 +82,9 @@
 
         <!-- Nav -->
         <nav id="nav">
-            <img src="{{ url_for('static', filename='images/logo_yourlifepathways_coaching.png') }}"
+            <img src="{{ url_for('static', filename='images/logo_your_life_pathways.png') }}"
                 alt="YourLifePathways Coaching Logo" class="logo"
-                onclick="window.location.href='{{ url_for('main.index') }}';">
+                onclick="window.location.href='{{ url_for('main.index') }}';" height="10%">
             <ul>
                 <li>
                     <a href="{% if request.path == '/' %}#intro{% else %}{{ url_for('main.index') }}#intro{% endif %}"

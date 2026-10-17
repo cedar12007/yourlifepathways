@@ -1823,6 +1823,7 @@ label {
 		z-index: 2000 !important;
 		border-radius: 0 !important;
 		margin: 0 !important;
+		padding-left: 38px !important;
 	}
 
 	#nav ul {
@@ -1832,7 +1833,7 @@ label {
 	#nav .logo {
 		height: 75px !important;
 		width: auto !important;
-		max-width: 90% !important;
+		max-width: 95% !important;
 		object-fit: contain !important;
 	}
 
@@ -2241,10 +2242,10 @@ body.is-navPanel-visible #main {
 	position: fixed;
 	top: 10px;
 	left: 5px;
-	width: 50px;
-	height: 50px;
-	min-width: 50px;
-	min-height: 50px;
+	width: 34px;
+	height: 34px;
+	min-width: 34px;
+	min-height: 34px;
 	z-index: 10003;
 	cursor: pointer;
 	display: none;
@@ -2253,7 +2254,7 @@ body.is-navPanel-visible #main {
 	border-radius: 50%;
 	padding: 0;
 	transition: all 0.3s ease;
-	line-height: 50px;
+	line-height: 34px;
 	text-align: center;
 }
 
@@ -2261,11 +2262,11 @@ body.is-navPanel-visible #main {
 	content: '\f00d';
 	font-family: 'Font Awesome 5 Free';
 	font-weight: 900;
-	font-size: 1.5rem;
+	font-size: 1.1rem;
 	color: white;
 	transition: color 0.3s ease;
 	display: block;
-	line-height: 46px;
+	line-height: 30px;
 }
 
 #navPanelClose:hover {
@@ -2287,8 +2288,8 @@ body.is-navPanel-visible #navPanelClose {
 	position: fixed;
 	top: 10px;
 	left: 5px;
-	height: 50px;
-	width: 50px;
+	height: 34px;
+	width: 34px;
 	z-index: 10001;
 	display: none;
 }
@@ -2304,7 +2305,7 @@ body.is-navPanel-visible #navPanelClose {
 	border-radius: 50%;
 	border: 2px solid rgba(29, 58, 94, 0.3);
 	transition: all 0.3s ease;
-	line-height: 50px;
+	line-height: 34px;
 	text-align: center;
 }
 
@@ -2317,10 +2318,10 @@ body.is-navPanel-visible #navPanelClose {
 	content: '\f0c9';
 	font-family: 'Font Awesome 5 Free';
 	font-weight: 900;
-	font-size: 1.2rem;
+	font-size: 1rem;
 	color: #1d3a5e;
 	display: block;
-	line-height: 46px;
+	line-height: 30px;
 }
 
 @media screen and (max-width: 980px) {
