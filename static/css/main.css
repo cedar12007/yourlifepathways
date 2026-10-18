@@ -1329,7 +1329,7 @@ body.is-preload #header.alt .logo {
 	align-items: center;
 	gap: 20px;
 	width: 75em;
-	max-width: calc(100%);
+	max-width: calc(100% - 4em);
 	padding: 0.25em;
 	background-color: #f7f7f7;
 	border-top-left-radius: 0.25em;
@@ -1775,7 +1775,8 @@ label {
 
 /* --- 1. TABLETS & SMALL LAPTOPS (Max 1280px) --- */
 @media screen and (max-width: 1280px) {
-	#wrapper {
+	#wrapper,
+	#nav {
 		width: 90%;
 		/* Give the edges some breathing room */
 	}
