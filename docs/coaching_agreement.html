@@ -1,0 +1,968 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="UTF-8">
+<title>Professional Coaching Agreement</title>
+<style>
+@page {
+    size: letter portrait;
+    margin: 12mm 15mm 10mm 15mm;
+}
+*, *::before, *::after { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+html { background-color: #ffffff; }
+@media (prefers-color-scheme: dark) {
+    html { background-color: #1f1f1f; }
+}
+body {
+    padding: 20px 0;
+    margin: 0 auto;
+    max-width: 900px !important;
+    border: none !important;
+    background: transparent !important;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    color: #1e293b;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+}
+
+.page {
+    min-height: 262mm;
+    margin: 0 auto 14px auto;
+    padding: 14mm 18mm 11mm 18mm;
+    background-color: #ffffff;
+    border: 1px solid rgba(0, 0, 0, 0.12);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    position: relative;
+    box-sizing: border-box;
+}
+
+@media screen and (max-width: 600px) {
+    body {
+        padding: 16px 0;
+    }
+    .page {
+        margin: 0 auto 8px auto;
+        border: none;
+        padding: 12px 20px;
+    }
+}
+
+.page-content {
+    flex: 1 1 0;
+    min-height: 0;
+}
+
+.page.compact, body.compact .page {
+    font-size: 9.3pt;
+    line-height: 1.34;
+}
+
+.page.compact .page-content > * + *, body.compact .page-content > * + * {
+    margin-top: 8px;
+}
+
+.page-content > :is(h1, h2, h3, h4) + * {
+    margin-top: 5px;
+}
+
+.page-footer {
+    flex-shrink: 0;
+    margin-top: auto;
+    padding-top: 3.5mm;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 8.5pt;
+    color: #64748b;
+    border-top: 1px solid #e2e8f0;
+}
+
+@media print {
+    *, *::before, *::after {
+        box-shadow: none !important;
+        text-shadow: none !important;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+    }
+    @page {
+        size: letter portrait;
+        margin: 0;
+    }
+    html, body {
+        padding: 0 !important;
+        margin: 0 !important;
+        background: #ffffff !important;
+        width: 100% !important;
+        height: 100% !important;
+    }
+    .doc-toolbar, .logo-upload-label, .toast-msg {
+        display: none !important;
+    }
+    .page {
+        margin: 0 !important;
+        padding: 12mm 16mm 10mm 16mm !important;
+        border: none !important;
+        box-shadow: none !important;
+        width: 100% !important;
+        height: 279mm !important;
+        min-height: 279mm !important;
+        max-height: 279mm !important;
+        box-sizing: border-box !important;
+        display: flex !important;
+        flex-direction: column !important;
+        justify-content: space-between !important;
+        page-break-after: always !important;
+        break-after: page !important;
+        page-break-inside: avoid !important;
+        break-inside: avoid !important;
+        overflow: hidden !important;
+    }
+    .page:last-child {
+        break-after: auto !important;
+        page-break-after: auto !important;
+    }
+    .page-content {
+        flex: 1 1 auto !important;
+        display: block !important;
+        overflow: visible !important;
+    }
+    .page-footer {
+        flex-shrink: 0 !important;
+        display: flex !important;
+        justify-content: space-between !important;
+        margin-top: auto !important;
+        padding-top: 3.5mm !important;
+        border-top: 1px solid #cbd5e1 !important;
+    }
+    .input-line {
+        background: transparent !important;
+        border-bottom: 1px solid #64748b !important;
+        color: #0f172a !important;
+    }
+    input::placeholder {
+        color: transparent !important;
+        opacity: 0 !important;
+    }
+}
+
+/* Toolbar & Utility Styles */
+.doc-toolbar {
+    position: sticky;
+    top: 10px;
+    z-index: 9999;
+    max-width: 900px;
+    margin: 0 auto 16px auto;
+    padding: 10px 16px;
+    background: #0f172a;
+    border-radius: 8px;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.22);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    color: #f8fafc;
+}
+
+.toolbar-buttons {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.btn-action {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 14px;
+    font-size: 8.9pt;
+    font-weight: 600;
+    border-radius: 5px;
+    border: none;
+    cursor: pointer;
+    font-family: inherit;
+    transition: all 0.15s ease;
+    user-select: none;
+}
+
+.btn-primary {
+    background: #0284c7;
+    color: #ffffff;
+}
+
+.btn-primary:hover {
+    background: #0369a1;
+}
+
+.btn-fillable {
+    background: #059669;
+    color: #ffffff;
+    text-decoration: none;
+}
+
+.btn-fillable:hover {
+    background: #047857;
+    color: #ffffff;
+}
+
+.btn-secondary {
+    background: #334155;
+    color: #f1f5f9;
+}
+
+.btn-secondary:hover {
+    background: #475569;
+}
+
+.btn-secondary.active-restore {
+    background: #0369a1;
+    color: #ffffff;
+    box-shadow: inset 0 0 0 1px #38bdf8;
+}
+
+.btn-outline {
+    background: transparent;
+    color: #38bdf8;
+    border: 1px solid rgba(56, 189, 248, 0.6);
+}
+
+.btn-outline:hover {
+    background: rgba(56, 189, 248, 0.12);
+    border-color: #38bdf8;
+}
+
+.toolbar-hint {
+    font-size: 8pt;
+    color: #94a3b8;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.toast-msg {
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #0f172a;
+    color: #f8fafc;
+    border: 1px solid #38bdf8;
+    padding: 9px 18px;
+    border-radius: 6px;
+    font-size: 8.8pt;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
+    z-index: 10001;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.25s ease;
+}
+
+.toast-msg.show {
+    opacity: 1;
+}
+
+[contenteditable]:focus { outline: none; }
+
+/* Custom Form & Legal Styles */
+.doc-masthead {
+    border-bottom: 2px solid #0f172a;
+    padding-bottom: 6px;
+    margin-bottom: 6px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.logo-container {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.doc-logo {
+    width: 58mm;
+    max-height: 22mm;
+    height: auto;
+    object-fit: contain;
+    display: block;
+}
+
+.logo-fallback {
+    display: none;
+    align-items: center;
+    gap: 9px;
+    text-decoration: none;
+}
+
+.logo-upload-label {
+    font-size: 7.5pt;
+    font-weight: 600;
+    color: #0284c7;
+    background: #f0f9ff;
+    border: 1px dashed #7dd3fc;
+    padding: 3px 7px;
+    border-radius: 4px;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background 0.15s ease;
+    user-select: none;
+}
+
+.logo-upload-label:hover {
+    background: #e0f2fe;
+}
+
+@media print {
+    .logo-upload-label {
+        display: none !important;
+    }
+}
+
+.doc-title {
+    font-size: 14pt;
+    font-weight: 700;
+    color: #0f172a;
+    letter-spacing: -0.01em;
+    text-transform: uppercase;
+    text-align: right;
+}
+
+.doc-badge {
+    display: inline-block;
+    font-size: 8pt;
+    font-weight: 600;
+    color: #0369a1;
+    background: #e0f2fe;
+    padding: 2px 7px;
+    border-radius: 4px;
+    margin-top: 3px;
+}
+
+.section-title {
+    font-size: 10pt;
+    font-weight: 700;
+    color: #0f172a;
+    border-top: 1px solid #cbd5e1;
+    border-bottom: 1px solid #cbd5e1;
+    padding-top: 3.5px;
+    padding-bottom: 3.5px;
+    margin-top: 4px;
+    margin-bottom: 6px;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+}
+
+.parties-grid {
+    display: grid;
+    grid-template-columns: 42% 58%;
+    gap: 12px;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    padding: 8px 12px;
+    border-radius: 4px;
+    font-size: 9pt;
+    align-items: center;
+}
+
+.party-col {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    padding-right: 4px;
+}
+
+.form-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    width: 100%;
+}
+
+.field-label {
+    font-weight: 600;
+    color: #334155;
+    white-space: nowrap;
+}
+
+.label-party {
+    min-width: 82px;
+    flex-shrink: 0;
+}
+
+.label-scope-left {
+    min-width: 96px;
+    flex-shrink: 0;
+}
+
+.label-scope-right {
+    min-width: 108px;
+    flex-shrink: 0;
+}
+
+.label-sig {
+    min-width: 65px;
+    flex-shrink: 0;
+}
+
+.input-line {
+    border: none;
+    border-bottom: 1px solid #94a3b8;
+    background: #f1f5f9;
+    font-family: inherit;
+    font-size: 8.8pt;
+    color: #0f172a;
+    padding: 2px 6px;
+    border-radius: 2px 2px 0 0;
+}
+
+.input-line::placeholder {
+    color: #64748b;
+    opacity: 0.85;
+}
+
+.input-line:focus {
+    background: #e2e8f0;
+    border-bottom: 1.5px solid #0284c7;
+    outline: none;
+}
+
+.input-flex {
+    flex: 1;
+    min-width: 0;
+}
+
+.input-xs { width: 50px; text-align: center; }
+.input-short { width: 95px; }
+.input-date { width: 115px; }
+.input-mid { width: 165px; }
+.input-wide { width: 240px; }
+.input-full { width: 100%; }
+
+.scope-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px 18px;
+    font-size: 9pt;
+}
+
+.scope-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.legal-block {
+    font-size: 8.7pt;
+    line-height: 1.35;
+    color: #334155;
+}
+
+.legal-block p {
+    margin: 3.5px 0;
+}
+
+.legal-block strong {
+    color: #0f172a;
+}
+
+.option-box {
+    background: #f8fafc;
+    border: 1px solid #cbd5e1;
+    padding: 7px 10px;
+    border-radius: 4px;
+    margin-top: 5px;
+    font-size: 8.7pt;
+}
+
+.checkbox-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    margin: 2px 0;
+    font-size: 8.9pt;
+}
+
+.checkbox-row input[type="checkbox"], 
+.checkbox-row input[type="radio"] {
+    margin-top: 2px;
+    accent-color: #0284c7;
+    cursor: pointer;
+}
+
+.consent-panel {
+    border: 1px solid #bae6fd;
+    background: #f0f9ff;
+    padding: 8px 12px;
+    border-radius: 4px;
+    margin-top: 6px;
+    font-size: 8.7pt;
+}
+
+.signatures-table {
+    width: 100%;
+    margin-top: 6px;
+    border-collapse: collapse;
+    table-layout: fixed;
+}
+
+.signatures-table td {
+    width: 50%;
+    padding: 8px 12px;
+    vertical-align: top;
+    font-size: 8.9pt;
+    border: 1px solid #e2e8f0;
+    background: #f8fafc;
+}
+
+.signatures-table tr.sig-info-row td {
+    border-bottom: none;
+    padding-bottom: 12px;
+}
+
+.signatures-table tr.sig-action-row td {
+    border-top: none;
+    padding-top: 0;
+}
+
+.sig-info-block {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.sig-line {
+    border-top: 1px dashed #64748b;
+    padding-top: 6px;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+</style>
+<body>
+
+<div class="doc-toolbar" contenteditable="false">
+  <div class="toolbar-buttons">
+    <a href="Professional_Coaching_Agreement_Fillable.pdf" download="Professional_Coaching_Agreement_Fillable.pdf" class="btn-action btn-fillable" title="Download the interactive AcroForm fillable PDF with clickable form fields for clients to fill in Adobe Reader or Preview">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+        <polyline points="7 10 12 15 17 10"></polyline>
+        <line x1="12" y1="15" x2="12" y2="3"></line>
+      </svg>
+      Download Fillable PDF Form
+    </a>
+
+    <button type="button" class="btn-action btn-primary" onclick="saveAsPDF()" title="Open print dialog to save as high-resolution PDF">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M6 9V2h12v7"></path>
+        <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path>
+        <rect x="6" y="14" width="12" height="8"></rect>
+      </svg>
+      Save as PDF / Print
+    </button>
+    
+    <button type="button" id="blankToggleBtn" class="btn-action btn-secondary" onclick="toggleBlankValues()" title="Clear helper default values and placeholders for a clean blank form">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M19 11V4h-5"></path>
+        <path d="M3 17l4.5-4.5"></path>
+        <path d="m14 11-7.5 7.5a2.12 2.12 0 1 0 3 3L17 14"></path>
+        <path d="m18 8 3-3"></path>
+      </svg>
+      Blank Default Values
+    </button>
+
+    <button type="button" class="btn-action btn-outline" onclick="saveEditableCopy()" title="Download an editable HTML copy with your entered data saved into the file">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
+        <polyline points="17 21 17 13 7 13 7 21"></polyline>
+        <polyline points="7 3 7 8 15 8"></polyline>
+      </svg>
+      Save Editable Copy (.html)
+    </button>
+  </div>
+  <div class="toolbar-hint">
+    <span>💡 Destination &rarr; Select <strong>Save as PDF</strong> in print dialog</span>
+  </div>
+</div>
+
+<div contenteditable="true">
+
+<section class="page compact">
+  <div class="page-content">
+    <div class="doc-masthead">
+      <div class="logo-container" contenteditable="false">
+        <img id="brandLogoImg" src="../static/images/logo_your_life_pathways.png" onerror="handleLogoFallback(this)" alt="YourLifePathways Coaching Logo" class="doc-logo">
+        
+        <div id="brandLogoFallback" class="logo-fallback">
+          <svg width="36" height="36" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg" style="flex-shrink: 0;">
+            <rect width="40" height="40" rx="8" fill="#0f172a"/>
+            <path d="M9 30C13.5 23 17.5 21 22 18.5C26.5 16 29 12.5 31 9" stroke="#38bdf8" stroke-width="2.8" stroke-linecap="round"/>
+            <path d="M24.5 9H31V15.5" stroke="#38bdf8" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M13 32C17 26.5 21 25 27 22.5" stroke="#94a3b8" stroke-width="2" stroke-linecap="round" stroke-dasharray="2 3"/>
+            <circle cx="13" cy="14" r="3" fill="#f8fafc"/>
+          </svg>
+          <div style="line-height: 1.15;">
+            <div style="font-size: 13pt; font-weight: 800; color: #0f172a; letter-spacing: -0.02em;">YourLife<span style="color: #0284c7;">Pathways</span></div>
+            <div style="font-size: 7pt; font-weight: 600; color: #64748b; text-transform: uppercase; letter-spacing: 0.07em;">Business, Executive &amp; Life Coaching</div>
+          </div>
+        </div>
+
+        <label class="logo-upload-label" title="Click to select your exact logo image file from your computer">
+          Change Logo
+          <input type="file" accept="image/*" style="display: none;" onchange="loadCustomLogo(event)">
+        </label>
+      </div>
+      <div style="text-align: right;">
+        <div class="doc-title">Professional Coaching Agreement</div>
+        <div class="doc-badge">International Coaching Federation (ICF) Code of Ethics Aligned</div>
+      </div>
+    </div>
+
+    <div style="font-size: 8.9pt; line-height: 1.34; margin-bottom: 5px; display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
+      <span>This Coaching Agreement is entered into as of</span>
+      <input type="text" class="input-line input-date" placeholder="YYYY-MM-DD" value="">
+      <span>(the "Effective Date") by and between:</span>
+    </div>
+
+    <div class="parties-grid">
+      <div>
+        <span class="field-label">Coach:</span> <strong>Erez Asif</strong><br>
+        <span style="font-size: 8.2pt; color: #475569;">Erickson International Trained Coach</span><br>
+        <span style="font-size: 8.2pt; color: #0284c7; font-weight: 500;">YourLifePathways (<a href="https://www.yourlifepathways.com" style="color: #0284c7; text-decoration: none;">www.yourlifepathways.com</a>)</span>
+      </div>
+      <div class="party-col">
+        <div class="form-row">
+          <span class="field-label label-party">Client / Org:</span> 
+          <input type="text" class="input-line input-flex" placeholder="Client Full Name or Organization">
+        </div>
+        <div class="form-row">
+          <span class="field-label label-party" style="font-size: 8.4pt;">Representing:</span>
+          <input type="text" class="input-line input-flex" placeholder="Department / Sponsoring Entity" style="font-size: 8.4pt;">
+        </div>
+      </div>
+    </div>
+
+    <br>
+    <div class="section-title">1. Scope of Coaching Services</div>
+    <div class="scope-grid">
+      <div class="scope-item">
+        <span class="field-label label-scope-left">Total Sessions:</span>
+        <input type="text" class="input-line input-flex" placeholder="e.g., 6 sessions / Ongoing">
+      </div>
+      <div class="scope-item">
+        <span class="field-label label-scope-right">Session Duration:</span>
+        <input type="text" class="input-line input-short" placeholder="60">
+        <span style="font-size: 8.7pt; color: #334155; white-space: nowrap;">minutes</span>
+      </div>
+      <div class="scope-item">
+        <span class="field-label label-scope-left">Frequency:</span>
+        <input type="text" class="input-line input-flex" placeholder="Weekly / Bi-weekly / Monthly">
+      </div>
+      <div class="scope-item">
+        <span class="field-label label-scope-right">Delivery Format:</span>
+        <input type="text" class="input-line input-flex" placeholder="Teams / Meet / Zoom / Phone">
+      </div>
+    </div>
+    <div style="font-size: 8.4pt; color: #475569; margin-top: 4px;">
+      <strong>Program Extension:</strong> May be extended for additional sessions upon mutual written agreement via email, maintaining the established terms and compensation structure.
+    </div>
+
+    <br>
+    <div class="section-title">2. Compensation Structure</div>
+    <div style="font-size: 8.4pt; color: #475569; margin-bottom: 3px;">
+      To satisfy ICF credentialing standards, this engagement is established under a formal professional fee agreement. Select the applicable option:
+    </div>
+
+    <div class="option-box">
+      <div class="checkbox-row">
+        <input type="radio" name="comp_option" id="optA">
+        <label for="optA"><strong>Option A: Subsidized Professional Fee Structure</strong></label>
+      </div>
+      <div style="padding-left: 22px; font-size: 8.6pt; line-height: 1.45;">
+        <div>
+          The Client (or sponsoring Organization) agrees to pay a subsidized professional fee of 
+          $ <input type="text" class="input-line input-short" placeholder="150.00"> per session, for a total program investment of 
+          $ <input type="text" class="input-line input-short" placeholder="900.00">.
+        </div>
+        <div class="form-row" style="margin-top: 4px;">
+          <span class="field-label">Payment Terms:</span>
+          <span style="white-space: nowrap;">Fees shall be paid via</span>
+          <input type="text" class="input-line input-flex" placeholder="Zelle / Venmo / Bank Transfer / Corporate Invoice">.
+        </div>
+      </div>
+    </div>
+
+    <div class="option-box">
+      <div class="checkbox-row">
+        <input type="radio" name="comp_option" id="optB">
+        <label for="optB"><strong>Option B: Professional Barter &amp; Service Exchange</strong></label>
+      </div>
+      <div style="padding-left: 22px; font-size: 8.6pt; line-height: 1.38;">
+        In lieu of direct financial payment, the parties agree to a professional barter exchange: Client provides a comprehensive written testimonial and professional review of the coaching experience upon completion of every 
+        <input type="text" class="input-line input-xs" placeholder="10" value="10"> sessions, suitable for the Coach's website (<strong>www.yourlifepathways.com</strong>) and marketing materials. Both parties agree this constitutes full, fair compensation.
+      </div>
+    </div>
+    <div style="font-size: 8.3pt; color: #475569; margin-top: 3px; padding-left: 4px;">
+      <strong>Extension Billing:</strong> If extended under Section 1, the chosen compensation rate will apply to all additional sessions.
+    </div>
+
+    <br>
+    <div class="section-title">3. Professional Boundaries, Disclaimer &amp; Client Responsibility</div>
+    <div class="legal-block">
+      <p><strong>What Coaching Is Not:</strong> Client understands and agrees Coach is not acting as a therapist, counselor, consultant, personal trainer, life manager, legal advisor, or medical expert. Coaching is distinct from consulting; recommendations or expert guidance must be offered as a separate service under a separate agreement.</p>
+      <p><strong>Client Responsibility &amp; Liability:</strong> Client is solely responsible for their own decisions, actions, and results. Coach is not liable for indirect, incidental, or consequential damages. Coach's total aggregate liability under any cause of action shall not exceed fees actually paid under Section 2.</p>
+    </div>
+  </div>
+
+  <footer class="page-footer">
+    <span>YourLifePathways • Business, Executive &amp; Life Coaching • <a href="https://www.yourlifepathways.com" style="color: #64748b; text-decoration: none;">www.yourlifepathways.com</a></span>
+    <span>Page 1 of 2</span>
+  </footer>
+</section>
+
+<section class="page compact">
+  <div class="page-content">
+    <div class="section-title" style="margin-top: 6px;">4. Confidentiality, Ethics &amp; ICF Auditing</div>
+    <div class="legal-block">
+      <p>The Coach agrees to maintain strict confidentiality of all coaching conversations in full alignment with the <strong>International Coaching Federation (ICF) Code of Ethics</strong>. No personal, proprietary, or organizational information shared during sessions will be disclosed without the Client’s written consent.</p>
+      <p><strong>ICF Client Log Audit Consent:</strong> The Client agrees that their name, email address, and total coaching hours completed under this contract may be listed on the Coach's confidential client coaching log for credentialing audit purposes with the ICF. The ICF audits contact records solely to verify hours and does not contact the Client regarding session content.</p>
+    </div>
+
+    <div class="consent-panel">
+      <div style="font-weight: 700; color: #0369a1; font-size: 9.1pt; margin-bottom: 3px;">
+        Optional Session Recording Consent (ICF Credentialing Performance Evaluation)
+      </div>
+      <div style="font-size: 8.6pt; line-height: 1.35; color: #334155;">
+        For the Coach’s ongoing credentialing with the International Coaching Federation (ICF), the ICF requires submission of unedited audio/video recordings to assess the Coach’s core competency performance.
+        <ul style="margin: 3px 0 5px 18px; padding: 0;">
+          <li>Recordings are used <strong>exclusively</strong> for confidential evaluation by certified ICF performance assessors and/or mentor coaches.</li>
+          <li>Recordings will <strong>never</strong> be published, distributed, or shared publicly.</li>
+          <li>The Coach will give verbal notice before starting any recording, and the Client retains the right at any point to decline recording for a specific session or request that recording stop immediately.</li>
+        </ul>
+      </div>
+
+      <div style="border-top: 1px dashed #93c5fd; padding-top: 5px; margin-top: 5px;">
+        <div class="checkbox-row">
+          <input type="radio" name="rec_consent" id="recYes">
+          <label for="recYes"><strong>I consent</strong> to having selected coaching sessions recorded for ICF credentialing and mentor evaluation purposes.</label>
+        </div>
+        <div class="checkbox-row">
+          <input type="radio" name="rec_consent" id="recNo">
+          <label for="recNo"><strong>I do not consent</strong> to session recordings at this time. <em>(Opting out does not affect our coaching engagement).</em></label>
+        </div>
+      </div>
+    </div>
+
+    <br>
+    <div class="section-title">5. Cancellation &amp; Scheduling Policy</div>
+    <div class="legal-block">
+      <p>Both parties commit to honoring scheduled appointments to protect the rhythm of the engagement. Sessions must be rescheduled with at least <strong>24 hours'</strong> advance notice. Missed appointments or cancellations with less than 24 hours' notice are deducted from the program total, except in acute personal or organizational emergencies.</p>
+    </div>
+
+    <br>
+    <div class="section-title">6. Agreement &amp; Execution</div>
+    <div class="legal-block">
+      <p>By signing below, the Coach and the Client/Organization representative acknowledge that they have read, understood, and agreed to the terms of this Agreement, confirming that the compensation selected in Section 2 serves as complete, professional payment for the coaching program.</p>
+    </div>
+    <BR>
+    <table class="signatures-table">
+      <tbody>
+        <tr class="sig-info-row">
+          <td>
+            <div style="font-weight: 700; color: #0f172a; margin-bottom: 4px;">COACH:</div>
+            <div class="sig-info-block">
+              <div><strong>Erez Asif</strong></div>
+              <div style="font-size: 8.2pt; color: #64748b;">Erickson International Trained Coach</div>
+              <div style="font-size: 8pt; color: #0284c7;">YourLifePathways (<a href="https://www.yourlifepathways.com" style="color: #0284c7; text-decoration: none;">www.yourlifepathways.com</a>)</div>
+            </div>
+          </td>
+          <td>
+            <div style="font-weight: 700; color: #0f172a; margin-bottom: 4px;">CLIENT / REPRESENTATIVE:</div>
+            <div class="sig-info-block">
+              <div class="form-row">
+                <span class="field-label label-sig" style="font-size: 8.4pt;">Name:</span>
+                <input type="text" class="input-line input-flex" placeholder="Authorized Client / Representative Name">
+              </div>
+              <div class="form-row">
+                <span class="field-label label-sig" style="font-size: 8.4pt;">Title / Org:</span>
+                <input type="text" class="input-line input-flex" placeholder="Title &amp; Organization (if applicable)" style="font-size: 8.4pt;">
+              </div>
+            </div>
+          </td>
+        </tr>
+        <tr class="sig-action-row">
+          <td>
+            <div class="sig-line">
+              <div class="form-row">
+                <span class="field-label label-sig">Signature:</span>
+                <input type="text" class="input-line input-flex" placeholder="Erez Asif" value="Erez Asif">
+              </div>
+              <div class="form-row">
+                <span class="field-label label-sig" style="font-size: 8.4pt;">Date:</span>
+                <input type="text" class="input-line input-date" placeholder="YYYY-MM-DD">
+              </div>
+            </div>
+          </td>
+          <td>
+            <div class="sig-line">
+              <div class="form-row">
+                <span class="field-label label-sig">Signature:</span>
+                <input type="text" class="input-line input-flex" placeholder="Client / Representative Signature">
+              </div>
+              <div class="form-row">
+                <span class="field-label label-sig" style="font-size: 8.4pt;">Date:</span>
+                <input type="text" class="input-line input-date" placeholder="YYYY-MM-DD">
+              </div>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <footer class="page-footer">
+    <span>YourLifePathways • Business, Executive &amp; Life Coaching • <a href="https://www.yourlifepathways.com" style="color: #64748b; text-decoration: none;">www.yourlifepathways.com</a></span>
+    <span>Page 2 of 2</span>
+  </footer>
+</section>
+
+</div>
+
+<script>
+function handleLogoFallback(imgEl) {
+  if (!imgEl.dataset.triedAlt) {
+    imgEl.dataset.triedAlt = "true";
+    imgEl.src = "https://www.yourlifepathways.com/static/images/logo_your_life_pathways.png";
+    return;
+  }
+  imgEl.style.display = "none";
+  var fb = document.getElementById("brandLogoFallback");
+  if (fb) {
+    fb.style.display = "flex";
+  }
+}
+
+function loadCustomLogo(event) {
+  var file = event.target.files && event.target.files[0];
+  if (!file) return;
+  var reader = new FileReader();
+  reader.onload = function(e) {
+    var imgEl = document.getElementById("brandLogoImg");
+    var fb = document.getElementById("brandLogoFallback");
+    if (imgEl) {
+      imgEl.src = e.target.result;
+      imgEl.style.display = "block";
+    }
+    if (fb) {
+      fb.style.display = "none";
+    }
+  };
+  reader.readAsDataURL(file);
+}
+
+var defaultState = {
+  isFormBlanked: false
+};
+
+function toggleBlankValues() {
+  var inputs = document.querySelectorAll('.page input:not([type="file"])');
+  var btn = document.getElementById('blankToggleBtn');
+  
+  if (!defaultState.isFormBlanked) {
+    // Blank out values and placeholders
+    inputs.forEach(function(el) {
+      el.dataset.origValue = el.value || '';
+      el.dataset.origPlaceholder = el.placeholder || '';
+      el.dataset.origChecked = el.checked ? 'true' : 'false';
+      
+      if (el.type === 'radio' || el.type === 'checkbox') {
+        el.checked = false;
+      } else {
+        el.value = '';
+        el.placeholder = '';
+      }
+    });
+    defaultState.isFormBlanked = true;
+    if (btn) {
+      btn.innerHTML = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0 1 15-6.7L21 8"></path><path d="M21 3v5h-5"></path><path d="M21 12a9 9 0 0 1-15 6.7L3 16"></path><path d="M3 21v-5h5"></path></svg>Restore Helper Values';
+      btn.classList.add('active-restore');
+      btn.title = 'Restore default placeholders and sample values';
+    }
+    showToast('All helper & default values blanked. Ready for blank printing or new client entry.');
+  } else {
+    // Restore original values and placeholders
+    inputs.forEach(function(el) {
+      if (el.dataset.origValue !== undefined) {
+        el.value = el.dataset.origValue;
+      }
+      if (el.dataset.origPlaceholder !== undefined) {
+        el.placeholder = el.dataset.origPlaceholder;
+      }
+      if (el.dataset.origChecked !== undefined && (el.type === 'radio' || el.type === 'checkbox')) {
+        el.checked = (el.dataset.origChecked === 'true');
+      }
+    });
+    defaultState.isFormBlanked = false;
+    if (btn) {
+      btn.innerHTML = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 11V4h-5"></path><path d="M3 17l4.5-4.5"></path><path d="m14 11-7.5 7.5a2.12 2.12 0 1 0 3 3L17 14"></path><path d="m18 8 3-3"></path></svg>Blank Default Values';
+      btn.classList.remove('active-restore');
+      btn.title = 'Clear helper default values and placeholders';
+    }
+    showToast('Default helper values restored.');
+  }
+}
+
+function saveAsPDF() {
+  window.print();
+}
+
+function saveEditableCopy() {
+  // Sync current input values and checked states into DOM attributes so they persist
+  var textInputs = document.querySelectorAll('.page input[type="text"]');
+  textInputs.forEach(function(el) {
+    el.setAttribute('value', el.value);
+  });
+  var checkInputs = document.querySelectorAll('.page input[type="radio"], .page input[type="checkbox"]');
+  checkInputs.forEach(function(el) {
+    if (el.checked) {
+      el.setAttribute('checked', 'checked');
+    } else {
+      el.removeAttribute('checked');
+    }
+  });
+
+  var htmlContent = "<!DOCTYPE html>\n" + document.documentElement.outerHTML;
+  var blob = new Blob([htmlContent], { type: 'text/html;charset=utf-8' });
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement('a');
+  a.href = url;
+  var clientInput = document.querySelector('input[placeholder*="Client Full Name"]');
+  var clientName = clientInput && clientInput.value ? clientInput.value.trim() : '';
+  var filename = clientName 
+    ? 'Coaching_Agreement_' + clientName.replace(/[^a-zA-Z0-9_-]/g, '_') + '.html'
+    : 'Professional_Coaching_Agreement.html';
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  showToast('Saved editable copy as ' + filename);
+}
+
+function showToast(msg) {
+  var toast = document.getElementById('toastMsg');
+  if (!toast) return;
+  toast.textContent = msg;
+  toast.classList.add('show');
+  setTimeout(function() {
+    toast.classList.remove('show');
+  }, 3200);
+}
+</script>
+
+<div id="toastMsg" class="toast-msg"></div>
+</body></html>
+
