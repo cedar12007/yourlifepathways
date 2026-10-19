@@ -9,14 +9,12 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
-    <meta name="description" content="{% block meta_description %}{{ meta_description if meta_description else "
-        Navigate your professional and personal evolution with YourLifePathways. From executive leadership to business
-        scaling and personal mastery, find your path to success." }}{% endblock %}">
+    <meta name="description" content="{% block meta_description %}{{ meta_description if meta_description else (page_description if page_description else 'Navigate your career, leadership, and personal evolution with YourLifePathways. ICF-aligned career, business, executive, and life coaching by Erez Asif.') }}{% endblock %}">
     <meta name="keywords"
-        content="Executive Leadership Coaching, Career Strategy & Growth, Professional Development Mentor, Leadership Presence, Performance Coaching, Career Transition Strategy, Hiring Manager Insider Coaching, Student Leadership Development, Youth Career Mentorship, ICF Certified Coach, Strategic Career Planning, High-Performance Coaching, Emotional Intelligence for Leaders, Career Foundations for Teens, Student Athlete Mentoring, Executive Presence Training, Authentic Leadership Coaching, Workplace Navigation Strategy, Career Milestones Coaching, Goal Achievement Coaching, Erez Asif.">
+        content="Career Coaching, Business Coaching, Executive Coaching, Life Coaching, Executive Leadership Coaching, Career Strategy & Growth, Professional Development Mentor, Leadership Presence, Performance Coaching, Career Transition Strategy, Hiring Manager Insider Coaching, Student Leadership Development, Youth Career Mentorship, ICF Certified Coach, Strategic Career Planning, High-Performance Coaching, Emotional Intelligence for Leaders, Career Foundations for Teens, Student Athlete Mentoring, Executive Presence Training, Authentic Leadership Coaching, Workplace Navigation Strategy, Career Milestones Coaching, Goal Achievement Coaching, Erez Asif.">
     <meta name="author" content="YourLifePathways">
     <meta name="msvalidate.01" content="D49AD5CBA7A62DBB632CFB8979302D8C" />
-    <title>{% block title %}YourLifePathways | Business, Executive & Life Coaching{% endblock %}</title>
+    <title>{% block title %}{% if page_title %}{{ page_title }}{% else %}YourLifePathways | Career, Business, Executive & Life Coaching | Erez Asif{% endif %}{% endblock %}</title>
     {% if noindex %}
     <meta name="robots" content="noindex, nofollow">
     {% endif %}
@@ -34,7 +32,7 @@
     <link rel="preconnect" href="https://cdnjs.cloudflare.com">
 
     <!-- Critical CSS -->
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}?v=2.2">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}?v=2.5">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <noscript>
         <link rel="stylesheet" href="{{ url_for('static', filename='css/noscript.css') }}" />
@@ -46,28 +44,22 @@
         rel="stylesheet">
 
     <meta name="title"
-        content="{% if page_title %}{{ page_title }}{% else %}Personal, Career Strategy, and Leadership Coaching | Erez Asif{% endif %}">
+        content="{% if page_title %}{{ page_title }}{% else %}YourLifePathways | Career, Business, Executive & Life Coaching | Erez Asif{% endif %}">
     <!-- Duplicate description removed, relying on the one above -->
 
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://www.yourlifepathways.com{{ request.path }}">
-    <meta property="og:title" content="{% block og_title %}{{ meta_title if meta_title else " Personal, Career Strategy,
-        and Leadership Coaching | Erez Asif" }}{% endblock %}">
-    <meta property="og:description" content="{% block og_description %}{{ meta_description if meta_description else "
-        Navigate your professional and personal evolution with YourLifePathways. From executive leadership to business
-        scaling and personal mastery, find your path to success." }}{% endblock %}">
+    <meta property="og:title" content="{% block og_title %}{{ meta_title if meta_title else (page_title if page_title else 'YourLifePathways | Career, Business, Executive & Life Coaching | Erez Asif') }}{% endblock %}">
+    <meta property="og:description" content="{% block og_description %}{{ meta_description if meta_description else (page_description if page_description else 'Navigate your career, leadership, and personal evolution with YourLifePathways. ICF-aligned career, business, executive, and life coaching by Erez Asif.') }}{% endblock %}">
     <meta property="og:image"
         content="{% block og_image %}{{ url_for('static', filename='images/og_image.png', _external=True) }}{% endblock %}">
-    <meta property="og:image:alt" content="YourLifePathways Coaching - Professional Life and Leadership Coaching">
+    <meta property="og:image:alt" content="YourLifePathways Coaching - Career, Business, Executive and Life Coaching">
 
     <meta property="twitter:card" content="summary_large_image">
     <meta property="twitter:url" content="https://www.yourlifepathways.com{{ request.path }}">
-    <meta property="twitter:title" content="{% block twitter_title %}{{ meta_title if meta_title else " Leadership &
-        Career Strategy from a 20-Year Hiring Manager" }}{% endblock %}">
+    <meta property="twitter:title" content="{% block twitter_title %}{{ meta_title if meta_title else (page_title if page_title else 'YourLifePathways | Career, Business, Executive & Life Coaching | Erez Asif') }}{% endblock %}">
     <meta property="twitter:description"
-        content="{% block twitter_description %}{{ meta_description if meta_description else " Navigate your
-        professional and personal evolution with YourLifePathways. From executive leadership to business scaling and
-        personal mastery, find your path to success." }}{% endblock %}">
+        content="{% block twitter_description %}{{ meta_description if meta_description else (page_description if page_description else 'Navigate your career, leadership, and personal evolution with YourLifePathways. ICF-aligned career, business, executive, and life coaching by Erez Asif.') }}{% endblock %}">
     <meta property="twitter:image"
         content="{% block twitter_image %}{{ url_for('static', filename='images/logo_yourlifepathways_coaching_horizontal.png', _external=True) }}{% endblock %}">
     {% block extra_head_elements %}{% endblock %}
