@@ -195,7 +195,31 @@ def tracking_stats():
     if date_filter is not None:
         top_refs_query = top_refs_query.filter(date_filter)
         
-    top_referrers = top_refs_query.group_by(SiteVisit.referrer).order_by(func.count(func.distinct(SiteVisit.visitor_ip)).desc()).limit(20).all()
+    raw_top_refs = top_refs_query.group_by(SiteVisit.referrer).order_by(func.count(func.distinct(SiteVisit.visitor_ip)).desc()).limit(60).all()
+    
+    import re
+    top_referrers = []
+    for ref, cnt in raw_top_refs:
+        if not ref:
+            continue
+        ref_l = ref.lower().strip()
+        # Drop internal & redirect domains
+        if any(d in ref_l for d in ('yourlifepathways.com', 'asifcoaching.com', 'mylifepathways.com', 'localhost', '127.0.0.1')):
+            continue
+        # Drop raw IP addresses in referrers
+        if re.search(r'https?://\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}', ref_l):
+            continue
+        # Drop commercial scrapers, bots, link-farms, and exploit probes
+        if any(bad in ref_l for bad in (
+            'scraper', 'crawler', 'spider', 'proxy', 'diffbot', 'semrush', 'ahrefs',
+            'backlink', 'linkbuilding', 'seochecker', 'dapachecker', 'rankchecker',
+            ':443', ':8443', ':8880', ':2083', ':2087', ':2096',
+            '/access/api/', 'wp-', '.php', '.env', '.git', 'graphql', 'dump.sql'
+        )):
+            continue
+        top_referrers.append((ref, cnt))
+        if len(top_referrers) >= 20:
+            break
     
     # 5. Apply Sorting and Execute main query with limit
     if sort_by == 'views':

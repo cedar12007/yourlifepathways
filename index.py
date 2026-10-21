@@ -119,16 +119,24 @@ def log_visit():
     if is_bot(ua):
         return
 
-    # 2c. Ignore exploit scanning query strings and probe signatures
+    # 2c. Ignore exploit scanning query strings, probe signatures, and referral spam
     probe_signatures = (
         'rest_route', '.git', '.env', '.json', '.sql', '.php', 'xmlrpc',
         'backup', 'wp-', 'well-known', 'eval(', 'base64', 'author=', 'sftp',
         'step=1', 'step=', 'install.php', 'option=com_', 'passwd', 'import&raw',
-        'feed=rss'
+        'feed=rss', 'backlink', 'linkbuilding', 'seochecker', 'dapachecker',
+        '.ssh', 'id_rsa', 'deploy.sh', 'graphql', 'updraftplus', 'core.js',
+        'sppagebuilder', 'livewire', ':8443', ':8880', ':2083', ':2087', ':2096'
     )
     req_full = (request.path + '?' + request.query_string.decode('utf-8', 'ignore')).lower()
-    if any(sig in req_full for sig in probe_signatures):
+    ref_lower = (referrer or '').lower()
+    if any(sig in req_full for sig in probe_signatures) or any(sig in ref_lower for sig in probe_signatures):
         return
+
+    # 2d. Drop raw IP referrers (e.g. http://172.67.220.28) - automated IP sweeps
+    if ref_lower and re.match(r'^https?://\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}', ref_lower):
+        if '127.0.0.1' not in ref_lower and 'localhost' not in ref_lower:
+            return
     
     # 3. Enhanced Referrer Logic (Capture UTM sources for ads/campaigns)
     referrer = request.referrer or request.args.get('referrer')
@@ -176,6 +184,13 @@ def log_event():
     target_url_lower = target_url.lower()
     if any(sig in target_url_lower for sig in ('rest_route', '.git', '.env', '.json', '.sql', '.php', 'xmlrpc', 'backup', 'wp-', 'step=1', 'step=', 'install.php')):
         return '', 204
+    
+    ref_lower = (request.referrer or request.args.get('referrer') or '').lower()
+    if any(sig in ref_lower for sig in ('rest_route', '.git', '.env', '.json', '.sql', '.php', 'xmlrpc', 'backup', 'wp-', 'backlink', 'linkbuilding', 'core.js', 'sppagebuilder', 'livewire')):
+        return '', 204
+    if ref_lower and re.match(r'^https?://\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}', ref_lower):
+        if '127.0.0.1' not in ref_lower and 'localhost' not in ref_lower:
+            return '', 204
     
     # Also skip if user is logged in (admin) or has the session flag
     from flask import session
