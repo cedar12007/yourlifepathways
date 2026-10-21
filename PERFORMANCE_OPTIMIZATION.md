@@ -14,7 +14,7 @@ This document summarizes all performance optimizations applied to YourLifePathwa
 | i_am_not_broken.png | 2.8 MB | i_am_not_broken.jpg | 474 KB | 83% |
 | the_trap_of_being_fine.png | 2.0 MB | the_trap_of_being_fine.jpg | 287 KB | 86% |
 | i_am_not_broken2.png | 1.3 MB | i_am_not_broken2.jpg | 170 KB | 87% |
-| profile_pic.png | 220 KB | profile_pic.jpg | 62 KB | 72% |
+| profile_pic.png | 220 KB | profile_casual_pic.jpg | 62 KB | 72% |
 | favicon.ico | 401 KB | favicon.ico | 4.3 KB | 99% |
 
 ### 2. Image Attributes
