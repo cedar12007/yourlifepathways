@@ -523,12 +523,28 @@ def view_journey(ip):
                 s_start = current_session_visits[0].timestamp
                 s_end = current_session_visits[-1].timestamp
                 s_dur = int((s_end - s_start).total_seconds())
+                
+                # Consolidate consecutive hits to the exact same URL (reloads/refreshes)
+                session_steps = []
+                for v in current_session_visits:
+                    if session_steps and session_steps[-1]['url'] == v.url:
+                        session_steps[-1]['count'] += 1
+                        session_steps[-1]['end_time'] = v.timestamp
+                    else:
+                        session_steps.append({
+                            'url': v.url,
+                            'timestamp': v.timestamp,
+                            'end_time': v.timestamp,
+                            'count': 1
+                        })
+                        
                 sessions.append({
                     'num': len(sessions) + 1,
                     'start': s_start,
                     'end': s_end,
                     'duration_seconds': s_dur,
-                    'visits': current_session_visits
+                    'visits': current_session_visits,
+                    'steps': session_steps
                 })
                 current_session_visits = [v]
             else:
@@ -538,12 +554,27 @@ def view_journey(ip):
         s_start = current_session_visits[0].timestamp
         s_end = current_session_visits[-1].timestamp
         s_dur = int((s_end - s_start).total_seconds())
+        
+        session_steps = []
+        for v in current_session_visits:
+            if session_steps and session_steps[-1]['url'] == v.url:
+                session_steps[-1]['count'] += 1
+                session_steps[-1]['end_time'] = v.timestamp
+            else:
+                session_steps.append({
+                    'url': v.url,
+                    'timestamp': v.timestamp,
+                    'end_time': v.timestamp,
+                    'count': 1
+                })
+                
         sessions.append({
             'num': len(sessions) + 1,
             'start': s_start,
             'end': s_end,
             'duration_seconds': s_dur,
-            'visits': current_session_visits
+            'visits': current_session_visits,
+            'steps': session_steps
         })
         
     total_active_seconds = sum(s['duration_seconds'] for s in sessions)

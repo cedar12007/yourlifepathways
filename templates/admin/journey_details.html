@@ -268,13 +268,20 @@
                 </div>
             </div>
             <div class="journey-timeline" style="margin: 0; padding: 1rem 1.25rem;">
-                {% for visit in session.visits %}
+                {% for step in (session.steps if session.steps is defined else session.visits) %}
                 <div class="timeline-item">
                     <div class="timeline-date">
-                        <span class="local-time" data-utc="{{ visit.timestamp.isoformat() if visit.timestamp else '' }}">{{
-                            visit.timestamp.strftime('%H:%M:%S') if visit.timestamp else '' }}</span>
+                        <span class="local-time" data-utc="{{ step.timestamp.isoformat() if step.timestamp else '' }}">{{
+                            step.timestamp.strftime('%H:%M:%S') if step.timestamp else '' }}</span>
                     </div>
-                    <div class="timeline-url"><a href="{{ visit.url }}" target="_blank" style="color: #2b6cb0; text-decoration: none;">{{ visit.url }}</a></div>
+                    <div class="timeline-url" style="display: flex; align-items: center; flex-wrap: wrap; gap: 6px;">
+                        <a href="{{ step.url }}" target="_blank" style="color: #2b6cb0; text-decoration: none;">{{ step.url }}</a>
+                        {% if step.count is defined and step.count > 1 %}
+                            <span style="background: #edf2f7; color: #4a5568; font-size: 0.72rem; font-weight: 600; padding: 2px 7px; border-radius: 12px; border: 1px solid #cbd5e0; white-space: nowrap;">
+                                <i class="fa-solid fa-rotate-right" style="font-size: 0.65rem; color: #718096; margin-right: 3px;"></i> Reloaded {{ step.count }}x
+                            </span>
+                        {% endif %}
+                    </div>
                 </div>
                 {% endfor %}
             </div>

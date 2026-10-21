@@ -137,6 +137,18 @@ def log_visit():
     if ref_lower and re.match(r'^https?://\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}', ref_lower):
         if '127.0.0.1' not in ref_lower and 'localhost' not in ref_lower:
             return
+
+    # 2e. Deduplicate rapid identical page reloads from same IP within 10 seconds
+    import time
+    if not hasattr(app, '_recent_visits'):
+        app._recent_visits = {}
+    now_ts = time.time()
+    if len(app._recent_visits) > 1000:
+        app._recent_visits = {k: v for k, v in app._recent_visits.items() if now_ts - v < 60}
+    visit_key = (ip, url)
+    if now_ts - app._recent_visits.get(visit_key, 0) < 10:
+        return
+    app._recent_visits[visit_key] = now_ts
     
     # 3. Enhanced Referrer Logic (Capture UTM sources for ads/campaigns)
     referrer = request.referrer or request.args.get('referrer')
@@ -236,6 +248,16 @@ def log_event():
     
     # Record this request
     app._event_rate_limiter[ip].append(now)
+
+    # Debounce rapid event pings to identical URL within 10 seconds
+    if not hasattr(app, '_recent_events'):
+        app._recent_events = {}
+    if len(app._recent_events) > 1000:
+        app._recent_events = {k: v for k, v in app._recent_events.items() if now - v < 60}
+    event_key = (ip, target_url)
+    if now - app._recent_events.get(event_key, 0) < 10:
+        return '', 204
+    app._recent_events[event_key] = now
     
     ua = request.headers.get('User-Agent', 'Unknown')
     
