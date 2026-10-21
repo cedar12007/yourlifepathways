@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+
+{% block extra_head_elements %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/admin.min.css') }}">
+{% endblock %}
+
+{% block content %}
+<section class="main admin-dashboard">
+    <a href="{{ url_for('admin.dashboard') }}" class="admin-back-link">
+        <i class="fa-solid fa-arrow-left"></i> Back to Admin
+    </a>
+    <header class="major">
+        <h2>Email Signature Reads</h2>
+        <p>Real-time log of when emails containing your signature headshot are opened.</p>
+    </header>
+
+    <div class="admin-tabs">
+        <a href="{{ url_for('admin.dashboard') }}" class="admin-tab">Blog Posts</a>
+        <a href="{{ url_for('admin.manage_comments') }}" class="admin-tab">Comments</a>
+        <a href="{{ url_for('admin.tracking_stats') }}" class="admin-tab">Site Traffic</a>
+        <a href="{{ url_for('admin.email_tracking') }}" class="admin-tab active">Email Reads</a>
+        <a href="{{ url_for('admin.security_logs') }}" class="admin-tab">Logs</a>
+    </div>
+
+    <div class="admin-table-wrapper">
+        <table class="admin-table">
+            <thead>
+                <tr>
+                    <th class="sortable">Date & Time</th>
+                    <th class="sortable">Reference / Tag</th>
+                    <th class="sortable">Location</th>
+                    <th class="sortable">IP Address</th>
+                    <th class="sortable">Device / Mail Client</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% if opens %}
+                {% for item in opens %}
+                <tr>
+                    <td>
+                        <span class="local-time" data-utc="{{ item.timestamp.isoformat() if item.timestamp else '' }}">
+                            {{ item.timestamp.strftime('%Y-%m-%d %H:%M') if item.timestamp else 'N/A' }}
+                        </span>
+                    </td>
+                    <td><strong style="color: #0f2d59;">{{ item.ref }}</strong></td>
+                    <td>{{ item.location or 'Unknown' }}</td>
+                    <td><code>{{ item.ip_address }}</code></td>
+                    <td><small style="color: #666;">{{ (item.user_agent[:60] + '...') if item.user_agent and item.user_agent|length > 60 else (item.user_agent or 'Unknown') }}</small></td>
+                </tr>
+                {% endfor %}
+                {% else %}
+                <tr>
+                    <td colspan="5" style="text-align: center; padding: 2.5em;">
+                        No email reads recorded yet. Once recipients view an email with your signature, events will appear here in real time.
+                    </td>
+                </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+</section>
+{% endblock %}
+

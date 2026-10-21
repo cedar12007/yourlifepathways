@@ -1,13 +1,13 @@
 import os
 
 # Only import Blueprint and request-related tools from flask
-from flask import Blueprint, render_template, request, jsonify, make_response, url_for, redirect
+from flask import Blueprint, render_template, request, jsonify, make_response, url_for, redirect, send_file, current_app
 
 # Import from your local files
-from extensions import db
-from models import Post
+from extensions import db, executor
+from models import Post, EmailOpen
 # from models import ContactMessage
-from utils import check_rate_limit, verify_recaptcha, send_email_notification, REDIS_ENABLED, get_client_ip, vercel_edge_cache
+from utils import check_rate_limit, verify_recaptcha, send_email_notification, REDIS_ENABLED, get_client_ip, get_ip_location, vercel_edge_cache
 
 # Ensure this is a string, not a list
 main_bp = Blueprint('main', __name__)
@@ -210,6 +210,45 @@ def bing_site_auth():
 </users>"""
     response = make_response(bing_content)
     response.headers['Content-Type'] = 'application/xml'
+    return response
+
+
+@main_bp.route('/signature/headshot.png')
+@main_bp.route('/signature/profile_pic_email_signature_150px.png')
+@main_bp.route('/static/images/profile/profile_pic_email_signature_150px.png')
+def track_signature_headshot():
+    # 1. Grab metadata
+    ref = request.args.get('ref') or request.args.get('id') or request.args.get('tag') or 'gmail_signature'
+    ip = get_client_ip()
+    ua = request.headers.get('User-Agent', '')
+
+    # 2. Async background logging so the image serves with 0ms latency
+    def log_open_task(app_context, ip_addr, user_ag, reference):
+        with app_context:
+            loc = get_ip_location(ip_addr) if ip_addr else None
+            try:
+                entry = EmailOpen(ref=reference, ip_address=ip_addr, location=loc, user_agent=user_ag)
+                db.session.add(entry)
+                db.session.commit()
+                current_app.logger.info(f"📧 [Email Open Logged] Ref: {reference} | IP: {ip_addr} ({loc})")
+            except Exception as e:
+                db.session.rollback()
+                current_app.logger.error(f"Error logging email open: {e}")
+
+    try:
+        executor.submit(log_open_task, current_app._get_current_object().app_context(), ip, ua, ref)
+    except Exception:
+        pass
+
+    # 3. Serve the actual 150px headshot with no-cache headers
+    img_path = os.path.join(current_app.root_path, 'static', 'images', 'profile', 'profile_pic_email_signature_150px.png')
+    if not os.path.exists(img_path):
+        img_path = os.path.join(current_app.root_path, 'static', 'images', 'profile', 'profile_pic.jpg')
+
+    response = send_file(img_path, mimetype='image/png')
+    response.headers['Cache-Control'] = 'no-store, no-cache, must-revalidate, max-age=0'
+    response.headers['Pragma'] = 'no-cache'
+    response.headers['Expires'] = '0'
     return response
 
 

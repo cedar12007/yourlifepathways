@@ -1,6 +1,6 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash, abort, jsonify, make_response
 from datetime import timedelta
-from models import Post, Comment, User, LoginHistory, db, SiteVisit, PostView
+from models import Post, Comment, User, LoginHistory, db, SiteVisit, PostView, EmailOpen
 from utils import slugify, parse_user_agent, send_comment_approval_email
 from routes_blog import is_admin
 from extensions import executor
@@ -892,3 +892,10 @@ def toggle_manual_bot(ip):
         db.session.add(new_bot)
         db.session.commit()
         return jsonify({'status': 'success', 'bot_status': 'manual'})
+
+
+@admin_bp.route('/email-tracking')
+@admin_required
+def email_tracking():
+    opens = EmailOpen.query.order_by(EmailOpen.timestamp.desc()).limit(150).all()
+    return render_template('admin/email_tracking.html', opens=opens, noindex=True)

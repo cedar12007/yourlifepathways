@@ -134,3 +134,14 @@ class ManualBot(db.Model):
     ip_address = db.Column(db.String(45), unique=True, nullable=False, index=True)
     notes = db.Column(db.Text)
     timestamp = db.Column(db.DateTime(timezone=True), server_default=func.now())
+
+
+class EmailOpen(db.Model):
+    __tablename__ = 'ylp_email_opens'
+    id = db.Column(db.Integer, primary_key=True)
+    ref = db.Column(db.String(150), default='gmail_signature', index=True)
+    ip_address = db.Column(db.String(45))
+    location = db.Column(db.String(255))
+    user_agent = db.Column(db.Text)
+    timestamp = db.Column(db.DateTime(timezone=True), server_default=func.now())
+
