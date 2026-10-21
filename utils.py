@@ -272,12 +272,27 @@ def is_bot(ua_string):
         if not any(k in ua for k in ('msie 9', 'msie 10', 'msie 8', 'msie 7')):
             return True
         
+    # Detect automated Android VM runtime (Dalvik is Android's headless Java VM, not a browser)
+    if 'dalvik/' in ua:
+        return True
+
+    # Detect URLs or PHP script paths passed inside the User-Agent header (exploit scanner pattern)
+    if 'http://' in ua or 'https://' in ua or '.php' in ua:
+        return True
+
+    # Detect truncated/incomplete AppleWebkit headers that miss Chrome/Safari/Firefox
+    if ua.endswith('applewebkit/537.36') and not any(k in ua for k in ('chrome', 'safari', 'firefox', 'edge')):
+        return True
+        
     bot_keywords = [
         # Generic Bot Terms
         'bot', 'spider', 'crawler', 'crawl', 'slurp', 'scraper', 'scrape', 
         'archiver', 'headless', 'preview', 'fetch', 'scanner', 'sniffer',
         'probe', 'checker', 'pathscan', 'builtwith', 'heritrix', 'dataprovider',
-        'leadforge', 'enrich', 'rust_',
+        'leadforge', 'enrich', 'rust_', 'detector', 'auditor', 'harvester',
+        'harvest', 'resty', 'req/', 'downloader', 'leadintelligence', 'siteradar',
+        'bugbounty', 'cve-', 'poc/', 'recon', 'researchscan', 'panscient',
+        'nokia', 'sonyericsson', 'elinks', 'lynx',
 
         # Search Engine & Indexer Crawlers
         'google', 'googlebot', 'bingbot', 'bingpreview', 'yandex', 'baiduspider', 

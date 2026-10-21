@@ -24,6 +24,11 @@ def index_redirect():
     return redirect(url_for('main.index'), code=301)
 
 
+@main_bp.route('/r=<source>')
+def referral_redirect(source):
+    return redirect(url_for('main.index', r=source), code=302)
+
+
 @main_bp.route('/discovery-call')
 @vercel_edge_cache(s_maxage=1, swr=86400)
 def discovery_call():

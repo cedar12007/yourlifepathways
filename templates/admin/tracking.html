@@ -266,7 +266,7 @@
                             style="background: #c0392b; color: white; padding: 2px 8px; border-radius: 4px; font-size: 0.7rem; font-weight: bold; vertical-align: middle; margin-left: 8px; border: 1px dotted #ffcccb;"
                             title="Manually Flagged Bot">BOT (Manual)</span>
                         {% endif %}
-                        {% if lifetime.days > 1 %}
+                        {% if lifetime.days > 1 and duration.total_seconds() > 0 %}
                         <span
                             style="background: #3498db; color: white; padding: 2px 8px; border-radius: 4px; font-size: 0.7rem; font-weight: bold; vertical-align: middle; margin-left: 8px;">RETURN
                             VISITOR ({{ lifetime.days }} days)</span>
