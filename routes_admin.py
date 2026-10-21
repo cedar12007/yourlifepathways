@@ -146,12 +146,16 @@ def tracking_stats():
             refs_ip_query = refs_ip_query.filter(date_filter)
         query = query.filter(SiteVisit.visitor_ip.in_(refs_ip_query))
     elif has_referrer:
+        from models import ManualBot
+        manual_bot_subquery = db.session.query(ManualBot.ip_address)
         refs_ip_query = db.session.query(SiteVisit.visitor_ip).filter(
             SiteVisit.referrer.isnot(None),
-            ~SiteVisit.referrer.contains('://yourlifepathways.com'),
-            ~SiteVisit.referrer.contains('://www.yourlifepathways.com'),
-            ~SiteVisit.referrer.contains('://localhost'),
-            ~SiteVisit.referrer.contains('://127.0.0.1')
+            ~SiteVisit.visitor_ip.in_(manual_bot_subquery),
+            ~SiteVisit.referrer.contains('yourlifepathways.com'),
+            ~SiteVisit.referrer.contains('asifcoaching.com'),
+            ~SiteVisit.referrer.contains('mylifepathways.com'),
+            ~SiteVisit.referrer.contains('localhost'),
+            ~SiteVisit.referrer.contains('127.0.0.1')
         )
         if date_filter is not None:
             refs_ip_query = refs_ip_query.filter(date_filter)
@@ -173,16 +177,20 @@ def tracking_stats():
     valid_ips_subquery = query.with_entities(SiteVisit.visitor_ip).subquery()
     
     # Top Referrers for the time range (counting unique visitors rather than total hits)
+    from models import ManualBot
+    manual_bot_subquery = db.session.query(ManualBot.ip_address)
     top_refs_query = db.session.query(
         SiteVisit.referrer,
         func.count(func.distinct(SiteVisit.visitor_ip)).label('count')
     ).filter(
         SiteVisit.visitor_ip.in_(valid_ips_subquery),
         SiteVisit.referrer.isnot(None),
-        ~SiteVisit.referrer.contains('://yourlifepathways.com'),
-        ~SiteVisit.referrer.contains('://www.yourlifepathways.com'),
-        ~SiteVisit.referrer.contains('://localhost'),
-        ~SiteVisit.referrer.contains('://127.0.0.1')
+        ~SiteVisit.visitor_ip.in_(manual_bot_subquery),
+        ~SiteVisit.referrer.contains('yourlifepathways.com'),
+        ~SiteVisit.referrer.contains('asifcoaching.com'),
+        ~SiteVisit.referrer.contains('mylifepathways.com'),
+        ~SiteVisit.referrer.contains('localhost'),
+        ~SiteVisit.referrer.contains('127.0.0.1')
     )
     if date_filter is not None:
         top_refs_query = top_refs_query.filter(date_filter)
