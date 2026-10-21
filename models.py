@@ -96,6 +96,8 @@ class SiteVisit(db.Model):
     visitor_location = db.Column(db.String(255))
     user_agent = db.Column(db.Text)
     referrer = db.Column(db.Text)  # Added for tracking source
+    scroll_depth = db.Column(db.Integer, default=0)
+    section_views = db.Column(db.Text, nullable=True)  # e.g. "intro:15s,services:45s,contact:20s"
     timestamp = db.Column(db.DateTime(timezone=True), server_default=func.now())
 
 class Comment(db.Model):

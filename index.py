@@ -322,6 +322,90 @@ def log_event():
     executor.submit(save_event_task, app.app_context(), ip, target_url, ua, referrer)
     return '', 204
 
+@app.route('/log_telemetry', methods=['GET', 'POST'])
+def log_telemetry():
+    """Receives scroll depth and section dwell telemetry and updates the visitor's visit record."""
+    if os.getenv('TRAFFIC_LOGGING', 'no').lower() != 'yes':
+        return '', 204
+        
+    ua = request.headers.get('User-Agent', 'Unknown')
+    from utils import is_bot
+    if is_bot(ua):
+        return '', 204
+        
+    ip = get_client_ip()
+    target_url = request.args.get('url') or request.form.get('url') or ''
+    depth = request.args.get('depth') or request.form.get('depth')
+    sections = request.args.get('sections') or request.form.get('sections')
+
+    def save_telemetry_task(app_context, ip, target_url, depth, sections):
+        with app_context:
+            try:
+                from models import SiteVisit, ManualBot
+                from datetime import datetime, timezone, timedelta
+                
+                if ManualBot.query.filter_by(ip_address=ip).first():
+                    return
+                    
+                now_utc = datetime.now(timezone.utc)
+                cutoff = now_utc - timedelta(hours=2)
+                
+                # Find the most recent visit from this IP within the last 2 hours
+                query = SiteVisit.query.filter(
+                    SiteVisit.visitor_ip == ip,
+                    SiteVisit.timestamp >= cutoff
+                )
+                if target_url:
+                    clean_url = target_url.split('#')[0].rstrip('/')
+                    query = query.filter(SiteVisit.url.like(f"{clean_url}%"))
+                    
+                visit = query.order_by(SiteVisit.timestamp.desc()).first()
+                if not visit:
+                    return
+                    
+                updated = False
+                if depth:
+                    try:
+                        d_val = min(100, max(0, int(depth)))
+                        if d_val > (visit.scroll_depth or 0):
+                            visit.scroll_depth = d_val
+                            updated = True
+                    except ValueError:
+                        pass
+                        
+                if sections:
+                    # Format: "intro:12,cost:45,contact:20"
+                    existing = {}
+                    if visit.section_views:
+                        for part in visit.section_views.split(','):
+                            if ':' in part:
+                                s_name, s_time = part.split(':', 1)
+                                try:
+                                    existing[s_name.strip()] = int(s_time.rstrip('s'))
+                                except ValueError:
+                                    pass
+                    for item in sections.split(','):
+                        if ':' in item:
+                            sec_name, sec_time = item.split(':', 1)
+                            sec_clean = sec_name.strip('#').lower()
+                            try:
+                                sec_secs = int(sec_time.rstrip('s'))
+                                existing[sec_clean] = existing.get(sec_clean, 0) + sec_secs
+                                updated = True
+                            except ValueError:
+                                pass
+                    if updated:
+                        visit.section_views = ','.join(f"{s}:{t}s" for s, t in existing.items())
+                        
+                if updated:
+                    db.session.commit()
+            except Exception as e:
+                db.session.rollback()
+                print(f"[log_telemetry] Background error: {e}")
+
+    executor.submit(save_telemetry_task, app.app_context(), ip, target_url, depth, sections)
+    return '', 204
+
 
 
 if __name__ == "__main__":

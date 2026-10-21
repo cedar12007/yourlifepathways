@@ -155,30 +155,12 @@
         <i class="fa-solid fa-robot" style="font-size: 1.5rem;"></i>
         <div>
             IDENTIFIED AS BOT / AUTOMATED TRAFFIC
-            <div style="font-size: 0.75rem; font-weight: normal; margin-top: 0.2rem;">This activity was auto-detected
-                based on its user agent string.</div>
-        </div>
-    </div>
-    {% elif bot_status == 'manual' %}
-    <div class="bot-banner" style="background-color: #fce4e4; border-color: #c0392b; color: #c0392b;">
-        <i class="fa-solid fa-flag" style="font-size: 1.5rem;"></i>
-        <div>
-            MANUALLY FLAGGED BOT
-            <div style="font-size: 0.75rem; font-weight: normal; margin-top: 0.2rem;">This IP was explicitly marked as
-                bot traffic by an administrator.</div>
+            <div style="font-size: 0.75rem; font-weight: normal; margin-top: 0.2rem;">This activity was auto-detected based on its user agent string.</div>
         </div>
     </div>
     {% endif %}
 
     <div class="journey-meta-box" style="width: 100%; box-sizing: border-box; position: relative;">
-        <div style="position: absolute; top: 1.5rem; right: 1.5rem;">
-            <button class="button bot-toggle-btn" data-ip="{{ ip }}"
-                style="font-size: 0.75rem; padding: 0.4rem 0.8rem; background: white; border: 1px solid #e74c3c; color: #e74c3c; border-radius: 4px; cursor: pointer;">
-                <i class="fa-solid fa-flag" style="margin-right: 4px;"></i>
-                <span class="bot-btn-text">{% if bot_status == 'manual' %}Unflag Bot{% else %}Flag as Bot{% endif
-                    %}</span>
-            </button>
-        </div>
         <p><strong>IP Address:</strong> <code>{{ ip }}</code></p>
         <p class="location-label">
             <strong>Location:</strong>
@@ -269,17 +251,52 @@
             </div>
             <div class="journey-timeline" style="margin: 0; padding: 1rem 1.25rem;">
                 {% for step in (session.steps if session.steps is defined else session.visits) %}
-                <div class="timeline-item">
+                <div class="timeline-item" style="padding-bottom: 0.85rem; margin-bottom: 0.85rem; border-bottom: 1px dashed #edf2f7;">
                     <div class="timeline-date">
                         <span class="local-time" data-utc="{{ step.timestamp.isoformat() if step.timestamp else '' }}">{{
                             step.timestamp.strftime('%H:%M:%S') if step.timestamp else '' }}</span>
                     </div>
-                    <div class="timeline-url" style="display: flex; align-items: center; flex-wrap: wrap; gap: 6px;">
-                        <a href="{{ step.url }}" target="_blank" style="color: #2b6cb0; text-decoration: none;">{{ step.url }}</a>
-                        {% if step.count is defined and step.count > 1 %}
-                            <span style="background: #edf2f7; color: #4a5568; font-size: 0.72rem; font-weight: 600; padding: 2px 7px; border-radius: 12px; border: 1px solid #cbd5e0; white-space: nowrap;">
-                                <i class="fa-solid fa-rotate-right" style="font-size: 0.65rem; color: #718096; margin-right: 3px;"></i> Reloaded {{ step.count }}x
-                            </span>
+                    <div style="flex-grow: 1;">
+                        <div class="timeline-url" style="display: flex; align-items: center; flex-wrap: wrap; gap: 8px;">
+                            <a href="{{ step.url }}" target="_blank" style="color: #2b6cb0; text-decoration: none; font-weight: 500;">{{ step.url }}</a>
+                            
+                            {% if step.count is defined and step.count > 1 %}
+                                <span style="background: #edf2f7; color: #4a5568; font-size: 0.72rem; font-weight: 600; padding: 2px 7px; border-radius: 12px; border: 1px solid #cbd5e0; white-space: nowrap;">
+                                    <i class="fa-solid fa-rotate-right" style="font-size: 0.65rem; color: #718096; margin-right: 3px;"></i> Reloaded {{ step.count }}x
+                                </span>
+                            {% endif %}
+                            
+                            {% if step.scroll_depth is defined and step.scroll_depth > 0 %}
+                                {% if step.scroll_depth >= 85 %}
+                                    <span style="background: #e6fffa; color: #234e52; border: 1px solid #b2f5ea; padding: 2px 8px; border-radius: 12px; font-size: 0.72rem; font-weight: 600; white-space: nowrap;">
+                                        <i class="fa-solid fa-check-double" style="color: #319795; margin-right: 3px;"></i> Read 100%
+                                    </span>
+                                {% elif step.scroll_depth >= 45 %}
+                                    <span style="background: #ebf8ff; color: #2b6cb0; border: 1px solid #bee3f8; padding: 2px 8px; border-radius: 12px; font-size: 0.72rem; font-weight: 600; white-space: nowrap;">
+                                        <i class="fa-solid fa-arrows-up-down" style="color: #3182ce; margin-right: 3px;"></i> Scrolled {{ step.scroll_depth }}%
+                                    </span>
+                                {% else %}
+                                    <span style="background: #fffaf0; color: #744210; border: 1px solid #feebc8; padding: 2px 8px; border-radius: 12px; font-size: 0.72rem; font-weight: 600; white-space: nowrap;">
+                                        <i class="fa-solid fa-arrow-down" style="color: #dd6b20; margin-right: 3px;"></i> Skimmed {{ step.scroll_depth }}%
+                                    </span>
+                                {% endif %}
+                            {% endif %}
+                        </div>
+
+                        {% if step.section_views is defined and step.section_views %}
+                        <div style="margin-top: 6px; display: flex; align-items: center; flex-wrap: wrap; gap: 6px;">
+                            <span style="font-size: 0.72rem; color: #718096; font-weight: 600;">Attention:</span>
+                            {% for sec_item in step.section_views.split(',') %}
+                                {% if ':' in sec_item %}
+                                    {% set sec_parts = sec_item.split(':') %}
+                                    <span style="background: #f7fafc; color: #4a5568; border: 1px solid #e2e8f0; border-radius: 4px; padding: 2px 7px; font-size: 0.72rem; display: inline-flex; align-items: center; gap: 4px;">
+                                        <i class="fa-solid fa-eye" style="font-size: 0.65rem; color: #3182ce;"></i>
+                                        <span>#{{ sec_parts[0] }}</span>
+                                        <strong style="color: #2d3748;">{{ sec_parts[1] }}</strong>
+                                    </span>
+                                {% endif %}
+                            {% endfor %}
+                        </div>
                         {% endif %}
                     </div>
                 </div>
@@ -348,39 +365,6 @@
                     }
                 }
             }
-        });
-
-        document.querySelectorAll('.bot-toggle-btn').forEach(btn => {
-            btn.addEventListener('click', function (e) {
-                e.preventDefault();
-                const ip = this.getAttribute('data-ip');
-                const textSpan = this.querySelector('.bot-btn-text');
-
-                this.style.opacity = '0.5';
-
-                fetch(`/admin/tracking/bot/toggle/${ip}`, {
-                    method: 'POST',
-                    headers: { 'X-Requested-With': 'XMLHttpRequest' }
-                })
-                    .then(response => response.json())
-                    .then(data => {
-                        this.style.opacity = '1';
-                        if (data.status === 'success') {
-                            if (data.bot_status === 'manual') {
-                                textSpan.textContent = 'Unflag Bot';
-                            } else {
-                                textSpan.textContent = 'Flag as Bot';
-                            }
-                            // Optionally, one could trigger a window.location.reload() 
-                            // to re-evaluate filters, but for seamless UX we just toggle the button text
-                        }
-                    })
-                    .catch(err => {
-                        this.style.opacity = '1';
-                        alert('An error occurred updating the bot status.');
-                        console.error(err);
-                    });
-            });
         });
     </script>
 </section>

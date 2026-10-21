@@ -527,14 +527,22 @@ def view_journey(ip):
                 # Consolidate consecutive hits to the exact same URL (reloads/refreshes)
                 session_steps = []
                 for v in current_session_visits:
+                    s_depth = getattr(v, 'scroll_depth', 0) or 0
+                    s_views = getattr(v, 'section_views', None) or ''
                     if session_steps and session_steps[-1]['url'] == v.url:
                         session_steps[-1]['count'] += 1
                         session_steps[-1]['end_time'] = v.timestamp
+                        if s_depth > session_steps[-1]['scroll_depth']:
+                            session_steps[-1]['scroll_depth'] = s_depth
+                        if s_views:
+                            session_steps[-1]['section_views'] = s_views
                     else:
                         session_steps.append({
                             'url': v.url,
                             'timestamp': v.timestamp,
                             'end_time': v.timestamp,
+                            'scroll_depth': s_depth,
+                            'section_views': s_views,
                             'count': 1
                         })
                         
@@ -557,14 +565,22 @@ def view_journey(ip):
         
         session_steps = []
         for v in current_session_visits:
+            s_depth = getattr(v, 'scroll_depth', 0) or 0
+            s_views = getattr(v, 'section_views', None) or ''
             if session_steps and session_steps[-1]['url'] == v.url:
                 session_steps[-1]['count'] += 1
                 session_steps[-1]['end_time'] = v.timestamp
+                if s_depth > session_steps[-1]['scroll_depth']:
+                    session_steps[-1]['scroll_depth'] = s_depth
+                if s_views:
+                    session_steps[-1]['section_views'] = s_views
             else:
                 session_steps.append({
                     'url': v.url,
                     'timestamp': v.timestamp,
                     'end_time': v.timestamp,
+                    'scroll_depth': s_depth,
+                    'section_views': s_views,
                     'count': 1
                 })
                 
