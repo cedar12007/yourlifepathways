@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 
 {% block extra_head_elements %}
-<link rel="stylesheet" href="{{ url_for('static', filename='css/admin.min.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/admin.min.css') }}?v=1.2">
 {% endblock %}
 
 {% block content %}
@@ -17,8 +17,11 @@
         <a href="{{ url_for('admin.dashboard') }}" class="admin-tab">Blog Posts</a>
         <a href="{{ url_for('admin.manage_comments') }}" class="admin-tab">Comments</a>
         <a href="{{ url_for('admin.manage_likes') }}" class="admin-tab">Likes</a>
+        <a href="{{ url_for('admin.tracking_stats') }}" class="admin-tab">Traffic</a>
+        <a href="{{ url_for('admin.email_tracking') }}" class="admin-tab">Email Reads</a>
         <a href="{{ url_for('admin.security_logs') }}" class="admin-tab active">Logs</a>
-        <a href="{{ url_for('admin.change_password') }}" class="admin-tab">Settings</a>
+        <a href="{{ url_for('admin.change_password') }}" class="admin-tab">Password</a>
+        <a href="{{ url_for('admin.database_resilience') }}" class="admin-tab">Resilience</a>
     </div>
 
     <div class="admin-table-wrapper">

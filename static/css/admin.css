@@ -181,47 +181,86 @@ table.admin-table {
     color: #fff !important;
 }
 
-.btn-new {
-    background: #333 !important;
-    color: #fff !important;
+.btn-new,
+a.btn-new,
+a.button.primary.btn-new {
+    background: #0f2d59 !important;
+    color: #ffffff !important;
     margin-bottom: 2em !important;
     display: inline-flex !important;
-    height: 32px;
-    line-height: 32px;
-    padding: 0 20px;
-    border-radius: 4px;
-    font-size: 0.75rem !important;
+    height: 38px;
+    line-height: 38px;
+    padding: 0 22px;
+    border-radius: 6px;
+    font-size: 0.85rem !important;
     font-weight: 600;
     align-items: center;
     justify-content: center;
+    gap: 8px;
     text-decoration: none !important;
+    box-shadow: 0 2px 6px rgba(15, 45, 89, 0.2);
+    transition: background 0.2s ease, transform 0.1s ease;
 }
 
-.btn-admin:hover,
-.btn-new:hover {
-    opacity: 0.8;
+.btn-new *,
+a.btn-new *,
+a.button.primary.btn-new * {
+    color: #ffffff !important;
+}
+
+.btn-new:hover,
+a.btn-new:hover,
+a.button.primary.btn-new:hover {
+    background: #1d4b8a !important;
+    color: #ffffff !important;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 10px rgba(15, 45, 89, 0.25);
+    opacity: 1 !important;
+}
+
+.btn-new:hover *,
+a.btn-new:hover *,
+a.button.primary.btn-new:hover * {
+    color: #ffffff !important;
 }
 
 /* Admin Tabs */
 .admin-tabs {
     display: flex;
-    gap: 20px;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    gap: 15px;
     margin-bottom: 2em;
     border-bottom: 1px solid #eee;
-    padding-bottom: 10px;
+    padding-bottom: 8px;
+}
+
+.admin-tabs::-webkit-scrollbar {
+    display: none;
 }
 
 .admin-tab {
+    flex-shrink: 0;
+    white-space: nowrap;
     text-decoration: none;
     color: #7f8c8d;
     font-weight: 600;
-    padding: 5px 10px;
+    padding: 6px 12px;
     font-size: 0.9rem;
+    transition: color 0.2s ease, border-color 0.2s ease;
+}
+
+.admin-tab:hover {
+    color: #0f2d59;
 }
 
 .admin-tab.active {
-    color: #333;
-    border-bottom: 2px solid #333;
+    color: #0f2d59;
+    border-bottom: 3px solid #0f2d59;
+    font-weight: 700;
 }
 
 /* Post/Comment Cards for Moderation */
@@ -353,18 +392,27 @@ table.admin-table {
         padding: 1em;
     }
 
-    /* 1. Make Tabs Swipable */
+    /* 1. Make Tabs Swipable Horizontally */
     .admin-tabs {
+        display: flex;
+        flex-wrap: nowrap;
         overflow-x: auto;
         white-space: nowrap;
         -webkit-overflow-scrolling: touch;
-        gap: 15px;
+        scrollbar-width: none;
+        gap: 12px;
         margin-bottom: 1.5em;
-        padding-bottom: 5px;
+        padding-bottom: 8px;
+    }
+
+    .admin-tabs::-webkit-scrollbar {
+        display: none;
     }
 
     .admin-tab {
-        padding: 5px 5px 10px 5px;
+        flex-shrink: 0;
+        white-space: nowrap;
+        padding: 5px 8px 8px 8px;
         font-size: 0.85rem;
     }
 

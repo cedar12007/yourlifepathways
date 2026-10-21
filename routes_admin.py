@@ -874,9 +874,42 @@ def reply_to_comment(comment_id):
 @admin_bp.route('/likes')
 @admin_required
 def manage_likes():
-    from models import PostLike
-    likes = db.session.query(PostLike, Post.title, Post.slug).join(Post, PostLike.post_id == Post.id).order_by(PostLike.timestamp.desc()).all()
-    return render_template('admin/likes.html', likes=likes, noindex=True)
+    from models import PostLike, SiteVisit
+    from sqlalchemy import func
+    from utils import get_ip_location
+
+    likes_raw = db.session.query(PostLike, Post.title, Post.slug)\
+        .join(Post, PostLike.post_id == Post.id)\
+        .order_by(PostLike.timestamp.desc())\
+        .all()
+
+    # Pre-fetch known locations from SiteVisit
+    ip_list = [like.visitor_ip for like, _, _ in likes_raw if like.visitor_ip]
+    ip_locations = {}
+    if ip_list:
+        loc_rows = db.session.query(SiteVisit.visitor_ip, func.max(SiteVisit.visitor_location))\
+            .filter(SiteVisit.visitor_ip.in_(ip_list), SiteVisit.visitor_location.isnot(None))\
+            .group_by(SiteVisit.visitor_ip)\
+            .all()
+        ip_locations = {ip: loc for ip, loc in loc_rows if loc}
+
+    likes_data = []
+    for like, post_title, post_slug in likes_raw:
+        loc = ip_locations.get(like.visitor_ip)
+        if not loc and like.visitor_ip:
+            loc = get_ip_location(like.visitor_ip)
+            if loc and loc != "Location unavailable":
+                ip_locations[like.visitor_ip] = loc
+        likes_data.append({
+            'timestamp': like.timestamp,
+            'post_title': post_title,
+            'post_slug': post_slug,
+            'visitor_ip': like.visitor_ip,
+            'location': loc or 'Location unavailable',
+            'is_deleted': like.is_deleted
+        })
+
+    return render_template('admin/likes.html', likes=likes_data, noindex=True)
 
 @admin_bp.route('/tracking/bot/toggle/<string:ip>', methods=['POST'])
 @admin_required
