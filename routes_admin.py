@@ -284,7 +284,6 @@ def tracking_stats():
     from utils import is_bot, parse_user_agent, parse_referrer_query
     
     journeys = []
-    bots_hidden_count = 0
     
     for row in raw_journeys:
         # Tuple unpacking: ip, location, first, last, views
@@ -297,7 +296,6 @@ def tracking_stats():
         bot_status = 'auto' if is_auto_bot else None
 
         if hide_bots and bot_status:
-            bots_hidden_count += 1
             continue
             
         first_ref = referrers[0] if referrers else None
@@ -325,7 +323,6 @@ def tracking_stats():
                           sort_by=sort_by,
                           showing_count=len(journeys),
                           filtered_count=filtered_count,
-                          bots_hidden=bots_hidden_count,
                           total_visitors=total_visitors,
                           top_referrers=top_referrers,
                           noindex=True)

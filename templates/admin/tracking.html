@@ -221,11 +221,6 @@
                 {% if not show_all and filtered_count < total_visitors %}
                     <span style="color: #718096; font-size: 0.85rem;">({{ total_visitors - filtered_count }} single-page visits hidden)</span>
                 {% endif %}
-                {% if bots_hidden is defined and bots_hidden > 0 %}
-                    <span style="color: #a0aec0; font-size: 0.8rem; margin-left: 0.4rem;">
-                        <i class="fa-solid fa-shield-halved"></i> {{ bots_hidden }} bot{{ 's' if bots_hidden > 1 else '' }} filtered
-                    </span>
-                {% endif %}
             </div>
                     <div style="font-size: 0.8rem; color: #666;">
                         {% if period == 'today' %}
