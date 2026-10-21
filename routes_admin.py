@@ -930,5 +930,30 @@ def toggle_manual_bot(ip):
 @admin_bp.route('/email-tracking')
 @admin_required
 def email_tracking():
+    from urllib.parse import unquote
     opens = EmailOpen.query.order_by(EmailOpen.timestamp.desc()).limit(150).all()
+    for o in opens:
+        if o.location:
+            o.location = unquote(o.location)
     return render_template('admin/email_tracking.html', opens=opens, noindex=True)
+
+
+@admin_bp.route('/email-tracking/<int:entry_id>/delete', methods=['POST'])
+@admin_required
+def delete_email_open(entry_id):
+    entry = EmailOpen.query.get_or_404(entry_id)
+    db.session.delete(entry)
+    db.session.commit()
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest' or request.is_json:
+        return jsonify({'status': 'success', 'message': 'Entry deleted'})
+    flash('Email read entry deleted.', 'success')
+    return redirect(url_for('admin.email_tracking'))
+
+
+@admin_bp.route('/email-tracking/clear-all', methods=['POST'])
+@admin_required
+def clear_all_email_opens():
+    EmailOpen.query.delete()
+    db.session.commit()
+    flash('All email read entries cleared.', 'success')
+    return redirect(url_for('admin.email_tracking'))

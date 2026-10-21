@@ -223,13 +223,23 @@ def track_signature_headshot():
     ua = request.headers.get('User-Agent', '')
 
     # 2. Get Geolocation (instant via Vercel Edge headers if available, or fallback)
-    city = request.headers.get('x-vercel-ip-city')
-    country = request.headers.get('x-vercel-ip-country')
-    region = request.headers.get('x-vercel-ip-country-region')
+    from urllib.parse import unquote
+    raw_city = request.headers.get('x-vercel-ip-city')
+    raw_country = request.headers.get('x-vercel-ip-country')
+    raw_region = request.headers.get('x-vercel-ip-country-region')
+    
+    city = unquote(raw_city) if raw_city else ''
+    country = unquote(raw_country) if raw_country else ''
+    region = unquote(raw_region) if raw_region else ''
+    
     if city and country:
         loc = f"{city}, {region}, {country}" if region else f"{city}, {country}"
     else:
         loc = get_ip_location(ip) if ip else "Unknown"
+
+    if 'GoogleImageProxy' in ua or 'ggpht.com' in ua:
+        if "(Google Proxy)" not in loc:
+            loc += " (Google Proxy)"
 
     # 3. Synchronous write to ensure serverless container doesn't terminate before DB commit
     try:

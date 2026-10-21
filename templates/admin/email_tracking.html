@@ -25,6 +25,16 @@
         <a href="{{ url_for('admin.database_resilience') }}" class="admin-tab">Resilience</a>
     </div>
 
+    {% if opens %}
+    <div style="display: flex; justify-content: flex-end; margin-bottom: 1em;">
+        <form action="{{ url_for('admin.clear_all_email_opens') }}" method="POST" onsubmit="return confirm('Are you sure you want to clear ALL email read records? This cannot be undone.');">
+            <button type="submit" class="btn-admin btn-delete" style="height: 32px; line-height: 32px; padding: 0 14px; font-size: 0.75rem; border-radius: 4px; display: inline-flex; align-items: center; gap: 6px;">
+                <i class="fa-solid fa-trash-can"></i> Clear All History
+            </button>
+        </form>
+    </div>
+    {% endif %}
+
     <div class="admin-table-wrapper">
         <table class="admin-table">
             <thead>
@@ -34,12 +44,13 @@
                     <th class="sortable">Location</th>
                     <th class="sortable">IP Address</th>
                     <th class="sortable">Device / Mail Client</th>
+                    <th style="text-align: right; width: 100px;">Action</th>
                 </tr>
             </thead>
             <tbody>
                 {% if opens %}
                 {% for item in opens %}
-                <tr>
+                <tr id="email-open-{{ item.id }}">
                     <td>
                         <span class="local-time" data-utc="{{ item.timestamp.isoformat() if item.timestamp else '' }}">
                             {{ item.timestamp.strftime('%Y-%m-%d %H:%M') if item.timestamp else 'N/A' }}
@@ -48,12 +59,35 @@
                     <td><strong style="color: #0f2d59;">{{ item.ref }}</strong></td>
                     <td>{{ item.location or 'Unknown' }}</td>
                     <td><code>{{ item.ip_address }}</code></td>
-                    <td><small style="color: #666;">{{ (item.user_agent[:60] + '...') if item.user_agent and item.user_agent|length > 60 else (item.user_agent or 'Unknown') }}</small></td>
+                    <td>
+                        {% if 'GoogleImageProxy' in (item.user_agent or '') or 'ggpht.com' in (item.user_agent or '') %}
+                        <span style="display: inline-flex; align-items: center; gap: 5px; color: #ea4335; font-weight: 600;">
+                            <i class="fa-brands fa-google"></i> Gmail (Google Proxy)
+                        </span>
+                        {% elif 'AppleWebKit' in (item.user_agent or '') and ('Mobile/' in (item.user_agent or '') or 'AppleMail' in (item.user_agent or '')) %}
+                        <span style="display: inline-flex; align-items: center; gap: 5px; color: #1d3a5e; font-weight: 600;">
+                            <i class="fa-brands fa-apple"></i> Apple Mail
+                        </span>
+                        {% elif 'Outlook' in (item.user_agent or '') or 'Office' in (item.user_agent or '') %}
+                        <span style="display: inline-flex; align-items: center; gap: 5px; color: #0078d4; font-weight: 600;">
+                            <i class="fa-solid fa-envelope"></i> Outlook
+                        </span>
+                        {% else %}
+                        <small style="color: #666;" title="{{ item.user_agent }}">{{ (item.user_agent[:45] + '...') if item.user_agent and item.user_agent|length > 45 else (item.user_agent or 'Unknown') }}</small>
+                        {% endif %}
+                    </td>
+                    <td style="text-align: right;">
+                        <button type="button" class="btn-admin btn-delete" 
+                                style="height: 28px; line-height: 28px; min-width: unset; padding: 0 10px; font-size: 0.75rem; border-radius: 4px; display: inline-flex; align-items: center; gap: 4px;" 
+                                onclick="deleteEmailEntry(event, {{ item.id }})">
+                            <i class="fa-solid fa-trash-can"></i> Delete
+                        </button>
+                    </td>
                 </tr>
                 {% endfor %}
                 {% else %}
                 <tr>
-                    <td colspan="5" style="text-align: center; padding: 2.5em;">
+                    <td colspan="6" style="text-align: center; padding: 2.5em;">
                         No email reads recorded yet. Once recipients view an email with your signature, events will appear here in real time.
                     </td>
                 </tr>
@@ -62,5 +96,44 @@
         </table>
     </div>
 </section>
-{% endblock %}
 
+<script>
+async function deleteEmailEntry(e, id) {
+    e.preventDefault();
+    if (!confirm("Are you sure you want to delete this email read entry?")) return;
+    const btn = e.currentTarget;
+    const row = btn.closest("tr");
+    btn.disabled = true;
+    btn.style.opacity = "0.5";
+    try {
+        const res = await fetch(`/admin/email-tracking/${id}/delete`, {
+            method: "POST",
+            headers: {
+                "X-Requested-With": "XMLHttpRequest"
+            }
+        });
+        if (res.ok) {
+            row.style.transition = "opacity 0.25s ease, transform 0.25s ease";
+            row.style.opacity = "0";
+            row.style.transform = "translateX(20px)";
+            setTimeout(() => {
+                row.remove();
+                const tbody = document.querySelector(".admin-table tbody");
+                if (tbody && tbody.children.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; padding: 2.5em;">No email reads recorded yet.</td></tr>';
+                }
+            }, 250);
+        } else {
+            alert("Failed to delete entry. Please refresh and try again.");
+            btn.disabled = false;
+            btn.style.opacity = "1";
+        }
+    } catch (err) {
+        console.error(err);
+        alert("Network error.");
+        btn.disabled = false;
+        btn.style.opacity = "1";
+    }
+}
+</script>
+{% endblock %}
