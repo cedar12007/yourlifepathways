@@ -124,9 +124,9 @@
     <!-- Context Navigation -->
     <div class="journey-nav">
         {% if prev_ip %}
-        <a href="{{ url_for('admin.view_journey', ip=prev_ip, period=period, custom_date=custom_date, start_date=start_date, end_date=end_date, has_referrer=('true' if has_referrer else 'false'), referrer_filter=referrer_filter, show_all=('true' if show_all else 'false'), sort_by=sort_by) }}"
-            class="button">
-            <i class="fa-solid fa-chevron-left"></i> Previous Journey
+        <a id="prev-journey-link" href="{{ url_for('admin.view_journey', ip=prev_ip, period=period, custom_date=custom_date, start_date=start_date, end_date=end_date, has_referrer=('true' if has_referrer else 'false'), referrer_filter=referrer_filter, show_all=('true' if show_all else 'false'), sort_by=sort_by) }}"
+            class="button" title="Shortcut: Left Arrow (←)">
+            <i class="fa-solid fa-chevron-left"></i> Previous <kbd style="font-size: 0.7rem; opacity: 0.7; border: 1px solid currentColor; border-radius: 3px; padding: 0 4px; margin-left: 2px;">&larr;</kbd>
         </a>
         {% else %}
         <span></span>
@@ -141,9 +141,9 @@
         </div>
 
         {% if next_ip %}
-        <a href="{{ url_for('admin.view_journey', ip=next_ip, period=period, custom_date=custom_date, start_date=start_date, end_date=end_date, has_referrer=('true' if has_referrer else 'false'), referrer_filter=referrer_filter, show_all=('true' if show_all else 'false'), sort_by=sort_by) }}"
-            class="button">
-            Next Journey <i class="fa-solid fa-chevron-right"></i>
+        <a id="next-journey-link" href="{{ url_for('admin.view_journey', ip=next_ip, period=period, custom_date=custom_date, start_date=start_date, end_date=end_date, has_referrer=('true' if has_referrer else 'false'), referrer_filter=referrer_filter, show_all=('true' if show_all else 'false'), sort_by=sort_by) }}"
+            class="button" title="Shortcut: Right Arrow (→)">
+            Next <kbd style="font-size: 0.7rem; opacity: 0.7; border: 1px solid currentColor; border-radius: 3px; padding: 0 4px; margin-right: 2px;">&rarr;</kbd> <i class="fa-solid fa-chevron-right"></i>
         </a>
         {% else %}
         <span></span>
@@ -309,18 +309,18 @@
     <!-- Bottom Navigation -->
     <div class="journey-nav" style="margin-top: 3rem;">
         {% if prev_ip %}
-        <a href="{{ url_for('admin.view_journey', ip=prev_ip, period=period, custom_date=custom_date, start_date=start_date, end_date=end_date, has_referrer=('true' if has_referrer else 'false'), referrer_filter=referrer_filter, show_all=('true' if show_all else 'false'), sort_by=sort_by) }}"
+        <a id="prev-journey-link-bottom" href="{{ url_for('admin.view_journey', ip=prev_ip, period=period, custom_date=custom_date, start_date=start_date, end_date=end_date, has_referrer=('true' if has_referrer else 'false'), referrer_filter=referrer_filter, show_all=('true' if show_all else 'false'), sort_by=sort_by) }}"
             class="button">
-            <i class="fa-solid fa-chevron-left"></i> Previous Journey
+            <i class="fa-solid fa-chevron-left"></i> Previous <kbd style="font-size: 0.7rem; opacity: 0.7; border: 1px solid currentColor; border-radius: 3px; padding: 0 4px; margin-left: 2px;">&larr;</kbd>
         </a>
         {% else %}
         <span></span>
         {% endif %}
 
         {% if next_ip %}
-        <a href="{{ url_for('admin.view_journey', ip=next_ip, period=period, custom_date=custom_date, start_date=start_date, end_date=end_date, has_referrer=('true' if has_referrer else 'false'), referrer_filter=referrer_filter, show_all=('true' if show_all else 'false'), sort_by=sort_by) }}"
+        <a id="next-journey-link-bottom" href="{{ url_for('admin.view_journey', ip=next_ip, period=period, custom_date=custom_date, start_date=start_date, end_date=end_date, has_referrer=('true' if has_referrer else 'false'), referrer_filter=referrer_filter, show_all=('true' if show_all else 'false'), sort_by=sort_by) }}"
             class="button">
-            Next Journey <i class="fa-solid fa-chevron-right"></i>
+            Next <kbd style="font-size: 0.7rem; opacity: 0.7; border: 1px solid currentColor; border-radius: 3px; padding: 0 4px; margin-right: 2px;">&rarr;</kbd> <i class="fa-solid fa-chevron-right"></i>
         </a>
         {% else %}
         <span></span>
@@ -328,6 +328,27 @@
     </div>
 
     <script>
+        // Keyboard Arrow Navigation (Left Arrow = Previous Journey, Right Arrow = Next Journey)
+        document.addEventListener('keydown', function (e) {
+            const tag = (e.target.tagName || '').toLowerCase();
+            if (tag === 'input' || tag === 'textarea' || tag === 'select' || e.target.isContentEditable) {
+                return;
+            }
+            if (e.key === 'ArrowLeft') {
+                const prevLink = document.getElementById('prev-journey-link') || document.getElementById('prev-journey-link-bottom');
+                if (prevLink && prevLink.href) {
+                    prevLink.style.opacity = '0.5';
+                    window.location.href = prevLink.href;
+                }
+            } else if (e.key === 'ArrowRight') {
+                const nextLink = document.getElementById('next-journey-link') || document.getElementById('next-journey-link-bottom');
+                if (nextLink && nextLink.href) {
+                    nextLink.style.opacity = '0.5';
+                    window.location.href = nextLink.href;
+                }
+            }
+        });
+
         document.addEventListener('DOMContentLoaded', async function () {
             const el = document.getElementById('journey-location-span');
             if (el) {

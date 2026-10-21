@@ -171,10 +171,6 @@ def log_visit():
         # 2. OPEN DB CONTEXT ONLY FOR THE WRITE (Fast)
         with app_context:
             try:
-                from models import ManualBot
-                if ManualBot.query.filter_by(ip_address=ip).first():
-                    return
-
                 # Save general visit
                 visit = SiteVisit(url=url, visitor_ip=ip, visitor_location=location, user_agent=ua, referrer=referrer)
                 db.session.add(visit)
@@ -277,12 +273,8 @@ def log_event():
         location = get_ip_location(ip)
         with app_context:
             try:
-                from models import SiteVisit, PostView, Post, ManualBot
+                from models import SiteVisit, PostView, Post
                 from datetime import datetime, timezone, timedelta
-                
-                # Skip if IP is in manual bot list
-                if ManualBot.query.filter_by(ip_address=ip).first():
-                    return
                 
                 # Use timezone-aware comparison for deduplication
                 now = datetime.now(timezone.utc)
@@ -341,12 +333,9 @@ def log_telemetry():
     def save_telemetry_task(app_context, ip, target_url, depth, sections):
         with app_context:
             try:
-                from models import SiteVisit, ManualBot
+                from models import SiteVisit
                 from datetime import datetime, timezone, timedelta
                 
-                if ManualBot.query.filter_by(ip_address=ip).first():
-                    return
-                    
                 now_utc = datetime.now(timezone.utc)
                 cutoff = now_utc - timedelta(hours=2)
                 

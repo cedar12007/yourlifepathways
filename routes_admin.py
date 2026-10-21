@@ -141,11 +141,8 @@ def tracking_stats():
             refs_ip_query = refs_ip_query.filter(date_filter)
         query = query.filter(SiteVisit.visitor_ip.in_(refs_ip_query))
     elif has_referrer:
-        from models import ManualBot
-        manual_bot_subquery = db.session.query(ManualBot.ip_address)
         refs_ip_query = db.session.query(SiteVisit.visitor_ip).filter(
             SiteVisit.referrer.isnot(None),
-            ~SiteVisit.visitor_ip.in_(manual_bot_subquery),
             ~SiteVisit.referrer.contains('yourlifepathways.com'),
             ~SiteVisit.referrer.contains('asifcoaching.com'),
             ~SiteVisit.referrer.contains('mylifepathways.com'),
@@ -172,15 +169,12 @@ def tracking_stats():
     valid_ips_subquery = query.with_entities(SiteVisit.visitor_ip).subquery()
     
     # Top Referrers for the time range (counting unique visitors rather than total hits)
-    from models import ManualBot
-    manual_bot_subquery = db.session.query(ManualBot.ip_address)
     top_refs_query = db.session.query(
         SiteVisit.referrer,
         func.count(func.distinct(SiteVisit.visitor_ip)).label('count')
     ).filter(
         SiteVisit.visitor_ip.in_(valid_ips_subquery),
         SiteVisit.referrer.isnot(None),
-        ~SiteVisit.visitor_ip.in_(manual_bot_subquery),
         ~SiteVisit.referrer.contains('yourlifepathways.com'),
         ~SiteVisit.referrer.contains('asifcoaching.com'),
         ~SiteVisit.referrer.contains('mylifepathways.com'),
@@ -288,9 +282,7 @@ def tracking_stats():
         } for row in lifetime_stats_query}
     
     from utils import is_bot, parse_user_agent, parse_referrer_query
-    from models import ManualBot
     
-    manual_bot_ips = {b.ip_address for b in ManualBot.query.all()}
     journeys = []
     bots_hidden_count = 0
     
@@ -302,13 +294,7 @@ def tracking_stats():
         clean_ua = parse_user_agent(ua)
         
         is_auto_bot = is_bot(ua)
-        is_manual_bot = ip in manual_bot_ips
-        
-        bot_status = None
-        if is_manual_bot:
-            bot_status = 'manual'
-        elif is_auto_bot:
-            bot_status = 'auto'
+        bot_status = 'auto' if is_auto_bot else None
 
         if hide_bots and bot_status:
             bots_hidden_count += 1
@@ -441,17 +427,13 @@ def view_journey(ip):
         ).filter(SiteVisit.visitor_ip.in_(all_ips)).distinct(SiteVisit.visitor_ip).order_by(SiteVisit.visitor_ip, SiteVisit.timestamp.asc())
         ip_to_ua = {r[0]: r[1] for r in ua_query.all()}
 
-    from models import ManualBot
-    manual_bot_ips = {b.ip_address for b in ManualBot.query.all()}
-
     # Final list of IPs according to filters
     filtered_ips = []
     for row in raw_ip_list:
         ip_addr = row[0]
         is_auto = is_bot(ip_to_ua.get(ip_addr, ''))
-        is_manual = ip_addr in manual_bot_ips
         
-        if hide_bots and (is_auto or is_manual):
+        if hide_bots and is_auto:
             continue
         filtered_ips.append(ip_addr)
         
@@ -505,9 +487,7 @@ def view_journey(ip):
     
     # Identify if bot (check all visits in this journey)
     is_auto_bot_journey = any(is_bot(v.user_agent) for v in visits)
-    is_manual_bot_journey = ip in manual_bot_ips
-    
-    bot_status = 'manual' if is_manual_bot_journey else ('auto' if is_auto_bot_journey else None)
+    bot_status = 'auto' if is_auto_bot_journey else None
 
     # Group visits into distinct sessions using standard 30-minute inactivity threshold
     sessions = []
@@ -1036,21 +1016,6 @@ def manage_likes():
         })
 
     return render_template('admin/likes.html', likes=likes_data, noindex=True)
-
-@admin_bp.route('/tracking/bot/toggle/<string:ip>', methods=['POST'])
-@admin_required
-def toggle_manual_bot(ip):
-    from models import ManualBot
-    bot = ManualBot.query.filter_by(ip_address=ip).first()
-    if bot:
-        db.session.delete(bot)
-        db.session.commit()
-        return jsonify({'status': 'success', 'bot_status': None})
-    else:
-        new_bot = ManualBot(ip_address=ip)
-        db.session.add(new_bot)
-        db.session.commit()
-        return jsonify({'status': 'success', 'bot_status': 'manual'})
 
 
 @admin_bp.route('/email-tracking')
