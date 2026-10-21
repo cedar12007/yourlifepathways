@@ -122,12 +122,12 @@ def validate_captcha():
         if not check_rate_limit(ip_address):
             return jsonify({"success": False, "message": "Submission limit exceeded. Please try again later."}), 429
 
-    # 2. reCAPTCHA Verification
+    # 2. reCAPTCHA Verification (Score >= 0.5)
     recaptcha_result = verify_recaptcha(recaptcha_response)
-    print("recaptcha_response: " + str(recaptcha_response))
-    if not recaptcha_result.get("success"):
-        print(str(recaptcha_result))
-        return jsonify({"success": False, "message": "Captcha validation failed."}), 400
+    score = recaptcha_result.get("score", 0.0)
+    print(f"reCAPTCHA score: {score}, result: {recaptcha_result}")
+    if not recaptcha_result.get("success") or score < 0.5:
+        return jsonify({"success": False, "message": "Security verification failed. Please try again."}), 400
 
     # 3. Process Success: Save to DB and Send Email
     try:

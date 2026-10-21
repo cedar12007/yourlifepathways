@@ -329,13 +329,25 @@ def add_comment(slug):
     # Recaptcha verification
     recaptcha_response = request.form.get('g-recaptcha-response')
     recaptcha_result = verify_recaptcha(recaptcha_response)
-    if not recaptcha_result.get("success"):
-        return jsonify({"success": False, "message": "Captcha validation failed. Please try again."})
+    score = recaptcha_result.get("score", 0.0)
+    if not recaptcha_result.get("success") or score < 0.5:
+        return jsonify({"success": False, "message": "Security verification failed. Please try again."})
 
     name = request.form.get('name', '').strip()
-    email = request.form.get('email')
-    content = request.form.get('content')
+    email = request.form.get('email', '').strip() if request.form.get('email') else None
+    content = request.form.get('content', '').strip()
     parent_id = request.form.get('parent_id', type=int)
+
+    # 🛑 Anti-Spam: Block raw HTML tags, BBCode, or external URLs
+    spam_link_patterns = [r'<\s*a\b', r'<\s*script\b', r'<\s*iframe\b', r'\[url\b', r'https?://', r'www\.']
+    has_links = any(re.search(pat, content, re.IGNORECASE) for pat in spam_link_patterns) or \
+                any(re.search(pat, name, re.IGNORECASE) for pat in spam_link_patterns)
+
+    if has_links and not current_user.is_authenticated:
+        return jsonify({
+            "success": False,
+            "message": "To protect against spam, website links and HTML tags are not allowed in comments. Please remove links and try again."
+        })
 
     # 🛑 Reserved Names Check
     reserved_names = ["admin", "erez", "erez asif", "yourlifepathways"]
