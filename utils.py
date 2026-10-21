@@ -236,17 +236,58 @@ Erez
 
 def is_bot(ua_string):
     """
-    Returns True if the user agent matches common bots/crawlers.
+    Returns True if the user agent matches common bots/crawlers/scrapers.
     """
-    if not ua_string or ua_string == 'Unknown':
-        return False
+    if not ua_string or ua_string.strip() in ('', '-', 'Unknown', 'unknown', 'null', 'none'):
+        return True
         
-    ua = ua_string.lower()
+    ua = ua_string.lower().strip()
+    
+    # Very short user agents without legitimate browser indicators
+    if len(ua) < 12 and not any(k in ua for k in ('curl', 'wget', 'lynx')):
+        return True
+        
     bot_keywords = [
-        'bot', 'spider', 'crawler', 'lighthouse', 'google', 'bing', 'yandex', 
-        'headless', 'monitoring', 'slurp', 'baiduspider', 'facebookexternalhit',
-        'python-requests', 'go-http-client', 'node-fetch', 'axios', 'curl', 'wget',
-        'pingdom', 'statuscake', 'uptime', 'preview'
+        # Generic Bot Terms
+        'bot', 'spider', 'crawler', 'crawl', 'slurp', 'scraper', 'scrape', 
+        'archiver', 'headless', 'preview', 'fetch', 'scanner',
+
+        # Search Engine & Indexer Crawlers
+        'google', 'googlebot', 'bingbot', 'bingpreview', 'yandex', 'baiduspider', 
+        'duckduckbot', 'sogou', 'exabot', 'ia_archiver', 'petalbot', 'seznambot', 
+        'qwantify', 'daum', 'naver',
+
+        # AI & LLM Scrapers
+        'gptbot', 'chatgpt-user', 'claudebot', 'claude-web', 'anthropic-ai', 
+        'cohere-ai', 'perplexitybot', 'bytespider', 'bytedance', 'ccbot', 
+        'diffbot', 'seekr', 'omgili', 'youbot', 'applebot', 'amazonbot',
+
+        # Social Media & Messaging Link Previewers
+        'facebookexternalhit', 'facebot', 'meta-externalagent', 'twitterbot', 
+        'linkedinbot', 'whatsapp', 'telegrambot', 'discordbot', 'slackbot', 
+        'pinterest', 'skypeuripreview', 'viber',
+
+        # Automation & Headless Frameworks
+        'headlesschrome', 'phantomjs', 'selenium', 'webdriver', 'playwright', 
+        'puppeteer', 'cypress', 'nightwatch',
+
+        # HTTP Clients, Scripts & Developer Libraries
+        'python-requests', 'python-urllib', 'requests/', 'urllib', 'aiohttp', 
+        'httpx', 'scrapy', 'go-http-client', 'curl', 'wget', 'node-fetch', 
+        'axios', 'got/', 'undici', 'superagent', 'okhttp', 'apache-httpclient', 
+        'java/', 'postmanruntime', 'rest-client', 'faraday', 'guzzlehttp', 
+        'httpclient', 'http_request', 'winhttp',
+
+        # SEO, Site Audit & Performance Monitoring Tools
+        'lighthouse', 'semrushbot', 'semrush', 'ahrefsbot', 'ahrefs', 'dotbot', 
+        'mj12bot', 'screaming frog', 'sitebulb', 'pingdom', 'statuscake', 
+        'uptime', 'uptimerobot', 'betteruptime', 'site24x7', 'newrelic', 
+        'datadog', 'feedly', 'prerender',
+
+        # Security Probes & Vulnerability Scanners
+        'censys', 'shodan', 'netcraft', 'zgrab', 'masscan', 'nmap', 'nikto', 
+        'sqlmap', 'nuclei', 'acunetix', 'nessus', 'openvas', 'dirbuster', 
+        'gobuster', 'wpscan'
     ]
     
     return any(keyword in ua for keyword in bot_keywords)
@@ -256,16 +297,31 @@ def parse_user_agent(ua_string):
     Simulated UA Parser. 
     Returns a human-readable device/browser string from a raw User-Agent.
     """
-    if not ua_string or ua_string == 'Unknown':
-        return 'Unknown Device'
+    if not ua_string or ua_string.strip() in ('', '-', 'Unknown', 'unknown', 'null', 'none'):
+        return 'Bot / Empty User-Agent'
+    
+    ua = ua_string.lower().strip()
     
     if is_bot(ua_string):
         # Identify specific bots if possible
-        ua = ua_string.lower()
         if 'googlebot' in ua: return 'Bot / Googlebot'
-        if 'bingbot' in ua: return 'Bot / Bingbot'
+        if 'bingbot' in ua or 'bingpreview' in ua: return 'Bot / Bing'
         if 'yandex' in ua: return 'Bot / Yandex'
         if 'lighthouse' in ua: return 'Bot / Lighthouse'
+        if any(k in ua for k in ('gptbot', 'chatgpt')): return 'Bot / OpenAI (ChatGPT)'
+        if any(k in ua for k in ('claude', 'anthropic')): return 'Bot / Anthropic (Claude)'
+        if any(k in ua for k in ('perplexity', 'seekr', 'youbot')): return 'Bot / AI Search'
+        if any(k in ua for k in ('bytespider', 'bytedance')): return 'Bot / ByteDance'
+        if any(k in ua for k in ('semrush', 'ahrefs', 'mj12bot', 'dotbot', 'screaming frog', 'sitebulb')): return 'Bot / SEO Crawler'
+        if any(k in ua for k in ('facebook', 'meta', 'twitter', 'linkedin', 'slack', 'discord', 'telegram', 'whatsapp')): return 'Bot / Social Preview'
+        if any(k in ua for k in ('applebot', 'amazonbot')): return 'Bot / Tech Crawler'
+        if any(k in ua for k in ('python', 'requests', 'urllib', 'aiohttp', 'httpx', 'scrapy')): return 'Bot / Python'
+        if any(k in ua for k in ('curl', 'wget')): return 'Bot / CLI (curl/wget)'
+        if 'go-http-client' in ua: return 'Bot / Go Client'
+        if any(k in ua for k in ('node', 'axios', 'puppeteer', 'playwright', 'selenium', 'phantomjs')): return 'Bot / Headless Scraper'
+        if any(k in ua for k in ('java', 'okhttp', 'apache-httpclient')): return 'Bot / Java Client'
+        if any(k in ua for k in ('pingdom', 'uptime', 'statuscake', 'site24x7', 'datadog', 'newrelic')): return 'Bot / Uptime Monitor'
+        if any(k in ua for k in ('censys', 'shodan', 'netcraft', 'zgrab', 'masscan', 'nmap', 'sqlmap', 'nikto', 'nuclei')): return 'Bot / Security Scanner'
         return 'Bot / Automated'
         
     ua = ua_string.lower()
@@ -295,7 +351,11 @@ def parse_user_agent(ua_string):
          browser = "IE"
          
     os_name = ""
-    if "windows" in ua:
+    if "iphone" in ua or "ipad" in ua:
+        os_name = "iOS"
+    elif "android" in ua:
+        os_name = "Android"
+    elif "windows" in ua:
         os_name = "Windows"
     elif "mac os" in ua:
         os_name = "macOS"
