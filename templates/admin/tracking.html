@@ -224,8 +224,15 @@
         <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem;">
             <div style="font-size: 0.9rem; color: #1d3a5e;">
                 <strong>Showing {{ showing_count }} of {{ filtered_count }}</strong>
-                {% if not show_all and filtered_count < total_visitors %} ({{ total_visitors - filtered_count }} bounces
-                    hidden) {% endif %} </div>
+                {% if not show_all and filtered_count < total_visitors %}
+                    <span style="color: #718096; font-size: 0.85rem;">({{ total_visitors - filtered_count }} bounces hidden)</span>
+                {% endif %}
+                {% if bots_hidden is defined and bots_hidden > 0 %}
+                    <span style="color: #e53e3e; font-size: 0.85rem; font-weight: 600; margin-left: 0.4rem;">
+                        <i class="fa-solid fa-robot"></i> {{ bots_hidden }} bot{{ 's' if bots_hidden > 1 else '' }} hidden (uncheck "Hide Bots" to view)
+                    </span>
+                {% endif %}
+            </div>
                     <div style="font-size: 0.8rem; color: #666;">
                         {% if period == 'today' %}
                         Today's visitors
@@ -295,11 +302,17 @@
                     <p>Last Activity: <span class="local-time"
                             data-utc="{{ last_visit.isoformat() if last_visit else '' }}">{{
                             last_visit.strftime('%Y-%m-%d %H:%M:%S') if last_visit else 'Unknown' }}</span></p>
-                    <p><strong>Total Duration:</strong>
-                        {% if duration.total_seconds() < 60 %} {{ duration.total_seconds()|int }}s {% elif
-                            duration.total_seconds() < 3600 %} {{ (duration.total_seconds() / 60)|int }}m {{
-                            (duration.total_seconds() % 60)|int }}s {% else %} {{ (duration.total_seconds() / 3600)|int
-                            }}h {{ ((duration.total_seconds() % 3600) / 60)|int }}m {% endif %} </p>
+                    <p><strong>Duration:</strong>
+                        {% if duration.total_seconds() > 86400 and lifetime.days > 1 %}
+                            <span style="color: #2b6cb0; font-weight: 600;">Visited across {{ lifetime.days }} days</span>
+                        {% elif duration.total_seconds() < 60 %}
+                            {{ duration.total_seconds()|int }}s
+                        {% elif duration.total_seconds() < 3600 %}
+                            {{ (duration.total_seconds() / 60)|int }}m {{ (duration.total_seconds() % 60)|int }}s
+                        {% else %}
+                            {{ (duration.total_seconds() / 3600)|int }}h {{ ((duration.total_seconds() % 3600) / 60)|int }}m
+                        {% endif %}
+                    </p>
                 </div>
                 <div class="journey-stats">
                     <strong>{{ page_views }} Pages Viewed</strong><br>

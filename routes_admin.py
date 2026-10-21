@@ -297,6 +297,7 @@ def tracking_stats():
     
     manual_bot_ips = {b.ip_address for b in ManualBot.query.all()}
     journeys = []
+    bots_hidden_count = 0
     
     for row in raw_journeys:
         # Tuple unpacking: ip, location, first, last, views
@@ -315,6 +316,7 @@ def tracking_stats():
             bot_status = 'auto'
 
         if hide_bots and bot_status:
+            bots_hidden_count += 1
             continue
             
         first_ref = referrers[0] if referrers else None
@@ -342,6 +344,7 @@ def tracking_stats():
                           sort_by=sort_by,
                           showing_count=len(journeys),
                           filtered_count=filtered_count,
+                          bots_hidden=bots_hidden_count,
                           total_visitors=total_visitors,
                           top_referrers=top_referrers,
                           noindex=True)
@@ -511,9 +514,50 @@ def view_journey(ip):
     
     bot_status = 'manual' if is_manual_bot_journey else ('auto' if is_auto_bot_journey else None)
 
+    # Group visits into distinct sessions using standard 30-minute inactivity threshold
+    sessions = []
+    current_session_visits = []
+    
+    for v in visits:
+        if not current_session_visits:
+            current_session_visits.append(v)
+        else:
+            prev_v = current_session_visits[-1]
+            time_diff = (v.timestamp - prev_v.timestamp).total_seconds()
+            if time_diff > 1800: # > 30 min gap -> new session
+                s_start = current_session_visits[0].timestamp
+                s_end = current_session_visits[-1].timestamp
+                s_dur = int((s_end - s_start).total_seconds())
+                sessions.append({
+                    'num': len(sessions) + 1,
+                    'start': s_start,
+                    'end': s_end,
+                    'duration_seconds': s_dur,
+                    'visits': current_session_visits
+                })
+                current_session_visits = [v]
+            else:
+                current_session_visits.append(v)
+                
+    if current_session_visits:
+        s_start = current_session_visits[0].timestamp
+        s_end = current_session_visits[-1].timestamp
+        s_dur = int((s_end - s_start).total_seconds())
+        sessions.append({
+            'num': len(sessions) + 1,
+            'start': s_start,
+            'end': s_end,
+            'duration_seconds': s_dur,
+            'visits': current_session_visits
+        })
+        
+    total_active_seconds = sum(s['duration_seconds'] for s in sessions)
+
     return render_template('admin/journey_details.html', 
                           ip=ip, 
                           visits=visits, 
+                          sessions=sessions,
+                          total_active_seconds=total_active_seconds,
                           prev_ip=prev_ip,
                           next_ip=next_ip,
                           bot_status=bot_status,
