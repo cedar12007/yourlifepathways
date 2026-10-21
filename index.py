@@ -122,7 +122,8 @@ def log_visit():
     # 2c. Ignore exploit scanning query strings and probe signatures
     probe_signatures = (
         'rest_route', '.git', '.env', '.json', '.sql', '.php', 'xmlrpc',
-        'backup', 'wp-', 'well-known', 'eval(', 'base64', 'author=', 'sftp'
+        'backup', 'wp-', 'well-known', 'eval(', 'base64', 'author=', 'sftp',
+        'step=1', 'step=', 'install.php'
     )
     req_full = (request.path + '?' + request.query_string.decode('utf-8', 'ignore')).lower()
     if any(sig in req_full for sig in probe_signatures):
@@ -172,7 +173,7 @@ def log_event():
         return '', 204
     
     target_url_lower = target_url.lower()
-    if any(sig in target_url_lower for sig in ('rest_route', '.git', '.env', '.json', '.sql', '.php', 'xmlrpc', 'backup', 'wp-')):
+    if any(sig in target_url_lower for sig in ('rest_route', '.git', '.env', '.json', '.sql', '.php', 'xmlrpc', 'backup', 'wp-', 'step=1', 'step=', 'install.php')):
         return '', 204
     
     # Also skip if user is logged in (admin) or has the session flag
