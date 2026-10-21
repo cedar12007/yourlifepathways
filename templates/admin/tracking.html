@@ -118,29 +118,23 @@
 
             <div class="filter-group">
                 <label
-                    style="display: block; font-size: 0.75rem; font-weight: bold; margin-bottom: 0.5rem; color: #666; text-transform: uppercase;">Sort
-                    By</label>
-                <select name="sort_by"
-                    style="height: 40px; padding: 0 0.75rem; border-radius: 4px; border: 1px solid #ddd; font-size: 0.85rem; background: white; width: 140px; color: #333;">
-                    <option value="recent" {% if sort_by=='recent' %}selected{% endif %}>Most Recent</option>
-                    <option value="views" {% if sort_by=='views' %}selected{% endif %}>Most Views</option>
+                    style="display: block; font-size: 0.75rem; font-weight: bold; margin-bottom: 0.5rem; color: #666; text-transform: uppercase;">Engagement</label>
+                <select name="show_all"
+                    style="height: 40px; padding: 0 0.75rem; border-radius: 4px; border: 1px solid #ddd; font-size: 0.85rem; background: white; color: #333;">
+                    <option value="false" {% if not show_all %}selected{% endif %}>Engaged Only (2+ pages)</option>
+                    <option value="true" {% if show_all %}selected{% endif %}>All Visitors (Inc. Bounces)</option>
                 </select>
             </div>
 
-            <div class="filter-group" style="display: flex; align-items: center; height: 40px;">
-                <input type="checkbox" id="show_all" name="show_all" value="true" {% if show_all %}checked{% endif %}
-                    style="width: 18px; height: 18px; margin: 0 0.5rem 0 0; cursor: pointer;">
-                <label for="show_all"
-                    style="font-size: 0.85rem; color: #1d3a5e; font-weight: 600; cursor: pointer; margin: 0;">Show
-                    Bounces (0s)</label>
-            </div>
-
-            <div class="filter-group" style="display: flex; align-items: center; height: 40px;">
-                <input type="checkbox" id="hide_bots" name="hide_bots" value="true" {% if hide_bots %}checked{% endif %}
-                    style="width: 18px; height: 18px; margin: 0 0.5rem 0 0; cursor: pointer;">
-                <label for="hide_bots"
-                    style="font-size: 0.85rem; color: #1d3a5e; font-weight: 600; cursor: pointer; margin: 0;">Hide
-                    Bots</label>
+            <div class="filter-group">
+                <label
+                    style="display: block; font-size: 0.75rem; font-weight: bold; margin-bottom: 0.5rem; color: #666; text-transform: uppercase;">Sort
+                    By</label>
+                <select name="sort_by"
+                    style="height: 40px; padding: 0 0.75rem; border-radius: 4px; border: 1px solid #ddd; font-size: 0.85rem; background: white; width: 130px; color: #333;">
+                    <option value="recent" {% if sort_by=='recent' %}selected{% endif %}>Most Recent</option>
+                    <option value="views" {% if sort_by=='views' %}selected{% endif %}>Most Views</option>
+                </select>
             </div>
 
             <div class="filter-group" style="display: flex; align-items: center; height: 40px;">
@@ -190,7 +184,7 @@
             {% for ref, count in top_referrers %}
             <div
                 style="display: flex; justify-content: space-between; align-items: center; padding: 0.5rem 1rem; background: #f8f9fa; border-radius: 4px; border: 1px solid #e9ecef;">
-                <a href="{{ url_for('admin.tracking_stats', period=period, start_date=start_date, end_date=end_date, show_all=('true' if show_all else 'false'), hide_bots=('true' if hide_bots else 'false'), sort_by=sort_by, referrer_filter=ref) }}"
+                <a href="{{ url_for('admin.tracking_stats', period=period, start_date=start_date, end_date=end_date, show_all=('true' if show_all else 'false'), sort_by=sort_by, referrer_filter=ref) }}"
                     style="color: #3498db; text-decoration: none; word-break: break-all; font-size: 0.9rem; margin-right: 1rem; flex-grow: 1;">
                     {{ ref|truncate(50) }}
                 </a>
@@ -214,7 +208,7 @@
             <span
                 style="background: #e2e8f0; color: #2d3748; padding: 4px 10px; border-radius: 12px; font-size: 0.8rem; font-weight: bold; word-break: break-all;">{{
                 referrer_filter }}</span>
-            <a href="{{ url_for('admin.tracking_stats', period=period, start_date=start_date, end_date=end_date, show_all=('true' if show_all else 'false'), hide_bots=('true' if hide_bots else 'false'), sort_by=sort_by) }}"
+            <a href="{{ url_for('admin.tracking_stats', period=period, start_date=start_date, end_date=end_date, show_all=('true' if show_all else 'false'), sort_by=sort_by) }}"
                 style="color: #e53e3e; text-decoration: none; font-size: 0.85rem; margin-left: auto;">
                 <i class="fa-solid fa-times-circle"></i> Clear Referrer Filter
             </a>
@@ -225,11 +219,11 @@
             <div style="font-size: 0.9rem; color: #1d3a5e;">
                 <strong>Showing {{ showing_count }} of {{ filtered_count }}</strong>
                 {% if not show_all and filtered_count < total_visitors %}
-                    <span style="color: #718096; font-size: 0.85rem;">({{ total_visitors - filtered_count }} bounces hidden)</span>
+                    <span style="color: #718096; font-size: 0.85rem;">({{ total_visitors - filtered_count }} single-page visits hidden)</span>
                 {% endif %}
                 {% if bots_hidden is defined and bots_hidden > 0 %}
-                    <span style="color: #e53e3e; font-size: 0.85rem; font-weight: 600; margin-left: 0.4rem;">
-                        <i class="fa-solid fa-robot"></i> {{ bots_hidden }} bot{{ 's' if bots_hidden > 1 else '' }} hidden (uncheck "Hide Bots" to view)
+                    <span style="color: #a0aec0; font-size: 0.8rem; margin-left: 0.4rem;">
+                        <i class="fa-solid fa-shield-halved"></i> {{ bots_hidden }} bot{{ 's' if bots_hidden > 1 else '' }} filtered
                     </span>
                 {% endif %}
             </div>
@@ -316,7 +310,7 @@
                 </div>
                 <div class="journey-stats">
                     <strong>{{ page_views }} Pages Viewed</strong><br>
-                    <a href="{{ url_for('admin.view_journey', ip=ip, period=period, custom_date=custom_date, show_all=('true' if show_all else 'false'), hide_bots=('true' if hide_bots else 'false'), sort_by=sort_by) }}"
+                    <a href="{{ url_for('admin.view_journey', ip=ip, period=period, custom_date=custom_date, start_date=start_date, end_date=end_date, has_referrer=('true' if has_referrer else 'false'), referrer_filter=referrer_filter, show_all=('true' if show_all else 'false'), sort_by=sort_by) }}"
                         class="button primary journey-btn">View
                         Journey</a>
                 </div>

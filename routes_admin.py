@@ -78,13 +78,8 @@ def tracking_stats():
     show_all = request.args.get('show_all') == 'true'
     has_referrer = request.args.get('has_referrer') == 'true'
     referrer_filter = request.args.get('referrer_filter', '')
-    
-    # If any query parameters exist, we respect the checkbox state (missing = unchecked)
-    # If no parameters exist (first load), we default to True
-    if request.args:
-        hide_bots = request.args.get('hide_bots') == 'true'
-    else:
-        hide_bots = True
+    # Bots are always automatically hidden from traffic analytics unless explicitly requested otherwise
+    hide_bots = request.args.get('hide_bots', 'true').lower() != 'false'
         
     sort_by = request.args.get('sort_by', 'recent') # 'recent' or 'views'
     
@@ -362,7 +357,7 @@ def view_journey(ip):
     start_date = request.args.get('start_date', '')
     end_date = request.args.get('end_date', '')
     show_all = request.args.get('show_all') == 'true'
-    hide_bots = request.args.get('hide_bots', 'true') == 'true'
+    hide_bots = request.args.get('hide_bots', 'true').lower() != 'false'
     has_referrer = request.args.get('has_referrer') == 'true'
     referrer_filter = request.args.get('referrer_filter', '')
     sort_by = request.args.get('sort_by', 'recent')

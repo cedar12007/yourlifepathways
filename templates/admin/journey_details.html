@@ -113,7 +113,7 @@
 
 {% block content %}
 <section class="main admin-dashboard">
-    <a href="{{ url_for('admin.tracking_stats', period=period, custom_date=custom_date, start_date=start_date, end_date=end_date, has_referrer=('true' if has_referrer else 'false'), referrer_filter=referrer_filter, show_all=('true' if show_all else 'false'), hide_bots=('true' if hide_bots else 'false'), sort_by=sort_by) }}"
+    <a href="{{ url_for('admin.tracking_stats', period=period, custom_date=custom_date, start_date=start_date, end_date=end_date, has_referrer=('true' if has_referrer else 'false'), referrer_filter=referrer_filter, show_all=('true' if show_all else 'false'), sort_by=sort_by) }}"
         class="admin-back-link">
         <i class="fa-solid fa-arrow-left"></i> Back to Analytics
     </a>
@@ -124,7 +124,7 @@
     <!-- Context Navigation -->
     <div class="journey-nav">
         {% if prev_ip %}
-        <a href="{{ url_for('admin.view_journey', ip=prev_ip, period=period, custom_date=custom_date, start_date=start_date, end_date=end_date, has_referrer=('true' if has_referrer else 'false'), referrer_filter=referrer_filter, show_all=('true' if show_all else 'false'), hide_bots=('true' if hide_bots else 'false'), sort_by=sort_by) }}"
+        <a href="{{ url_for('admin.view_journey', ip=prev_ip, period=period, custom_date=custom_date, start_date=start_date, end_date=end_date, has_referrer=('true' if has_referrer else 'false'), referrer_filter=referrer_filter, show_all=('true' if show_all else 'false'), sort_by=sort_by) }}"
             class="button">
             <i class="fa-solid fa-chevron-left"></i> Previous Journey
         </a>
@@ -133,12 +133,15 @@
         {% endif %}
 
         <div style="text-align: center; color: #636363; font-size: 0.85rem;">
-            Journey Context: <strong>{{ period|capitalize }}</strong><br>
-            <span style="font-size: 0.8em;">(Sorted by {{ 'Views' if sort_by == 'views' else 'Recent' }})</span>
+            Journey Context: <strong>{{ period|capitalize }}</strong>
+            {% if referrer_filter %}
+                <br><span style="font-size: 0.8em; color: #2b6cb0; font-weight: 600;"><i class="fa-solid fa-filter"></i> {{ referrer_filter|truncate(40) }}</span>
+            {% endif %}
+            <br><span style="font-size: 0.8em;">(Sorted by {{ 'Views' if sort_by == 'views' else 'Recent' }})</span>
         </div>
 
         {% if next_ip %}
-        <a href="{{ url_for('admin.view_journey', ip=next_ip, period=period, custom_date=custom_date, start_date=start_date, end_date=end_date, has_referrer=('true' if has_referrer else 'false'), referrer_filter=referrer_filter, show_all=('true' if show_all else 'false'), hide_bots=('true' if hide_bots else 'false'), sort_by=sort_by) }}"
+        <a href="{{ url_for('admin.view_journey', ip=next_ip, period=period, custom_date=custom_date, start_date=start_date, end_date=end_date, has_referrer=('true' if has_referrer else 'false'), referrer_filter=referrer_filter, show_all=('true' if show_all else 'false'), sort_by=sort_by) }}"
             class="button">
             Next Journey <i class="fa-solid fa-chevron-right"></i>
         </a>
@@ -282,7 +285,7 @@
     <!-- Bottom Navigation -->
     <div class="journey-nav" style="margin-top: 3rem;">
         {% if prev_ip %}
-        <a href="{{ url_for('admin.view_journey', ip=prev_ip, period=period, custom_date=custom_date, start_date=start_date, end_date=end_date, has_referrer=('true' if has_referrer else 'false'), referrer_filter=referrer_filter, show_all=('true' if show_all else 'false'), hide_bots=('true' if hide_bots else 'false'), sort_by=sort_by) }}"
+        <a href="{{ url_for('admin.view_journey', ip=prev_ip, period=period, custom_date=custom_date, start_date=start_date, end_date=end_date, has_referrer=('true' if has_referrer else 'false'), referrer_filter=referrer_filter, show_all=('true' if show_all else 'false'), sort_by=sort_by) }}"
             class="button">
             <i class="fa-solid fa-chevron-left"></i> Previous Journey
         </a>
@@ -291,7 +294,7 @@
         {% endif %}
 
         {% if next_ip %}
-        <a href="{{ url_for('admin.view_journey', ip=next_ip, period=period, custom_date=custom_date, start_date=start_date, end_date=end_date, has_referrer=('true' if has_referrer else 'false'), referrer_filter=referrer_filter, show_all=('true' if show_all else 'false'), hide_bots=('true' if hide_bots else 'false'), sort_by=sort_by) }}"
+        <a href="{{ url_for('admin.view_journey', ip=next_ip, period=period, custom_date=custom_date, start_date=start_date, end_date=end_date, has_referrer=('true' if has_referrer else 'false'), referrer_filter=referrer_filter, show_all=('true' if show_all else 'false'), sort_by=sort_by) }}"
             class="button">
             Next Journey <i class="fa-solid fa-chevron-right"></i>
         </a>
