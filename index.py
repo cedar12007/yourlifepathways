@@ -121,6 +121,7 @@ def log_visit():
 
     # 2c. Ignore exploit scanning query strings, probe signatures, and referral spam
     probe_signatures = (
+        'robots.txt', 'sitemap.xml', 'ads.txt',
         'rest_route', '.git', '.env', '.json', '.sql', '.php', 'xmlrpc',
         'backup', 'wp-', 'well-known', 'eval(', 'base64', 'author=', 'sftp',
         'step=1', 'step=', 'install.php', 'option=com_', 'passwd', 'import&raw',

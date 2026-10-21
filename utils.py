@@ -267,10 +267,17 @@ def is_bot(ua_string):
     if re.search(r'chrome/\d+\.0\.0\.0(?!\d)', ua):
         return True
         
+    # Detect standard automated bot/crawler RFC signature: (compatible; <botname>; +http...)
+    if '(compatible;' in ua:
+        if not any(k in ua for k in ('msie 9', 'msie 10', 'msie 8', 'msie 7')):
+            return True
+        
     bot_keywords = [
         # Generic Bot Terms
         'bot', 'spider', 'crawler', 'crawl', 'slurp', 'scraper', 'scrape', 
-        'archiver', 'headless', 'preview', 'fetch', 'scanner',
+        'archiver', 'headless', 'preview', 'fetch', 'scanner', 'sniffer',
+        'probe', 'checker', 'pathscan', 'builtwith', 'heritrix', 'dataprovider',
+        'leadforge', 'enrich', 'rust_',
 
         # Search Engine & Indexer Crawlers
         'google', 'googlebot', 'bingbot', 'bingpreview', 'yandex', 'baiduspider', 
