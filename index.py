@@ -110,9 +110,22 @@ def log_visit():
     view_args = request.view_args.copy() if request.view_args else {}
     ua = request.headers.get('User-Agent', 'Unknown')
 
+    # 2a. Ignore 404 / Non-existent routes (exploit scanners probing dead paths)
+    if not endpoint:
+        return
+
     # 2b. Do NOT log bots/scrapers to database (Cloudflare tracks bots at edge)
     from utils import is_bot
     if is_bot(ua):
+        return
+
+    # 2c. Ignore exploit scanning query strings and probe signatures
+    probe_signatures = (
+        'rest_route', '.git', '.env', '.json', '.sql', '.php', 'xmlrpc',
+        'backup', 'wp-', 'well-known', 'eval(', 'base64', 'author=', 'sftp'
+    )
+    req_full = (request.path + '?' + request.query_string.decode('utf-8', 'ignore')).lower()
+    if any(sig in req_full for sig in probe_signatures):
         return
     
     # 3. Enhanced Referrer Logic (Capture UTM sources for ads/campaigns)
@@ -156,6 +169,10 @@ def log_visit():
 def log_event():
     target_url = request.args.get('url')
     if not target_url or os.getenv('TRAFFIC_LOGGING', 'no').lower() != 'yes':
+        return '', 204
+    
+    target_url_lower = target_url.lower()
+    if any(sig in target_url_lower for sig in ('rest_route', '.git', '.env', '.json', '.sql', '.php', 'xmlrpc', 'backup', 'wp-')):
         return '', 204
     
     # Also skip if user is logged in (admin) or has the session flag
