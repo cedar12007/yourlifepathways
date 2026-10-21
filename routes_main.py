@@ -25,6 +25,7 @@ def index_redirect():
 
 
 @main_bp.route('/r=<source>')
+@main_bp.route('/r/<source>')
 def referral_redirect(source):
     return redirect(url_for('main.index', r=source), code=302)
 

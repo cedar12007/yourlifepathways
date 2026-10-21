@@ -182,8 +182,11 @@
         <p style="margin-top: 0.5rem; word-break: break-word;">
             <strong>Source{% if referrers|length > 1 %}s{% endif %}:</strong>
             {% for ref in referrers %}
-            <a href="{{ ref }}" target="_blank" style="color: #e67e22;">{{ ref|truncate(50) }}</a>{% if not loop.last
-            %}, {% endif %}
+            {% if ref.startswith('http://') or ref.startswith('https://') %}
+            <a href="{{ ref }}" target="_blank" style="color: #e67e22;">{{ ref|truncate(50) }}</a>
+            {% else %}
+            <span style="color: #d97706; font-weight: 600;">{{ ref|truncate(50) }}</span>
+            {% endif %}{% if not loop.last %}, {% endif %}
             {% endfor %}
             {% if search_term %}
             <br><span style="font-size: 0.85em; color: #888;">Search: "<b>{{ search_term }}</b>"</span>

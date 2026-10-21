@@ -151,11 +151,11 @@ def log_visit():
         return
     app._recent_visits[visit_key] = now_ts
     
-    # 3. Enhanced Referrer Logic (Capture UTM and short campaign tags like ?r=ig)
+    # 3. Enhanced Referrer Logic (Capture UTM and short campaign tags like ?r=ig or ?ref=sig)
     referrer = request.referrer or request.args.get('referrer')
     utm_source = request.args.get('utm_source')
     utm_medium = request.args.get('utm_medium')
-    r_param = request.args.get('r')
+    r_param = request.args.get('r') or request.args.get('ref')
     
     if r_param:
         r_clean = r_param.lower().strip()
@@ -165,6 +165,10 @@ def log_visit():
             referrer = "https://facebook.com/"
         elif r_clean in ('li', 'linkedin'):
             referrer = "https://linkedin.com/"
+        elif r_clean in ('sig', 'email_sig', 'email', 'signature'):
+            referrer = "referral://email-signature"
+        elif r_clean == 'pfi':
+            referrer = "referral://pfi"
         else:
             referrer = f"referral://{r_clean}"
     elif utm_source:
@@ -274,10 +278,10 @@ def log_event():
     if is_bot(ua):
         return '', 204
     
-    # Enhanced Referrer Logic for events (e.g. LinkedIn scroll, ?r=ig)
+    # Enhanced Referrer Logic for events (e.g. LinkedIn scroll, ?r=ig, ?ref=sig)
     referrer = request.referrer or request.args.get('referrer')
     utm_source = request.args.get('utm_source')
-    r_param = request.args.get('r')
+    r_param = request.args.get('r') or request.args.get('ref')
     if r_param:
         r_clean = r_param.lower().strip()
         if r_clean in ('ig', 'instagram'):
@@ -286,6 +290,10 @@ def log_event():
             referrer = "https://facebook.com/"
         elif r_clean in ('li', 'linkedin'):
             referrer = "https://linkedin.com/"
+        elif r_clean in ('sig', 'email_sig', 'email', 'signature'):
+            referrer = "referral://email-signature"
+        elif r_clean == 'pfi':
+            referrer = "referral://pfi"
         else:
             referrer = f"referral://{r_clean}"
     elif utm_source and (not referrer or any(host in referrer for host in ['yourlifepathways.com', 'localhost', '127.0.0.1'])):
