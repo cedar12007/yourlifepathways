@@ -109,6 +109,11 @@ def log_visit():
     endpoint = request.endpoint
     view_args = request.view_args.copy() if request.view_args else {}
     ua = request.headers.get('User-Agent', 'Unknown')
+
+    # 2b. Do NOT log bots/scrapers to database (Cloudflare tracks bots at edge)
+    from utils import is_bot
+    if is_bot(ua):
+        return
     
     # 3. Enhanced Referrer Logic (Capture UTM sources for ads/campaigns)
     referrer = request.referrer or request.args.get('referrer')
@@ -131,9 +136,10 @@ def log_visit():
         # 2. OPEN DB CONTEXT ONLY FOR THE WRITE (Fast)
         with app_context:
             try:
+                from models import ManualBot
+                if ManualBot.query.filter_by(ip_address=ip).first():
+                    return
 
-                # 1. DO GEOLOCATION FIRST (Slow network I/O)
-                location = get_ip_location(ip)
                 # Save general visit
                 visit = SiteVisit(url=url, visitor_ip=ip, visitor_location=location, user_agent=ua, referrer=referrer)
                 db.session.add(visit)
@@ -207,6 +213,11 @@ def log_event():
     
     ua = request.headers.get('User-Agent', 'Unknown')
     
+    # Do NOT log bots/scrapers to database
+    from utils import is_bot
+    if is_bot(ua):
+        return '', 204
+    
     # Enhanced Referrer Logic for events (e.g. LinkedIn scroll)
     referrer = request.referrer or request.args.get('referrer')
     utm_source = request.args.get('utm_source')
@@ -218,8 +229,12 @@ def log_event():
         location = get_ip_location(ip)
         with app_context:
             try:
-                from models import SiteVisit, PostView, Post
+                from models import SiteVisit, PostView, Post, ManualBot
                 from datetime import datetime, timezone, timedelta
+                
+                # Skip if IP is in manual bot list
+                if ManualBot.query.filter_by(ip_address=ip).first():
+                    return
                 
                 # Use timezone-aware comparison for deduplication
                 now = datetime.now(timezone.utc)
