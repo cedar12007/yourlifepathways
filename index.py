@@ -144,14 +144,6 @@ def log_visit():
                 visit = SiteVisit(url=url, visitor_ip=ip, visitor_location=location, user_agent=ua, referrer=referrer)
                 db.session.add(visit)
                 
-                # If it's a blog post, log that too
-                if endpoint == 'blog.view_post':
-                    slug = view_args.get('slug')
-                    post = Post.query.filter_by(slug=slug).first()
-                    if post:
-                        p_view = PostView(post_id=post.id, visitor_ip=ip, visitor_location=location, user_agent=ua)
-                        db.session.add(p_view)
-                
                 db.session.commit()
             except Exception as e:
                 db.session.rollback()
@@ -252,16 +244,16 @@ def log_event():
                 blog_post_match = re.search(r'/blog/([^/?#]+)', url)
                 if blog_post_match:
                     slug = blog_post_match.group(1).strip('/')
-                    if slug:
+                    if slug and slug != 'blog':
                         post = Post.query.filter_by(slug=slug).first()
                         if post:
-                            p_view = PostView(post_id=post.id, visitor_ip=ip, visitor_location=location, user_agent=ua)
-                            db.session.add(p_view)
-                        else:
-                            # It might be the main list at /blog/
-                            if slug == 'blog':
-                                # Main blog list - usually handled by SiteVisit, but we can tag it
-                                pass
+                            # Avoid duplicate views from same visitor within 10 minutes
+                            ten_min_ago = datetime.now(timezone.utc) - timedelta(minutes=10)
+                            already_viewed = PostView.query.filter_by(post_id=post.id, visitor_ip=ip)\
+                                                           .filter(PostView.timestamp > ten_min_ago).first()
+                            if not already_viewed:
+                                p_view = PostView(post_id=post.id, visitor_ip=ip, visitor_location=location, user_agent=ua)
+                                db.session.add(p_view)
                 # 2. Main Blog List page (multiple possible URLs)
                 elif any(p in url for p in ['/blog', 'main_life_professional_business_leadership_executive_coaching_blog']):
                     # This captures the blog listing views

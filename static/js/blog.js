@@ -334,6 +334,31 @@ document.addEventListener('click', function (event) {
     }
 });
 
-// Initial page load ping (captures blog visits even if edge-cached)
-fetch('/log_event?url=' + encodeURIComponent(window.location.href) + '&_cb=' + Date.now());
+// Engaged Reader Tracking: Fires when a real visitor stays 6 seconds OR scrolls into the article
+(function () {
+    let pinged = false;
+    function sendReadPing() {
+        if (pinged) return;
+        pinged = true;
+        cleanup();
+        fetch('/log_event?url=' + encodeURIComponent(window.location.href) + '&engaged=1&_cb=' + Date.now());
+    }
+
+    // 1. Dwell timer: 6 seconds of reading time
+    const timer = setTimeout(sendReadPing, 6000);
+
+    // 2. Scroll trigger: scrolled 250px down into content
+    function onScroll() {
+        if (window.scrollY > 250) {
+            sendReadPing();
+        }
+    }
+
+    window.addEventListener('scroll', onScroll, { passive: true });
+
+    function cleanup() {
+        clearTimeout(timer);
+        window.removeEventListener('scroll', onScroll);
+    }
+})();
 

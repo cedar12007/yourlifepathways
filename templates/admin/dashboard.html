@@ -33,6 +33,7 @@
                     <th class="sortable">ID</th>
                     <th class="sortable">Title</th>
                     <th class="sortable">Category</th>
+                    <th class="sortable" style="text-align: center;">Views</th>
                     <th class="sortable">Date</th>
                     <th class="sortable">Status</th>
                     <th>Actions</th>
@@ -45,6 +46,11 @@
                     <td><a href="{{ url_for('blog.view_post', slug=post.slug) }}" target="_blank"
                             class="post-title-link">{{ post.title }}</a></td>
                     <td>{{ post.category }}</td>
+                    <td style="text-align: center;">
+                        <span style="font-weight: 600; color: #1d3a5e; display: inline-flex; align-items: center; justify-content: center; gap: 5px;">
+                            <i class="fa-solid fa-eye" style="color: #7f8c8d; font-size: 0.85em;"></i>{{ post.view_count }}
+                        </span>
+                    </td>
                     <td><span class="local-time"
                             data-utc="{{ post.date_created.isoformat() if post.date_created else '' }}"
                             data-format="date">{{ post.date_created.strftime('%Y-%m-%d') if post.date_created else ''

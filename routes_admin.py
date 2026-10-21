@@ -734,7 +734,15 @@ def create_initial_admin():
 @admin_bp.route('/')
 @admin_required
 def dashboard():
+    from sqlalchemy import func
     posts = Post.query.order_by(Post.date_created.desc()).all()
+    view_counts = dict(
+        db.session.query(PostView.post_id, func.count(PostView.id))
+        .group_by(PostView.post_id)
+        .all()
+    )
+    for post in posts:
+        post.view_count = view_counts.get(post.id, 0)
     return render_template('admin/dashboard.html', posts=posts, noindex=True)
 
 @admin_bp.route('/post/new', methods=['GET', 'POST'])
