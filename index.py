@@ -123,7 +123,8 @@ def log_visit():
     probe_signatures = (
         'rest_route', '.git', '.env', '.json', '.sql', '.php', 'xmlrpc',
         'backup', 'wp-', 'well-known', 'eval(', 'base64', 'author=', 'sftp',
-        'step=1', 'step=', 'install.php'
+        'step=1', 'step=', 'install.php', 'option=com_', 'passwd', 'import&raw',
+        'feed=rss'
     )
     req_full = (request.path + '?' + request.query_string.decode('utf-8', 'ignore')).lower()
     if any(sig in req_full for sig in probe_signatures):
