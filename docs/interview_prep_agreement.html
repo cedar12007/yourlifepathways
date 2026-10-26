@@ -1,0 +1,395 @@
+<html lang="en"><head>
+  <meta charset="UTF-8">
+  <title>Interview Preparation &amp; Coaching Agreement - PrepForInterviews</title>
+  <style>
+    :root {
+      --primary: #1e3a5f;
+      --accent: #2b6cb0;
+      --text: #1a202c;
+      --muted: #4a5568;
+      --border: #cbd5e0;
+      --bg-light: #f7fafc;
+    }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      color: var(--text);
+      background: #e2e8f0;
+      font-size: 10.5pt;
+      line-height: 1.42;
+      padding: 20px;
+    }
+    .page {
+      width: 8.5in;
+      min-height: 11in;
+      background: #ffffff;
+      margin: 0 auto 24px auto;
+      padding: 0.55in 0.65in 0.65in 0.65in;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 2.5px solid var(--primary);
+      padding-bottom: 12px;
+      margin-bottom: 14px;
+    }
+    .brand-title {
+      font-size: 16pt;
+      font-weight: 800;
+      color: var(--primary);
+      letter-spacing: -0.3px;
+    }
+    .brand-sub {
+      font-size: 9pt;
+      color: var(--muted);
+      font-weight: 500;
+    }
+    .doc-title-box {
+      text-align: right;
+    }
+    .doc-title {
+      font-size: 12.5pt;
+      font-weight: 700;
+      color: var(--primary);
+      text-transform: uppercase;
+    }
+    .badge {
+      display: inline-block;
+      background: var(--bg-light);
+      border: 1px solid var(--border);
+      color: var(--primary);
+      font-size: 8pt;
+      font-weight: 600;
+      padding: 2px 8px;
+      border-radius: 4px;
+      margin-top: 3px;
+    }
+    .intro-line {
+      margin-bottom: 12px;
+      font-size: 10pt;
+    }
+    .parties-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      background: var(--bg-light);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 10px 12px;
+      margin-bottom: 14px;
+      font-size: 9.5pt;
+    }
+    .party-box strong {
+      color: var(--primary);
+      display: block;
+      margin-bottom: 3px;
+      font-size: 10pt;
+    }
+    h2 {
+      font-size: 10.5pt;
+      font-weight: 700;
+      color: #ffffff;
+      background: var(--primary);
+      padding: 4px 10px;
+      border-radius: 4px;
+      margin: 12px 0 8px 0;
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+    }
+    .scope-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px 16px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 10px 12px;
+      margin-bottom: 8px;
+      font-size: 9.5pt;
+    }
+    .field-row {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .field-row label {
+      font-weight: 600;
+      white-space: nowrap;
+      color: var(--primary);
+    }
+    input[type="text"], input[type="date"] {
+      border: none;
+      border-bottom: 1px solid #718096;
+      background: transparent;
+      font-family: inherit;
+      font-size: 9.5pt;
+      color: var(--text);
+      padding: 1px 4px;
+      width: 100%;
+    }
+    input.inline-input {
+      width: 110px;
+      text-align: center;
+    }
+    .option-card {
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 8px 12px;
+      margin-bottom: 8px;
+      font-size: 9.5pt;
+    }
+    .option-header {
+      font-weight: 700;
+      color: var(--primary);
+      margin-bottom: 4px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    p {
+      margin-bottom: 6px;
+      font-size: 9.5pt;
+      text-align: justify;
+    }
+    .consent-box {
+      background: var(--bg-light);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 8px 12px;
+      margin-top: 6px;
+      font-size: 9.2pt;
+    }
+    .checkbox-row {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      margin-top: 5px;
+      font-weight: 500;
+    }
+    .sig-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+      margin-top: 14px;
+      padding-top: 10px;
+      border-top: 1px solid var(--border);
+      font-size: 9.5pt;
+    }
+    .sig-line {
+      margin-top: 22px;
+      border-bottom: 1px solid var(--text);
+      height: 22px;
+    }
+    .footer {
+      border-top: 1px solid var(--border);
+      padding-top: 6px;
+      margin-top: 14px;
+      display: flex;
+      justify-content: space-between;
+      font-size: 8.5pt;
+      color: var(--muted);
+    }
+    @media print {
+      body {
+        background: none;
+        padding: 0;
+      }
+      .page {
+        box-shadow: none;
+        margin: 0;
+        page-break-after: always;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- PAGE 1 -->
+  <div class="page">
+    <div>
+      <div class="header">
+        <div>
+          <div class="brand-title">PrepForInterviews</div>
+          <div class="brand-sub">Interview Preparation for Individuals &amp; Businesses • www.prepforinterviews.com</div>
+        </div>
+        <div class="doc-title-box">
+          <div class="doc-title">Interview Prep &amp; Coaching Agreement</div>
+          <div class="badge">ICF Code of Ethics Aligned</div>
+<br><br>
+        </div>
+      </div>
+
+      <div class="intro-line">
+        This Interview Preparation &amp; Coaching Agreement is entered into as of
+        <input type="text" class="inline-input" placeholder="YYYY-MM-DD"> (the "Effective Date") by and between:
+      </div>
+
+      <div class="parties-grid">
+        <div class="party-box">
+          <strong>Coach</strong>
+          Erez Asif — Interview Coach<br>
+          Erickson International Trained Coach<br>
+          PrepForInterviews (www.prepforinterviews.com)<br>
+          iprepforinterviews@gmail.com • 571-234-1432
+        </div>
+        <div class="party-box">
+          <strong>Client / Organization</strong>
+          <div class="field-row" style="margin-bottom:4px;">
+            <label>Name / Org:</label>
+            <input type="text" placeholder="Client Name or Organization">
+          </div>
+          <div class="field-row" style="margin-bottom:4px;">
+            <label>Track / Role:</label>
+            <input type="text" placeholder="Individual / Student / Corporate Team">
+          </div>
+          <div class="field-row">
+            <label>Email / Phone:</label>
+            <input type="text" placeholder="client@email.com • Phone">
+          </div>
+        </div>
+      </div>
+
+      <h2>1. Scope of Interview Preparation &amp; Coaching Services</h2>
+      <div class="scope-grid">
+        <div class="field-row">
+          <label>Service Type:</label>
+          <input type="text" value="1:1 Mock Interviews &amp; Coaching">
+        </div>
+        <div class="field-row">
+          <label>Total Sessions:</label>
+          <input type="text" placeholder="e.g., 3 sessions / 6 sessions / Ongoing">
+        </div>
+        <div class="field-row">
+          <label>Session Duration:</label>
+          <input type="text" value="60 minutes">
+        </div>
+        <div class="field-row">
+          <label>Frequency:</label>
+          <input type="text" placeholder="Weekly / Bi-weekly / Flexible (Eve &amp; Wknd)">
+        </div>
+        <div class="field-row" style="grid-column: span 2;">
+          <label>Delivery Format:</label>
+          <input type="text" value="Zoom / Microsoft Teams / Google Meet / On-Site">
+        </div>
+      </div>
+      <p>
+        <strong>Focus &amp; Program Extension:</strong> Sessions cover tailored mock interviews, response structuring, communication strategy, and actionable feedback. This engagement may be extended for additional sessions upon mutual written agreement via email, maintaining the established terms and compensation structure.
+      </p>
+
+      <h2>2. Compensation Structure</h2>
+      <p>To satisfy ICF credentialing standards and establish clear engagement terms, this program is established under a formal professional fee agreement. Select the applicable option:</p>
+
+      <div class="option-card">
+        
+        <p style="margin-bottom:4px;">The Client (or sponsoring Organization) commits to an initial two (2) sessions at $
+<input type="text" class="inline-input" style="width:70px;" placeholder="125"> per session, for a total program investment of
+          $<input type="text" class="inline-input" style="width:80px;" placeholder="250.00">. Additional sessions beyond the initial two are billed at $100.00 per 60-minute session.
+        </p>
+        <div class="field-row">
+          <label>Payment Terms:</label>
+          <input type="text" value="Fees shall be paid via Zelle / Venmo / PayPal / Invoice.">
+        </div>
+      </div>
+
+      
+      <p><strong>Extension Billing:</strong> If extended under Section 1, the chosen compensation rate will apply to all additional sessions.</p>
+
+      <h2>3. Professional Boundaries, Disclaimers &amp; Client Responsibility</h2>
+      <p>
+        <strong>What Interview Coaching Is Not:</strong> The Client understands and agrees that the Coach provides interview preparation, mock interviewing, and coaching services, and is not acting as an employment agency, recruiter, job placement service, therapist, counselor, or legal advisor.
+      </p>
+      <p>
+        <strong>No Guarantee of Outcome &amp; Limitation of Liability:</strong> While sessions are designed to sharpen responses and build interview confidence, the Coach does not guarantee job offers, internships, promotions, or college/program admission. The Client is solely responsible for their own interview performance, career decisions, actions, and results. The Coach is not liable for indirect, incidental, or consequential damages, and total aggregate liability under any cause of action shall not exceed fees actually paid under Section 2.
+      </p>
+    </div>
+
+    <div class="footer">
+      <span>Erez Asif • PrepForInterviews (www.prepforinterviews.com)</span>
+      <span>Page 1 of 2</span>
+    </div>
+  </div>
+
+  <!-- PAGE 2 -->
+  <div class="page">
+    <div>
+      <div class="header">
+        <div>
+          <div class="brand-title">PrepForInterviews</div>
+          <div class="brand-sub">Interview Preparation for Individuals &amp; Businesses • www.prepforinterviews.com</div>
+        </div>
+        <div class="doc-title-box">
+          <div class="doc-title">Interview Prep &amp; Coaching Agreement</div>
+          <div class="badge">ICF Code of Ethics Aligned</div>
+<br><br>
+        </div>
+      </div>
+
+      <h2>4. Confidentiality, Ethics &amp; ICF Auditing</h2>
+      <p>
+        The Coach agrees to maintain strict confidentiality of all coaching conversations, candidate backgrounds, resumes, target employers, and proprietary organizational details in full alignment with the International Coaching Federation (ICF) Code of Ethics. No personal, proprietary, or organizational information shared during sessions will be disclosed without the Client’s written consent.
+      </p>
+      <p>
+        <strong>ICF Client Log Audit Consent:</strong> The Client agrees that their name, email address, and total coaching hours completed under this contract may be listed on the Coach's confidential client coaching log for credentialing audit purposes with the ICF. The ICF audits contact records solely to verify hours and does not contact the Client regarding session content.
+      </p>
+
+      
+
+      <h2>5. Cancellation &amp; Scheduling Policy</h2>
+      <p>
+        Both parties commit to honoring scheduled appointments to protect the momentum of the preparation timeline. Sessions must be rescheduled with at least 24 hours' advance notice. Missed appointments or cancellations with less than 24 hours' notice are deducted from the program total, except in acute personal or organizational emergencies.
+      </p>
+
+      <h2>6. Agreement &amp; Execution</h2>
+      <p>
+        By signing below, the Coach and the Client (or Parent/Legal Guardian if the Client is under 18, or authorized Organization representative) acknowledge that they have read, understood, and agreed to the terms of this Agreement, confirming that the compensation selected in Section 2 serves as complete, professional payment for the program.
+      </p>
+
+      <div class="sig-grid">
+        <div>
+          <strong>COACH:</strong><br>
+          Erez Asif<br>
+          Interview Coach &amp; Erickson International Trained Coach<div class="sig-line"></div>
+          <div style="font-size:8.5pt; color:var(--muted); margin-bottom:8px;">Coach Signature</div>
+          <div class="field-row">
+            <label>Date:</label>
+            <input type="text" placeholder="YYYY-MM-DD">
+          </div>
+        </div>
+
+        <div>
+          <strong>CLIENT / REPRESENTATIVE / GUARDIAN:</strong><br>
+          <div class="field-row" style="margin-top:2px;">
+            <label>Name:</label>
+            <input type="text" placeholder="Authorized Client or Guardian Name">
+          </div>
+          <div class="field-row" style="margin-top:2px;">
+            <label>Title / Rel:</label>
+            <input type="text" placeholder="Candidate / Parent / Org Title">
+          </div>
+          <div class="sig-line" style="margin-top:14px;"></div>
+          <div style="font-size:8.5pt; color:var(--muted); margin-bottom:8px;">Client / Representative Signature</div>
+          <div class="field-row">
+            <label>Date:</label>
+            <input type="text" placeholder="YYYY-MM-DD">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="footer">
+      <span>Erez Asif • PrepForInterviews (www.prepforinterviews.com) • iprepforinterviews@gmail.com</span>
+      <span>Page 2 of 2</span>
+    </div>
+  </div>
+
+
+</body></html>
