@@ -234,7 +234,15 @@ def track_signature_headshot():
     excluded_ips_raw = os.getenv('EXCLUDED_SIGNATURE_IPS', '71.191.38.21,127.0.0.1')
     excluded_ips = {x.strip() for x in excluded_ips_raw.split(',') if x.strip()}
     
-    is_sender_self_open = ip in excluded_ips
+    candidate_ips = {
+        ip,
+        getattr(request, 'remote_addr', ''),
+        request.headers.get('CF-Connecting-IP', '').strip(),
+        request.headers.get('True-Client-IP', '').strip(),
+        request.headers.get('X-Real-IP', '').strip()
+    }
+    candidate_ips.discard('')
+    is_sender_self_open = bool(candidate_ips & excluded_ips)
     try:
         from flask_login import current_user
         if current_user.is_authenticated:

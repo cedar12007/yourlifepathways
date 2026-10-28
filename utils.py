@@ -69,10 +69,26 @@ def vercel_edge_cache(s_maxage=1, swr=86400):
     return decorator
 
 def get_client_ip():
-    """Returns the real client IP, considering proxies."""
-    if request.headers.get('X-Forwarded-For'):
-        return request.headers.get('X-Forwarded-For').split(',')[0].strip()
-    return request.remote_addr
+    """Returns the real client IP, considering Cloudflare, Vercel, and proxies."""
+    cf_ip = request.headers.get('CF-Connecting-IP')
+    if cf_ip:
+        return cf_ip.strip()
+
+    true_ip = request.headers.get('True-Client-IP')
+    if true_ip:
+        return true_ip.strip()
+
+    real_ip = request.headers.get('X-Real-IP')
+    if real_ip:
+        return real_ip.strip()
+
+    xff = request.headers.get('X-Forwarded-For')
+    if xff:
+        parts = [p.strip() for p in xff.split(',') if p.strip()]
+        if parts:
+            return parts[0]
+
+    return request.remote_addr or ''
 
 def get_ip_location(ip_address):
     """Fetches geolocation for a given IP address using ip-api.com."""
