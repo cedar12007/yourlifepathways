@@ -15,7 +15,7 @@
         }
         .card {
             background: #ffffff;
-            max-width: 620px;
+            max-width: 650px;
             width: 100%;
             border-radius: 16px;
             box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
@@ -79,33 +79,51 @@
             overflow-x: auto;
             margin-top: 10px;
             user-select: all;
+            word-break: break-all;
+        }
+        .note {
+            background: #eff6ff;
+            border-left: 4px solid #3b82f6;
+            padding: 12px 16px;
+            border-radius: 0 8px 8px 0;
+            font-size: 13.5px;
+            color: #1e40af;
+            margin: 16px 0;
         }
     </style>
 </head>
 <body>
     <div class="card">
-        <h1>Gmail Signature Tagging Bookmarklet</h1>
+        <h1>Gmail Signature Tagging Bookmarklet (v2)</h1>
         <p>Easily tag any drafted email in Gmail with a custom client name, lead ID, or campaign tag so every email open and website click is tracked in your admin dashboard.</p>
 
         <div class="drag-box">
-            <p style="margin-top: 0; font-weight: 600; color: #1e40af;">Drag this button directly to your browser's Bookmarks Bar:</p>
-            <a class="bookmark-btn" href="javascript:(function(){const activeDraft=document.querySelector('div[aria-label=&quot;Message Body&quot;]:focus, div[role=&quot;textbox&quot;][contenteditable=&quot;true&quot;]:focus')||document.querySelector('div[aria-label=&quot;Message Body&quot;], div[role=&quot;textbox&quot;][contenteditable=&quot;true&quot;]');if(!activeDraft){alert('No active Gmail draft found. Click inside your email body first!');return;}const img=activeDraft.querySelector('img[src*=&quot;profile_pic_email_signature&quot;], img[src*=&quot;/signature/&quot;], img[src*=&quot;yourlifepathways.com&quot;]');if(!img){alert('Signature headshot image not found in the current draft.');return;}let currentTag='';try{const u=new URL(img.src);currentTag=u.searchParams.get('ref')||u.searchParams.get('tag')||'';}catch(e){}const tag=prompt('Enter tracking tag / client name (e.g. john_smith, interview_prep):',currentTag);if(tag===null)return;const clean=tag.trim().toLowerCase().replace(/[^a-z0-9_-]/g,'_');try{const imgUrl=new URL(img.src);if(clean){imgUrl.searchParams.set('ref',clean);}else{imgUrl.searchParams.delete('ref');}img.src=imgUrl.toString();const links=activeDraft.querySelectorAll('a[href*=&quot;yourlifepathways.com&quot;]');links.forEach(l=>{try{const lu=new URL(l.href);if(clean){lu.searchParams.set('ref',clean);}else{lu.searchParams.set('ref','sig');}l.href=lu.toString();}catch(err){}});alert('Signature updated!\nTracking Tag: '+(clean||'default'));}catch(e){alert('Error updating signature: '+e.message);}})();">🏷️ Tag Signature</a>
+            <p style="margin-top: 0; font-weight: 600; color: #1e40af;">Drag this updated button to replace your Bookmarks Bar shortcut:</p>
+            <a class="bookmark-btn" href="javascript:(function(){const d=document.querySelector('div[aria-label=&quot;Message Body&quot;]:focus, div[role=&quot;textbox&quot;][contenteditable=&quot;true&quot;]:focus')||document.querySelector('div[aria-label=&quot;Message Body&quot;], div[role=&quot;textbox&quot;][contenteditable=&quot;true&quot;]');if(!d){alert('No active Gmail draft found. Click inside your email body first!');return;}const img=d.querySelector('img[src*=&quot;profile_pic_email_signature&quot;], img[src*=&quot;/signature/&quot;], img[src*=&quot;yourlifepathways.com&quot;]');if(!img){alert('Signature headshot image not found in the current draft.');return;}const sb=img.closest('[data-smartmail=&quot;gmail_signature&quot;], .gmail_signature');if(sb){sb.removeAttribute('data-smartmail');sb.classList.remove('gmail_signature');}let c='';try{const u=new URL(img.src);c=u.searchParams.get('ref')||u.searchParams.get('tag')||'';}catch(e){}const tag=prompt('Enter tracking tag / client name (e.g. john_smith, interview_prep):',c);if(tag===null)return;const clean=tag.trim().toLowerCase().replace(/[^a-z0-9_-]/g,'_');try{const imgUrl=new URL(img.src);if(clean){imgUrl.searchParams.set('ref',clean);}else{imgUrl.searchParams.delete('ref');}const newImg=img.cloneNode(true);newImg.setAttribute('src',imgUrl.toString());newImg.src=imgUrl.toString();const sel=window.getSelection();const range=document.createRange();range.selectNode(img);sel.removeAllRanges();sel.addRange(range);if(!document.execCommand('insertHTML',false,newImg.outerHTML)){img.replaceWith(newImg);}d.querySelectorAll('a[href*=&quot;yourlifepathways.com&quot;]').forEach(l=>{try{const lu=new URL(l.href);if(clean){lu.searchParams.set('ref',clean);}else{lu.searchParams.set('ref','sig');}l.setAttribute('href',lu.toString());l.href=lu.toString();}catch(err){}});d.focus();if(typeof InputEvent==='function'){d.dispatchEvent(new InputEvent('input',{bubbles:true,cancelable:true,inputType:'insertReplacementText'}));}d.dispatchEvent(new Event('input',{bubbles:true,cancelable:true}));d.dispatchEvent(new Event('change',{bubbles:true,cancelable:true}));alert('Signature updated and draft autosaved!\nTag: '+(clean||'default')+'\n\n(Verify &quot;Saved&quot; appears at bottom right before sending)');}catch(e){alert('Error updating signature: '+e.message);}})();">🏷️ Tag Signature</a>
+        </div>
+
+        <div class="note">
+            <strong>What's fixed in v2:</strong>
+            <ul style="margin: 6px 0 0; padding-left: 20px;">
+                <li>Uses native browser <code>execCommand</code> to register with Gmail's internal editor state so changes stick when sent.</li>
+                <li>Detaches Gmail's <code>data-smartmail="gmail_signature"</code> attribute so Gmail doesn't overwrite your custom tag with the default settings.</li>
+                <li>Dispatches native input events to force Gmail's autosave to commit before sending.</li>
+            </ul>
         </div>
 
         <h3>How to use:</h3>
         <ol>
-            <li>In <strong>Gmail</strong>, open or start drafting an email (make sure your signature is inserted).</li>
+            <li>In <strong>Gmail</strong>, start or open your draft email (with your signature present).</li>
             <li>Click the <strong>🏷️ Tag Signature</strong> button in your Bookmarks Bar.</li>
-            <li>A popup asks for the recipient/campaign tag (e.g., <code>john_doe</code> or <code>interview_prep</code>).</li>
-            <li>Hit <strong>Enter</strong>. Both the tracking headshot image and website links in your draft are instantly updated with your custom tag!</li>
+            <li>Type the tag (e.g., <code>john_doe</code>) and hit <strong>Enter</strong>.</li>
+            <li>Confirm Gmail shows <strong>"Saved"</strong> at the bottom right of the compose box, then click <strong>Send</strong>.</li>
         </ol>
 
         <details style="margin-top: 24px;">
             <summary style="cursor: pointer; color: #2563eb; font-weight: 500;">Or copy the code manually</summary>
-            <p style="font-size: 13px; margin-top: 8px;">If your Bookmarks Bar is hidden (press <code>Cmd + Shift + B</code> to show it), or if you prefer adding it manually, copy this entire snippet into the URL field of a new bookmark:</p>
-            <div class="raw-code">javascript:(function(){const activeDraft=document.querySelector('div[aria-label="Message Body"]:focus, div[role="textbox"][contenteditable="true"]:focus')||document.querySelector('div[aria-label="Message Body"], div[role="textbox"][contenteditable="true"]');if(!activeDraft){alert('No active Gmail draft found. Click inside your email body first!');return;}const img=activeDraft.querySelector('img[src*="profile_pic_email_signature"], img[src*="/signature/"], img[src*="yourlifepathways.com"]');if(!img){alert('Signature headshot image not found in the current draft.');return;}let currentTag='';try{const u=new URL(img.src);currentTag=u.searchParams.get('ref')||u.searchParams.get('tag')||'';}catch(e){}const tag=prompt('Enter tracking tag / client name (e.g. john_smith, interview_prep):',currentTag);if(tag===null)return;const clean=tag.trim().toLowerCase().replace(/[^a-z0-9_-]/g,'_');try{const imgUrl=new URL(img.src);if(clean){imgUrl.searchParams.set('ref',clean);}else{imgUrl.searchParams.delete('ref');}img.src=imgUrl.toString();const links=activeDraft.querySelectorAll('a[href*="yourlifepathways.com"]');links.forEach(l=>{try{const lu=new URL(l.href);if(clean){lu.searchParams.set('ref',clean);}else{lu.searchParams.set('ref','sig');}l.href=lu.toString();}catch(err){}});alert('Signature updated!\nTracking Tag: '+(clean||'default'));}catch(e){alert('Error updating signature: '+e.message);}})();</div>
+            <p style="font-size: 13px; margin-top: 8px;">If you prefer manually updating your existing bookmark, copy and replace the URL with this snippet:</p>
+            <div class="raw-code">javascript:(function(){const d=document.querySelector('div[aria-label="Message Body"]:focus, div[role="textbox"][contenteditable="true"]:focus')||document.querySelector('div[aria-label="Message Body"], div[role="textbox"][contenteditable="true"]');if(!d){alert('No active Gmail draft found. Click inside your email body first!');return;}const img=d.querySelector('img[src*="profile_pic_email_signature"], img[src*="/signature/"], img[src*="yourlifepathways.com"]');if(!img){alert('Signature headshot image not found in the current draft.');return;}const sb=img.closest('[data-smartmail="gmail_signature"], .gmail_signature');if(sb){sb.removeAttribute('data-smartmail');sb.classList.remove('gmail_signature');}let c='';try{const u=new URL(img.src);c=u.searchParams.get('ref')||u.searchParams.get('tag')||'';}catch(e){}const tag=prompt('Enter tracking tag / client name (e.g. john_smith, interview_prep):',c);if(tag===null)return;const clean=tag.trim().toLowerCase().replace(/[^a-z0-9_-]/g,'_');try{const imgUrl=new URL(img.src);if(clean){imgUrl.searchParams.set('ref',clean);}else{imgUrl.searchParams.delete('ref');}const newImg=img.cloneNode(true);newImg.setAttribute('src',imgUrl.toString());newImg.src=imgUrl.toString();const sel=window.getSelection();const range=document.createRange();range.selectNode(img);sel.removeAllRanges();sel.addRange(range);if(!document.execCommand('insertHTML',false,newImg.outerHTML)){img.replaceWith(newImg);}d.querySelectorAll('a[href*="yourlifepathways.com"]').forEach(l=>{try{const lu=new URL(l.href);if(clean){lu.searchParams.set('ref',clean);}else{lu.searchParams.set('ref','sig');}l.setAttribute('href',lu.toString());l.href=lu.toString();}catch(err){}});d.focus();if(typeof InputEvent==='function'){d.dispatchEvent(new InputEvent('input',{bubbles:true,cancelable:true,inputType:'insertReplacementText'}));}d.dispatchEvent(new Event('input',{bubbles:true,cancelable:true}));d.dispatchEvent(new Event('change',{bubbles:true,cancelable:true}));alert('Signature updated and draft autosaved!\nTag: '+(clean||'default')+'\n\n(Verify "Saved" appears at bottom right before sending)');}catch(e){alert('Error updating signature: '+e.message);}})();</div>
         </details>
     </div>
 </body>
 </html>
-
