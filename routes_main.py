@@ -223,46 +223,76 @@ def bing_site_auth():
 @main_bp.route('/signature/profile_pic_email_signature_150px.png')
 @main_bp.route('/static/images/profile/profile_pic_email_signature_150px.png')
 def track_signature_headshot():
+    from datetime import datetime, timedelta, timezone
+
     # 1. Grab metadata
     ref = request.args.get('ref') or request.args.get('id') or request.args.get('tag') or 'gmail_signature'
     ip = get_client_ip()
     ua = request.headers.get('User-Agent', '')
 
-    # 2. Get Geolocation (instant via Vercel Edge headers if available, or fallback)
-    from urllib.parse import unquote
-    raw_city = request.headers.get('x-vercel-ip-city')
-    raw_country = request.headers.get('x-vercel-ip-country')
-    raw_region = request.headers.get('x-vercel-ip-country-region')
+    # 1a. Exclude sender self-opens while drafting or testing
+    excluded_ips_raw = os.getenv('EXCLUDED_SIGNATURE_IPS', '71.191.38.21,127.0.0.1')
+    excluded_ips = {x.strip() for x in excluded_ips_raw.split(',') if x.strip()}
     
-    city = unquote(raw_city) if raw_city else ''
-    country = unquote(raw_country) if raw_country else ''
-    region = unquote(raw_region) if raw_region else ''
-    
-    if city and country:
-        loc = f"{city}, {region}, {country}" if region else f"{city}, {country}"
-    else:
-        loc = get_ip_location(ip) if ip else "Unknown"
-
-    if 'GoogleImageProxy' in ua or 'ggpht.com' in ua:
-        if "(Google Proxy)" not in loc:
-            loc += " (Google Proxy)"
-
-    # 3. Synchronous write to ensure serverless container doesn't terminate before DB commit
+    is_sender_self_open = ip in excluded_ips
     try:
-        entry = EmailOpen(ref=ref, ip_address=ip, location=loc, user_agent=ua)
-        db.session.add(entry)
-        db.session.commit()
-    except Exception as e:
-        db.session.rollback()
+        from flask_login import current_user
+        if current_user.is_authenticated:
+            is_sender_self_open = True
+    except Exception:
+        pass
+
+    # 1b. Debounce rapid duplicate opens for the same tag (e.g. Google Proxy prefetching across datacenters within 120s)
+    is_duplicate = False
+    if not is_sender_self_open:
         try:
-            db.create_all()
+            cutoff = datetime.now(timezone.utc) - timedelta(seconds=120)
+            recent_hit = EmailOpen.query.filter(
+                EmailOpen.ref == ref,
+                EmailOpen.timestamp >= cutoff
+            ).first()
+            if recent_hit:
+                is_duplicate = True
+        except Exception:
+            pass
+
+    # 2. Only record to database if it's a genuine recipient open and not a rapid duplicate
+    if not is_sender_self_open and not is_duplicate:
+        # Get Geolocation (instant via Vercel Edge headers if available, or fallback)
+        from urllib.parse import unquote
+        raw_city = request.headers.get('x-vercel-ip-city')
+        raw_country = request.headers.get('x-vercel-ip-country')
+        raw_region = request.headers.get('x-vercel-ip-country-region')
+        
+        city = unquote(raw_city) if raw_city else ''
+        country = unquote(raw_country) if raw_country else ''
+        region = unquote(raw_region) if raw_region else ''
+        
+        if city and country:
+            loc = f"{city}, {region}, {country}" if region else f"{city}, {country}"
+        else:
+            loc = get_ip_location(ip) if ip else "Unknown"
+
+        if 'GoogleImageProxy' in ua or 'ggpht.com' in ua:
+            if "(Google Proxy)" not in loc:
+                loc += " (Google Proxy)"
+
+        # Synchronous write to ensure serverless container doesn't terminate before DB commit
+        try:
             entry = EmailOpen(ref=ref, ip_address=ip, location=loc, user_agent=ua)
             db.session.add(entry)
             db.session.commit()
         except Exception:
             db.session.rollback()
+            try:
+                db.create_all()
+                entry = EmailOpen(ref=ref, ip_address=ip, location=loc, user_agent=ua)
+                db.session.add(entry)
+                db.session.commit()
+            except Exception:
+                db.session.rollback()
 
-    # 4. Serve the actual 150px headshot with anti-caching headers
+    # 3. Always serve the actual 150px headshot with anti-caching headers
     img_path = os.path.join(current_app.root_path, 'static', 'images', 'profile', 'profile_pic_email_signature_150px.png')
     if not os.path.exists(img_path):
         img_path = os.path.join(current_app.root_path, 'static', 'images', 'profile', 'profile_pic.jpg')
