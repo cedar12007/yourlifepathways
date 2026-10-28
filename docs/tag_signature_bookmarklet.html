@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gmail Signature Tagging Tool | YourLifePathways</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: #f3f4f6;
+            color: #1f2937;
+            padding: 40px 20px;
+            display: flex;
+            justify-content: center;
+        }
+        .card {
+            background: #ffffff;
+            max-width: 620px;
+            width: 100%;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+            padding: 36px;
+        }
+        h1 {
+            font-size: 24px;
+            color: #0f2d59;
+            margin-top: 0;
+            margin-bottom: 8px;
+        }
+        p {
+            font-size: 15px;
+            line-height: 1.6;
+            color: #4b5563;
+        }
+        .drag-box {
+            background: #f8fafc;
+            border: 2px dashed #93c5fd;
+            border-radius: 12px;
+            padding: 24px;
+            text-align: center;
+            margin: 24px 0;
+        }
+        .bookmark-btn {
+            display: inline-block;
+            background: linear-gradient(135deg, #1d4ed8 0%, #0f2d59 100%);
+            color: #ffffff !important;
+            font-weight: 600;
+            font-size: 16px;
+            padding: 12px 24px;
+            border-radius: 8px;
+            text-decoration: none;
+            cursor: move;
+            box-shadow: 0 4px 12px rgba(29, 78, 216, 0.3);
+            transition: transform 0.15s ease;
+        }
+        .bookmark-btn:hover {
+            transform: scale(1.03);
+        }
+        ol {
+            padding-left: 20px;
+            font-size: 14px;
+            line-height: 1.8;
+            color: #374151;
+        }
+        code {
+            background: #e5e7eb;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 13px;
+            color: #1e293b;
+            word-break: break-all;
+        }
+        .raw-code {
+            background: #1e293b;
+            color: #f1f5f9;
+            padding: 14px;
+            border-radius: 8px;
+            font-size: 12px;
+            overflow-x: auto;
+            margin-top: 10px;
+            user-select: all;
+        }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h1>Gmail Signature Tagging Bookmarklet</h1>
+        <p>Easily tag any drafted email in Gmail with a custom client name, lead ID, or campaign tag so every email open and website click is tracked in your admin dashboard.</p>
+
+        <div class="drag-box">
+            <p style="margin-top: 0; font-weight: 600; color: #1e40af;">Drag this button directly to your browser's Bookmarks Bar:</p>
+            <a class="bookmark-btn" href="javascript:(function(){const activeDraft=document.querySelector('div[aria-label=&quot;Message Body&quot;]:focus, div[role=&quot;textbox&quot;][contenteditable=&quot;true&quot;]:focus')||document.querySelector('div[aria-label=&quot;Message Body&quot;], div[role=&quot;textbox&quot;][contenteditable=&quot;true&quot;]');if(!activeDraft){alert('No active Gmail draft found. Click inside your email body first!');return;}const img=activeDraft.querySelector('img[src*=&quot;profile_pic_email_signature&quot;], img[src*=&quot;/signature/&quot;], img[src*=&quot;yourlifepathways.com&quot;]');if(!img){alert('Signature headshot image not found in the current draft.');return;}let currentTag='';try{const u=new URL(img.src);currentTag=u.searchParams.get('ref')||u.searchParams.get('tag')||'';}catch(e){}const tag=prompt('Enter tracking tag / client name (e.g. john_smith, interview_prep):',currentTag);if(tag===null)return;const clean=tag.trim().toLowerCase().replace(/[^a-z0-9_-]/g,'_');try{const imgUrl=new URL(img.src);if(clean){imgUrl.searchParams.set('ref',clean);}else{imgUrl.searchParams.delete('ref');}img.src=imgUrl.toString();const links=activeDraft.querySelectorAll('a[href*=&quot;yourlifepathways.com&quot;]');links.forEach(l=>{try{const lu=new URL(l.href);if(clean){lu.searchParams.set('ref',clean);}else{lu.searchParams.set('ref','sig');}l.href=lu.toString();}catch(err){}});alert('Signature updated!\nTracking Tag: '+(clean||'default'));}catch(e){alert('Error updating signature: '+e.message);}})();">🏷️ Tag Signature</a>
+        </div>
+
+        <h3>How to use:</h3>
+        <ol>
+            <li>In <strong>Gmail</strong>, open or start drafting an email (make sure your signature is inserted).</li>
+            <li>Click the <strong>🏷️ Tag Signature</strong> button in your Bookmarks Bar.</li>
+            <li>A popup asks for the recipient/campaign tag (e.g., <code>john_doe</code> or <code>interview_prep</code>).</li>
+            <li>Hit <strong>Enter</strong>. Both the tracking headshot image and website links in your draft are instantly updated with your custom tag!</li>
+        </ol>
+
+        <details style="margin-top: 24px;">
+            <summary style="cursor: pointer; color: #2563eb; font-weight: 500;">Or copy the code manually</summary>
+            <p style="font-size: 13px; margin-top: 8px;">If your Bookmarks Bar is hidden (press <code>Cmd + Shift + B</code> to show it), or if you prefer adding it manually, copy this entire snippet into the URL field of a new bookmark:</p>
+            <div class="raw-code">javascript:(function(){const activeDraft=document.querySelector('div[aria-label="Message Body"]:focus, div[role="textbox"][contenteditable="true"]:focus')||document.querySelector('div[aria-label="Message Body"], div[role="textbox"][contenteditable="true"]');if(!activeDraft){alert('No active Gmail draft found. Click inside your email body first!');return;}const img=activeDraft.querySelector('img[src*="profile_pic_email_signature"], img[src*="/signature/"], img[src*="yourlifepathways.com"]');if(!img){alert('Signature headshot image not found in the current draft.');return;}let currentTag='';try{const u=new URL(img.src);currentTag=u.searchParams.get('ref')||u.searchParams.get('tag')||'';}catch(e){}const tag=prompt('Enter tracking tag / client name (e.g. john_smith, interview_prep):',currentTag);if(tag===null)return;const clean=tag.trim().toLowerCase().replace(/[^a-z0-9_-]/g,'_');try{const imgUrl=new URL(img.src);if(clean){imgUrl.searchParams.set('ref',clean);}else{imgUrl.searchParams.delete('ref');}img.src=imgUrl.toString();const links=activeDraft.querySelectorAll('a[href*="yourlifepathways.com"]');links.forEach(l=>{try{const lu=new URL(l.href);if(clean){lu.searchParams.set('ref',clean);}else{lu.searchParams.set('ref','sig');}l.href=lu.toString();}catch(err){}});alert('Signature updated!\nTracking Tag: '+(clean||'default'));}catch(e){alert('Error updating signature: '+e.message);}})();</div>
+        </details>
+    </div>
+</body>
+</html>
+
