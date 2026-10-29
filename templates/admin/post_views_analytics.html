@@ -1,0 +1,251 @@
+{% extends "base.html" %}
+
+{% block extra_head_elements %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/admin.min.css') }}?v=1.5">
+<style>
+    .stats-card-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        gap: 15px;
+        margin: 1.5em 0;
+    }
+    .stats-card {
+        background: white;
+        border-radius: 8px;
+        padding: 1.2em 1.5em;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+        border-left: 4px solid #2b6cb0;
+    }
+    .stats-card.highlight {
+        border-left-color: #2e7d32;
+        background: #fbfdfb;
+    }
+    .stats-card h4 {
+        margin: 0;
+        font-size: 0.75rem;
+        color: #718096;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    .stats-card .number {
+        font-size: 1.8rem;
+        font-weight: 700;
+        color: #1a202c;
+        margin: 0.2em 0 0;
+        line-height: 1.2;
+    }
+    .stats-card.highlight .number {
+        color: #2e7d32;
+    }
+    .filter-pills {
+        display: flex;
+        gap: 10px;
+        margin: 1.5em 0 1em;
+        flex-wrap: wrap;
+    }
+    .filter-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 6px 14px;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        text-decoration: none !important;
+        background: #edf2f7;
+        color: #4a5568;
+        transition: all 0.2s ease;
+    }
+    .filter-pill:hover {
+        background: #e2e8f0;
+        color: #1a202c;
+    }
+    .filter-pill.active {
+        background: #1d3a5e;
+        color: white;
+    }
+    .filter-pill.active-new {
+        background: #2e7d32;
+        color: white;
+    }
+    .badge-new-pill {
+        background: #e8f5e9;
+        color: #2e7d32;
+        font-size: 0.68rem;
+        font-weight: 700;
+        padding: 1px 6px;
+        border-radius: 8px;
+        margin-left: 4px;
+        text-transform: uppercase;
+    }
+    .section-tag {
+        background: #f7fafc;
+        color: #4a5568;
+        border: 1px solid #e2e8f0;
+        border-radius: 4px;
+        padding: 2px 6px;
+        font-size: 0.72rem;
+        display: inline-flex;
+        align-items: center;
+        gap: 3px;
+        white-space: nowrap;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<section class="main admin-dashboard">
+    <a href="{{ url_for('admin.dashboard') }}" class="admin-back-link">
+        <i class="fa-solid fa-arrow-left"></i> Back to Blog Management
+    </a>
+
+    <header class="major" style="margin-bottom: 1em;">
+        <h2>Reader Activity: {{ post.title }}</h2>
+        <p style="color: #666; font-size: 0.9rem; margin-top: 0.5em;">
+            <a href="{{ url_for('blog.view_post', slug=post.slug) }}" target="_blank" style="color: #2b6cb0; text-decoration: underline;">
+                /blog/{{ post.slug }} <i class="fa-solid fa-arrow-up-right-from-square" style="font-size: 0.75em;"></i>
+            </a>
+            {% if post.category %} &bull; Category: <strong>{{ post.category }}</strong>{% endif %}
+        </p>
+    </header>
+
+    <div class="stats-card-grid">
+        <div class="stats-card {% if filter_mode == 'new' %}highlight{% endif %}">
+            <h4>New Views (Since Last Login)</h4>
+            <div class="number">
+                {% if new_views_count > 0 %}+{% endif %}{{ new_views_count }}
+            </div>
+        </div>
+        <div class="stats-card">
+            <h4>Total Lifetime Views</h4>
+            <div class="number">{{ total_views_count }}</div>
+        </div>
+        <div class="stats-card">
+            <h4>Unique Locations</h4>
+            <div class="number">{{ unique_locations_count }}</div>
+        </div>
+        {% if last_login_time %}
+        <div class="stats-card">
+            <h4>Last Login Reference</h4>
+            <div style="font-size: 0.95rem; font-weight: 600; color: #2d3748; margin-top: 0.4em;">
+                <span class="local-time" data-utc="{{ last_login_time.isoformat() }}">
+                    {{ last_login_time.strftime('%Y-%m-%d %H:%M') }}
+                </span>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    <div class="filter-pills">
+        <a href="{{ url_for('admin.post_views_analytics', post_id=post.id, filter='new') }}" 
+           class="filter-pill {% if filter_mode == 'new' %}active-new{% endif %}">
+            <i class="fa-solid fa-arrow-up"></i> New Views Since Last Login ({{ new_views_count }})
+        </a>
+        <a href="{{ url_for('admin.post_views_analytics', post_id=post.id, filter='all') }}" 
+           class="filter-pill {% if filter_mode == 'all' %}active{% endif %}">
+            <i class="fa-solid fa-list"></i> All Lifetime Views ({{ total_views_count }})
+        </a>
+    </div>
+
+    <div class="admin-table-wrapper">
+        <table class="admin-table">
+            <thead>
+                <tr>
+                    <th class="sortable">Date & Time</th>
+                    <th class="sortable">Location</th>
+                    <th class="sortable">Reading / Scroll Depth</th>
+                    <th>Section Dwell / Attention</th>
+                    <th class="sortable">Referrer Source</th>
+                    <th class="sortable">Device / Browser</th>
+                    <th style="text-align: right; width: 110px;">Journey</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% if views %}
+                {% for item in views %}
+                <tr>
+                    <td>
+                        <span class="local-time" data-utc="{{ item.timestamp.isoformat() if item.timestamp else '' }}">
+                            {{ item.timestamp.strftime('%Y-%m-%d %H:%M:%S') if item.timestamp else 'N/A' }}
+                        </span>
+                        {% if item.is_new %}
+                            <span class="badge-new-pill">NEW</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <span style="font-weight: 600; color: #1d3a5e; display: inline-flex; align-items: center; gap: 5px;">
+                            <i class="fa-solid fa-location-dot" style="color: #e53e3e; font-size: 0.85em;"></i>
+                            {{ item.location }}
+                        </span>
+                    </td>
+                    <td>
+                        {% if item.scroll_depth >= 85 %}
+                            <span style="background: #e6fffa; color: #234e52; border: 1px solid #b2f5ea; padding: 2px 8px; border-radius: 12px; font-size: 0.72rem; font-weight: 700; white-space: nowrap; display: inline-flex; align-items: center; gap: 4px;">
+                                <i class="fa-solid fa-check-double" style="color: #319795;"></i> Read 100%
+                            </span>
+                        {% elif item.scroll_depth >= 45 %}
+                            <span style="background: #ebf8ff; color: #2b6cb0; border: 1px solid #bee3f8; padding: 2px 8px; border-radius: 12px; font-size: 0.72rem; font-weight: 700; white-space: nowrap; display: inline-flex; align-items: center; gap: 4px;">
+                                <i class="fa-solid fa-arrows-up-down" style="color: #3182ce;"></i> Scrolled {{ item.scroll_depth }}%
+                            </span>
+                        {% elif item.scroll_depth > 0 %}
+                            <span style="background: #fffaf0; color: #744210; border: 1px solid #feebc8; padding: 2px 8px; border-radius: 12px; font-size: 0.72rem; font-weight: 700; white-space: nowrap; display: inline-flex; align-items: center; gap: 4px;">
+                                <i class="fa-solid fa-arrow-down" style="color: #dd6b20;"></i> Skimmed {{ item.scroll_depth }}%
+                            </span>
+                        {% else %}
+                            <span style="color: #a0aec0; font-size: 0.75rem; display: inline-flex; align-items: center; gap: 4px;">
+                                <i class="fa-regular fa-eye"></i> Visited
+                            </span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if item.section_views %}
+                            <div style="display: flex; align-items: center; flex-wrap: wrap; gap: 4px;">
+                            {% for sec in item.section_views.split(',') %}
+                                {% if ':' in sec %}
+                                    {% set parts = sec.split(':') %}
+                                    <span class="section-tag" title="Spent {{ parts[1] }} on {{ parts[0] }}">
+                                        <i class="fa-regular fa-clock" style="color: #718096; font-size: 0.65rem;"></i>
+                                        <span>#{{ parts[0] }}</span> <strong>{{ parts[1] }}</strong>
+                                    </span>
+                                {% endif %}
+                            {% endfor %}
+                            </div>
+                        {% else %}
+                            <span style="color: #ccc; font-size: 0.8rem;">—</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if item.referrer %}
+                            <span style="font-size: 0.8rem; color: #4a5568; word-break: break-all;" title="{{ item.referrer }}">
+                                {{ item.referrer | truncate(35) }}
+                            </span>
+                        {% else %}
+                            <span style="color: #a0aec0; font-size: 0.8rem;">Direct / None</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <span style="font-size: 0.8rem; color: #4a5568;" title="{{ item.device }}">
+                            {{ item.device }}
+                        </span>
+                    </td>
+                    <td style="text-align: right;">
+                        <a href="{{ url_for('admin.view_journey', ip=item.ip) }}" class="btn-admin" style="background: #2b6cb0; color: white; display: inline-flex; align-items: center; gap: 4px; padding: 0 10px; height: 26px; line-height: 26px; font-size: 0.7rem; min-width: unset;" title="View all pages visited by this IP">
+                            <i class="fa-solid fa-shoe-prints"></i> Journey
+                        </a>
+                    </td>
+                </tr>
+                {% endfor %}
+                {% else %}
+                <tr>
+                    <td colspan="7" style="text-align: center; padding: 3em; color: #718096;">
+                        <i class="fa-solid fa-chart-line" style="font-size: 2rem; color: #cbd5e0; margin-bottom: 0.5em; display: block;"></i>
+                        No reader activity records found for this selection.
+                    </td>
+                </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+</section>
+{% endblock %}
+

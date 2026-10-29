@@ -148,6 +148,12 @@ table.admin-table {
     font-size: 0.75em;
 }
 
+.new-views-badge:hover {
+    background: #d4edda !important;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 5px rgba(46, 125, 50, 0.2);
+}
+
 /* Consistent Button Sizing */
 .admin-actions {
     display: flex;

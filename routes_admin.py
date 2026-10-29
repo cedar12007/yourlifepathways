@@ -930,6 +930,114 @@ def new_post():
     
     return render_template('admin/edit_post.html', post=None, noindex=True)
 
+@admin_bp.route('/post/<int:post_id>/views-analytics')
+@admin_required
+def post_views_analytics(post_id):
+    from sqlalchemy import func
+    from datetime import datetime
+    from utils import parse_user_agent
+
+    post = Post.query.get_or_404(post_id)
+
+    # 1. Determine last login timestamp
+    last_login_time = None
+    last_login_iso = session.get('last_login_time')
+    if last_login_iso:
+        try:
+            last_login_time = datetime.fromisoformat(last_login_iso)
+        except Exception:
+            last_login_time = None
+
+    if not last_login_time and current_user.is_authenticated:
+        recent_logins = LoginHistory.query.filter_by(
+            user_id=current_user.id,
+            status='success'
+        ).order_by(LoginHistory.timestamp.desc()).limit(2).all()
+
+        if len(recent_logins) >= 2:
+            last_login_time = recent_logins[1].timestamp
+        elif len(recent_logins) == 1:
+            last_login_time = recent_logins[0].timestamp
+
+    # 2. Total & new counts
+    total_views_count = PostView.query.filter_by(post_id=post.id).count()
+    new_views_count = 0
+    if last_login_time:
+        new_views_count = PostView.query.filter_by(post_id=post.id).filter(PostView.timestamp >= last_login_time).count()
+
+    # 3. Filter mode
+    filter_mode = request.args.get('filter', '')
+    if not filter_mode:
+        if request.args.get('since_login') == 'true' or new_views_count > 0:
+            filter_mode = 'new'
+        else:
+            filter_mode = 'all'
+
+    # 4. Fetch PostViews according to filter
+    pv_query = PostView.query.filter_by(post_id=post.id)
+    if filter_mode == 'new' and last_login_time:
+        pv_query = pv_query.filter(PostView.timestamp >= last_login_time)
+    views_records = pv_query.order_by(PostView.timestamp.desc()).limit(300).all()
+
+    # 5. Enrich with SiteVisit telemetry (scroll depth, section dwell time, referrer)
+    ips = list({v.visitor_ip for v in views_records if v.visitor_ip})
+    site_visits_by_ip = {}
+    if ips:
+        matching_visits = SiteVisit.query.filter(
+            SiteVisit.visitor_ip.in_(ips),
+            SiteVisit.url.contains(post.slug)
+        ).order_by(SiteVisit.timestamp.desc()).all()
+        for sv in matching_visits:
+            if sv.visitor_ip not in site_visits_by_ip:
+                site_visits_by_ip[sv.visitor_ip] = []
+            site_visits_by_ip[sv.visitor_ip].append(sv)
+
+    view_items = []
+    unique_locations = set()
+
+    for pv in views_records:
+        sv_candidates = site_visits_by_ip.get(pv.visitor_ip, [])
+        best_sv = None
+        min_diff = None
+        for sv in sv_candidates:
+            diff = abs((sv.timestamp - pv.timestamp).total_seconds()) if (sv.timestamp and pv.timestamp) else 999999
+            if min_diff is None or diff < min_diff:
+                min_diff = diff
+                best_sv = sv
+
+        loc = pv.visitor_location or (best_sv.visitor_location if best_sv else 'Unknown')
+        if loc and loc != 'Unknown':
+            unique_locations.add(loc)
+
+        depth = getattr(best_sv, 'scroll_depth', 0) if best_sv else 0
+        sections = getattr(best_sv, 'section_views', None) if best_sv else None
+        referrer = best_sv.referrer if best_sv else None
+        is_new = bool(last_login_time and pv.timestamp and pv.timestamp >= last_login_time)
+
+        view_items.append({
+            'id': pv.id,
+            'timestamp': pv.timestamp,
+            'ip': pv.visitor_ip,
+            'location': loc or 'Unknown Location',
+            'device': parse_user_agent(pv.user_agent),
+            'scroll_depth': depth or 0,
+            'section_views': sections or '',
+            'referrer': referrer,
+            'is_new': is_new
+        })
+
+    return render_template(
+        'admin/post_views_analytics.html',
+        post=post,
+        views=view_items,
+        total_views_count=total_views_count,
+        new_views_count=new_views_count,
+        filter_mode=filter_mode,
+        last_login_time=last_login_time,
+        unique_locations_count=len(unique_locations),
+        noindex=True
+    )
+
 @admin_bp.route('/post/<int:post_id>/edit', methods=['GET', 'POST'])
 @admin_required
 def edit_post(post_id):

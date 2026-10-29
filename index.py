@@ -4,7 +4,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-from flask import Flask, render_template
+from flask import Flask, render_template, jsonify
 from flask import redirect, url_for
 from flask_login import LoginManager, current_user
 
@@ -299,50 +299,51 @@ def log_event():
     elif utm_source and (not referrer or any(host in referrer for host in ['yourlifepathways.com', 'localhost', '127.0.0.1'])):
         referrer = f"social://{utm_source}"
     
-    def save_event_task(app_context, ip, url, ua, referrer):
-        from utils import get_ip_location
-        location = get_ip_location(ip)
-        with app_context:
-            try:
-                from models import SiteVisit, PostView, Post
-                from datetime import datetime, timezone, timedelta
-                
-                # Use timezone-aware comparison for deduplication
-                now = datetime.now(timezone.utc)
-                recent = SiteVisit.query.filter_by(visitor_ip=ip, url=url).filter(SiteVisit.timestamp > now - timedelta(seconds=10)).first()
-                if recent:
-                    # Already logged very recently, skip duplicate
-                    return
+    # Run synchronously so Vercel Serverless (AWS Lambda) does not freeze before writing to Supabase
+    from utils import get_ip_location
+    location = get_ip_location(ip)
+    current_views_count = None
 
-                # Save general visit
-                visit = SiteVisit(url=url, visitor_ip=ip, visitor_location=location, user_agent=ua, referrer=referrer)
-                db.session.add(visit)
-                
-                # Enhanced blog content detection
-                # 1. Individual Post (matches /blog/slug)
-                blog_post_match = re.search(r'/blog/([^/?#]+)', url)
-                if blog_post_match:
-                    slug = blog_post_match.group(1).strip('/')
-                    if slug and slug != 'blog':
-                        post = Post.query.filter_by(slug=slug).first()
-                        if post:
-                            # Avoid duplicate views from same visitor within 10 minutes
-                            ten_min_ago = datetime.now(timezone.utc) - timedelta(minutes=10)
-                            already_viewed = PostView.query.filter_by(post_id=post.id, visitor_ip=ip)\
-                                                           .filter(PostView.timestamp > ten_min_ago).first()
-                            if not already_viewed:
-                                p_view = PostView(post_id=post.id, visitor_ip=ip, visitor_location=location, user_agent=ua)
-                                db.session.add(p_view)
-                # 2. Main Blog List page (multiple possible URLs)
-                elif any(p in url for p in ['/blog', 'main_life_professional_business_leadership_executive_coaching_blog']):
-                    # This captures the blog listing views
-                    pass
-                db.session.commit()
-            except Exception as e:
-                print(f"[log_event] Background error: {e}")
-                db.session.rollback()
-    
-    executor.submit(save_event_task, app.app_context(), ip, target_url, ua, referrer)
+    try:
+        from models import SiteVisit, PostView, Post
+        from datetime import datetime, timezone, timedelta
+        
+        # Use timezone-aware comparison for deduplication
+        now_dt = datetime.now(timezone.utc)
+        recent = SiteVisit.query.filter_by(visitor_ip=ip, url=target_url).filter(SiteVisit.timestamp > now_dt - timedelta(seconds=10)).first()
+        if not recent:
+            # Save general visit
+            visit = SiteVisit(url=target_url, visitor_ip=ip, visitor_location=location, user_agent=ua, referrer=referrer)
+            db.session.add(visit)
+        
+        # Enhanced blog content detection
+        # 1. Individual Post (matches /blog/slug)
+        blog_post_match = re.search(r'/blog/([^/?#]+)', target_url)
+        if blog_post_match:
+            slug = blog_post_match.group(1).strip('/')
+            if slug and slug != 'blog':
+                post = Post.query.filter_by(slug=slug).first()
+                if post:
+                    # Avoid duplicate views from same visitor within 10 minutes
+                    ten_min_ago = now_dt - timedelta(minutes=10)
+                    already_viewed = PostView.query.filter_by(post_id=post.id, visitor_ip=ip)\
+                                                   .filter(PostView.timestamp > ten_min_ago).first()
+                    if not already_viewed:
+                        p_view = PostView(post_id=post.id, visitor_ip=ip, visitor_location=location, user_agent=ua)
+                        db.session.add(p_view)
+                        db.session.flush()
+                    
+                    db.session.commit()
+                    current_views_count = PostView.query.filter_by(post_id=post.id).count()
+                    return jsonify({'status': 'ok', 'views': current_views_count})
+
+        db.session.commit()
+    except Exception as e:
+        print(f"[log_event] Error: {e}")
+        db.session.rollback()
+
+    if current_views_count is not None:
+        return jsonify({'status': 'ok', 'views': current_views_count})
     return '', 204
 
 @app.route('/log_telemetry', methods=['GET', 'POST'])
@@ -361,69 +362,64 @@ def log_telemetry():
     depth = request.args.get('depth') or request.form.get('depth')
     sections = request.args.get('sections') or request.form.get('sections')
 
-    def save_telemetry_task(app_context, ip, target_url, depth, sections):
-        with app_context:
-            try:
-                from models import SiteVisit
-                from datetime import datetime, timezone, timedelta
-                
-                now_utc = datetime.now(timezone.utc)
-                cutoff = now_utc - timedelta(hours=2)
-                
-                # Find the most recent visit from this IP within the last 2 hours
-                query = SiteVisit.query.filter(
-                    SiteVisit.visitor_ip == ip,
-                    SiteVisit.timestamp >= cutoff
-                )
-                if target_url:
-                    clean_url = target_url.split('#')[0].rstrip('/')
-                    query = query.filter(SiteVisit.url.like(f"{clean_url}%"))
+    try:
+        from models import SiteVisit
+        from datetime import datetime, timezone, timedelta
+        
+        now_utc = datetime.now(timezone.utc)
+        cutoff = now_utc - timedelta(hours=2)
+        
+        # Find the most recent visit from this IP within the last 2 hours
+        query = SiteVisit.query.filter(
+            SiteVisit.visitor_ip == ip,
+            SiteVisit.timestamp >= cutoff
+        )
+        if target_url:
+            clean_url = target_url.split('#')[0].rstrip('/')
+            query = query.filter(SiteVisit.url.like(f"{clean_url}%"))
+            
+        visit = query.order_by(SiteVisit.timestamp.desc()).first()
+        if visit:
+            updated = False
+            if depth:
+                try:
+                    d_val = min(100, max(0, int(depth)))
+                    if d_val > (visit.scroll_depth or 0):
+                        visit.scroll_depth = d_val
+                        updated = True
+                except ValueError:
+                    pass
                     
-                visit = query.order_by(SiteVisit.timestamp.desc()).first()
-                if not visit:
-                    return
-                    
-                updated = False
-                if depth:
-                    try:
-                        d_val = min(100, max(0, int(depth)))
-                        if d_val > (visit.scroll_depth or 0):
-                            visit.scroll_depth = d_val
-                            updated = True
-                    except ValueError:
-                        pass
-                        
-                if sections:
-                    # Format: "intro:12,cost:45,contact:20"
-                    existing = {}
-                    if visit.section_views:
-                        for part in visit.section_views.split(','):
-                            if ':' in part:
-                                s_name, s_time = part.split(':', 1)
-                                try:
-                                    existing[s_name.strip()] = int(s_time.rstrip('s'))
-                                except ValueError:
-                                    pass
-                    for item in sections.split(','):
-                        if ':' in item:
-                            sec_name, sec_time = item.split(':', 1)
-                            sec_clean = sec_name.strip('#').lower()
+            if sections:
+                # Format: "intro:12,cost:45,contact:20"
+                existing = {}
+                if visit.section_views:
+                    for part in visit.section_views.split(','):
+                        if ':' in part:
+                            s_name, s_time = part.split(':', 1)
                             try:
-                                sec_secs = int(sec_time.rstrip('s'))
-                                existing[sec_clean] = existing.get(sec_clean, 0) + sec_secs
-                                updated = True
+                                existing[s_name.strip()] = int(s_time.rstrip('s'))
                             except ValueError:
                                 pass
-                    if updated:
-                        visit.section_views = ','.join(f"{s}:{t}s" for s, t in existing.items())
-                        
+                for item in sections.split(','):
+                    if ':' in item:
+                        sec_name, sec_time = item.split(':', 1)
+                        sec_clean = sec_name.strip('#').lower()
+                        try:
+                            sec_secs = int(sec_time.rstrip('s'))
+                            existing[sec_clean] = existing.get(sec_clean, 0) + sec_secs
+                            updated = True
+                        except ValueError:
+                            pass
                 if updated:
-                    db.session.commit()
-            except Exception as e:
-                db.session.rollback()
-                print(f"[log_telemetry] Background error: {e}")
+                    visit.section_views = ','.join(f"{s}:{t}s" for s, t in existing.items())
+                    
+            if updated:
+                db.session.commit()
+    except Exception as e:
+        db.session.rollback()
+        print(f"[log_telemetry] Error: {e}")
 
-    executor.submit(save_telemetry_task, app.app_context(), ip, target_url, depth, sections)
     return '', 204
 
 

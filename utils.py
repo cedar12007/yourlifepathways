@@ -100,7 +100,7 @@ def get_ip_location(ip_address):
     
     try:
         # Using http because some environments block https for this API or it's free tier
-        response = requests.get(f"http://ip-api.com/json/{ip_address}", timeout=5)
+        response = requests.get(f"http://ip-api.com/json/{ip_address}", timeout=1.5)
         if response.status_code == 200:
             data = response.json()
             if data.get('status') == 'success':

@@ -341,7 +341,21 @@ document.addEventListener('click', function (event) {
         if (pinged) return;
         pinged = true;
         cleanup();
-        fetch('/log_event?url=' + encodeURIComponent(window.location.href) + '&engaged=1&_cb=' + Date.now());
+        fetch('/log_event?url=' + encodeURIComponent(window.location.href) + '&engaged=1&_cb=' + Date.now())
+            .then(function (res) {
+                if (res.ok && res.status !== 204) {
+                    return res.json();
+                }
+                return null;
+            })
+            .then(function (data) {
+                if (data && typeof data.views === 'number') {
+                    document.querySelectorAll('.view-stat .count').forEach(function (el) {
+                        el.textContent = data.views;
+                    });
+                }
+            })
+            .catch(function () {});
     }
 
     // 1. Dwell timer: 6 seconds of reading time

@@ -802,5 +802,19 @@ $(document).ready(function () {
 	});
 
 	// Initial page load ping (captures visits even if page is edge-cached)
-	fetch('/log_event?url=' + encodeURIComponent(window.location.href) + '&_cb=' + Date.now());
+	fetch('/log_event?url=' + encodeURIComponent(window.location.href) + '&_cb=' + Date.now())
+		.then(function (res) {
+			if (res.ok && res.status !== 204) {
+				return res.json();
+			}
+			return null;
+		})
+		.then(function (data) {
+			if (data && typeof data.views === 'number') {
+				document.querySelectorAll('.view-stat .count').forEach(function (el) {
+					el.textContent = data.views;
+				});
+			}
+		})
+		.catch(function () {});
 });

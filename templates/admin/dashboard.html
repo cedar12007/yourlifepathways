@@ -56,15 +56,17 @@
                             class="post-title-link">{{ post.title }}</a></td>
                     <td>{{ post.category }}</td>
                     <td style="text-align: center;">
-                        <span style="font-weight: 600; color: #1d3a5e; display: inline-flex; align-items: center; justify-content: center; gap: 5px;">
-                            <i class="fa-solid fa-eye" style="color: #7f8c8d; font-size: 0.85em;"></i>{{ post.view_count }}
-                        </span>
+                        <a href="{{ url_for('admin.post_views_analytics', post_id=post.id, filter='all') }}" style="text-decoration: none;" title="View all reader analytics for this post">
+                            <span style="font-weight: 600; color: #1d3a5e; display: inline-flex; align-items: center; justify-content: center; gap: 5px;">
+                                <i class="fa-solid fa-eye" style="color: #7f8c8d; font-size: 0.85em;"></i>{{ post.view_count }}
+                            </span>
+                        </a>
                     </td>
                     <td style="text-align: center;" data-sort="{{ post.new_views }}">
                         {% if post.new_views and post.new_views > 0 %}
-                        <span class="new-views-badge" style="display: inline-flex; align-items: center; justify-content: center; gap: 4px; color: #2e7d32; font-weight: 700; background: #e8f5e9; padding: 3px 8px; border-radius: 12px; font-size: 0.85rem;" title="{{ post.new_views }} new view{{ 's' if post.new_views != 1 else '' }} since last login">
+                        <a href="{{ url_for('admin.post_views_analytics', post_id=post.id, filter='new') }}" class="new-views-badge" style="display: inline-flex; align-items: center; justify-content: center; gap: 4px; color: #2e7d32; font-weight: 700; background: #e8f5e9; padding: 3px 8px; border-radius: 12px; font-size: 0.85rem; text-decoration: none; cursor: pointer; transition: transform 0.15s ease, box-shadow 0.15s ease;" title="Click to view locations and reader activity for {{ post.new_views }} new view{{ 's' if post.new_views != 1 else '' }}">
                             <i class="fa-solid fa-arrow-up" style="color: #2e7d32; font-size: 0.75em;"></i>+{{ post.new_views }}
-                        </span>
+                        </a>
                         {% else %}
                         <span style="color: #bbb; font-size: 0.85rem;">—</span>
                         {% endif %}
