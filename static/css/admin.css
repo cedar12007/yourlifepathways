@@ -130,6 +130,24 @@ table.admin-table {
     color: #856404;
 }
 
+.new-views-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    color: #2e7d32;
+    background: #e8f5e9;
+    padding: 3px 8px;
+    border-radius: 12px;
+    font-weight: 700;
+    font-size: 0.85rem;
+}
+
+.new-views-badge i {
+    color: #2e7d32;
+    font-size: 0.75em;
+}
+
 /* Consistent Button Sizing */
 .admin-actions {
     display: flex;

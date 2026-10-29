@@ -213,6 +213,16 @@
     color: #3498db !important;
 }
 
+.icon-only.view-stat {
+    cursor: default !important;
+}
+
+.icon-only.view-stat:hover,
+#main .icon-only.view-stat:hover {
+    color: #888 !important;
+    transform: none !important;
+}
+
 .icon-only:active {
     transform: scale(0.9);
 }
@@ -385,11 +395,33 @@ button.like-btn.already-liked {
     text-overflow: ellipsis;
 }
 
+.mobile-back-btn {
+    display: none;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: #4a5568;
+    text-decoration: none !important;
+    border-bottom: none !important;
+    transition: color 0.2s ease;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+.mobile-back-btn:hover {
+    color: #085a8d;
+}
+
+.mobile-back-btn i {
+    font-size: 0.8rem;
+}
+
 #nav+#main {
     background-color: white;
     padding: 2em;
-    padding-top: 110px !important;
-    /* Extra padding on desktop to prevent breadcrumb cutoff */
+    padding-top: 125px !important;
+    /* Balanced padding to clear fixed nav cleanly without extra gap */
 }
 
 @media screen and (max-width: 980px) {
@@ -398,7 +430,7 @@ button.like-btn.already-liked {
         width: 100% !important;
         max-width: 100% !important;
         margin-top: 0 !important;
-        padding-top: 100px !important;
+        padding-top: 115px !important;
         border-radius: 0 !important;
         padding-left: 1em !important;
         padding-right: 1em !important;
@@ -602,21 +634,16 @@ sup a:hover {
         font-size: 16px;
     }
 
-    .breadcrumb ol {
-        flex-wrap: nowrap;
+    .desktop-only {
+        display: none !important;
     }
 
-    .breadcrumb li.active span {
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        display: block;
+    .mobile-only {
+        display: inline-flex !important;
     }
 
-    .breadcrumb li.active {
-        flex: 0 1 120px;
-        max-width: 120px;
-        min-width: 0;
+    .breadcrumb .interaction-group {
+        gap: 12px;
     }
 
     .image.main img {
@@ -630,6 +657,13 @@ sup a:hover {
         font-size: 1.5em !important;
     }
 
+    .breadcrumb .interaction-group {
+        gap: 8px;
+    }
+
+    .breadcrumb .icon-only {
+        gap: 4px;
+    }
 }
 
 /* Submit buttons */

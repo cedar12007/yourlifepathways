@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 {% block extra_head_elements %}
-<link rel="stylesheet" href="{{ url_for('static', filename='css/blog.min.css') }}?v=1.1" />
+<link rel="stylesheet" href="{{ url_for('static', filename='css/blog.min.css') }}?v=1.4" />
 {% endblock %}
 
 {% block content %}
@@ -35,6 +35,11 @@
                     <i class="fa-solid fa-share-nodes"></i>
                     <span class="count">{{ post.num_shares }}</span>
                 </button>
+
+                <span class="icon-only view-stat" style="cursor: default;" title="Views">
+                    <i class="fa-regular fa-eye"></i>
+                    <span class="count">{{ post.num_views }}</span>
+                </span>
             </div>
         </div>
     </article>

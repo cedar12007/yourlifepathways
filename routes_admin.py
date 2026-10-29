@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, request, redirect, url_for, flash, abort, jsonify, make_response
+from flask import Blueprint, render_template, request, redirect, url_for, flash, abort, jsonify, make_response, session
 from datetime import timedelta
 from models import Post, Comment, User, LoginHistory, db, SiteVisit, PostView, EmailOpen
 from utils import slugify, parse_user_agent, send_comment_approval_email
@@ -38,6 +38,16 @@ def cedar_login():
         )
         
         if user and check_password_hash(user.password_hash, password):
+            # Capture the last successful login timestamp before recording this new one
+            last_successful = LoginHistory.query.filter_by(
+                user_id=user.id,
+                status='success'
+            ).order_by(LoginHistory.timestamp.desc()).first()
+            if last_successful and last_successful.timestamp:
+                session['last_login_time'] = last_successful.timestamp.isoformat()
+            else:
+                session.pop('last_login_time', None)
+
             login_user(user)
             history.user_id = user.id
             history.status = 'success'
@@ -54,6 +64,7 @@ def cedar_login():
 
 @admin_bp.route('/exit-pathway')
 def logout():
+    session.pop('last_login_time', None)
     logout_user()
     return redirect(url_for('main.index'))
 
@@ -827,18 +838,66 @@ def create_initial_admin():
     return "Gateway initialized. Username: admin, Password: ChangeMe123! - PLEASE CHANGE PASSWORD IMMEDIATELY."
 
 @admin_bp.route('/')
+@admin_bp.route('/dashboard')
 @admin_required
 def dashboard():
     from sqlalchemy import func
+    from datetime import datetime
     posts = Post.query.order_by(Post.date_created.desc()).all()
     view_counts = dict(
         db.session.query(PostView.post_id, func.count(PostView.id))
         .group_by(PostView.post_id)
         .all()
     )
+
+    # Determine last login timestamp to calculate new views
+    last_login_time = None
+    last_login_iso = session.get('last_login_time')
+    if last_login_iso:
+        try:
+            last_login_time = datetime.fromisoformat(last_login_iso)
+        except Exception:
+            last_login_time = None
+
+    # Fallback to LoginHistory if not present in session (e.g. session active before this update)
+    if not last_login_time and current_user.is_authenticated:
+        recent_logins = LoginHistory.query.filter_by(
+            user_id=current_user.id,
+            status='success'
+        ).order_by(LoginHistory.timestamp.desc()).limit(2).all()
+
+        if len(recent_logins) >= 2:
+            last_login_time = recent_logins[1].timestamp
+        elif len(recent_logins) == 1:
+            last_login_time = recent_logins[0].timestamp
+
+        if last_login_time:
+            session['last_login_time'] = last_login_time.isoformat()
+
+    new_view_counts = {}
+    if last_login_time:
+        try:
+            new_views_query = (
+                db.session.query(PostView.post_id, func.count(PostView.id))
+                .filter(PostView.timestamp >= last_login_time)
+                .group_by(PostView.post_id)
+                .all()
+            )
+            new_view_counts = dict(new_views_query)
+        except Exception as e:
+            print(f"Error querying new views since last login: {e}")
+            new_view_counts = {}
+
     for post in posts:
         post.view_count = view_counts.get(post.id, 0)
-    return render_template('admin/dashboard.html', posts=posts, noindex=True)
+        post.new_views = new_view_counts.get(post.id, 0)
+
+    return render_template(
+        'admin/dashboard.html',
+        posts=posts,
+        last_login_time=last_login_time,
+        noindex=True
+    )
 
 @admin_bp.route('/post/new', methods=['GET', 'POST'])
 @admin_required

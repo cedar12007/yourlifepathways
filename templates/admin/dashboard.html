@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 
 {% block extra_head_elements %}
-<link rel="stylesheet" href="{{ url_for('static', filename='css/admin.min.css') }}?v=1.4">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/admin.min.css') }}?v=1.5">
 {% endblock %}
 
 {% block content %}
@@ -24,7 +24,15 @@
         <a href="{{ url_for('admin.database_resilience') }}" class="admin-tab">Resilience</a>
     </div>
 
-    <a href="{{ url_for('admin.new_post') }}" class="btn-new"><i class="fa-solid fa-plus"></i> Add New Post</a>
+    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 2em;">
+        <a href="{{ url_for('admin.new_post') }}" class="btn-new" style="margin-bottom: 0 !important;"><i class="fa-solid fa-plus"></i> Add New Post</a>
+        {% if last_login_time %}
+        <div style="font-size: 0.85rem; color: #666; display: inline-flex; align-items: center; gap: 6px; white-space: nowrap;">
+            <i class="fa-solid fa-clock-rotate-left" style="color: #2b6cb0; font-size: 0.85rem;"></i>
+            <span style="font-size: 0.85rem; line-height: 1;">New views since last login: <span class="local-time" data-utc="{{ last_login_time.isoformat() }}" style="font-size: 0.85rem; font-weight: 700; color: #1d3a5e;">{{ last_login_time.strftime('%Y-%m-%d %H:%M') }}</span></span>
+        </div>
+        {% endif %}
+    </div>
 
     <div class="admin-table-wrapper">
         <table class="admin-table">
@@ -34,6 +42,7 @@
                     <th class="sortable">Title</th>
                     <th class="sortable">Category</th>
                     <th class="sortable" style="text-align: center;">Views</th>
+                    <th class="sortable" style="text-align: center;" title="New views since your last login{% if last_login_time %} ({{ last_login_time.strftime('%Y-%m-%d %H:%M') }}){% endif %}">New Views</th>
                     <th class="sortable">Date</th>
                     <th class="sortable">Status</th>
                     <th>Actions</th>
@@ -50,6 +59,15 @@
                         <span style="font-weight: 600; color: #1d3a5e; display: inline-flex; align-items: center; justify-content: center; gap: 5px;">
                             <i class="fa-solid fa-eye" style="color: #7f8c8d; font-size: 0.85em;"></i>{{ post.view_count }}
                         </span>
+                    </td>
+                    <td style="text-align: center;" data-sort="{{ post.new_views }}">
+                        {% if post.new_views and post.new_views > 0 %}
+                        <span class="new-views-badge" style="display: inline-flex; align-items: center; justify-content: center; gap: 4px; color: #2e7d32; font-weight: 700; background: #e8f5e9; padding: 3px 8px; border-radius: 12px; font-size: 0.85rem;" title="{{ post.new_views }} new view{{ 's' if post.new_views != 1 else '' }} since last login">
+                            <i class="fa-solid fa-arrow-up" style="color: #2e7d32; font-size: 0.75em;"></i>+{{ post.new_views }}
+                        </span>
+                        {% else %}
+                        <span style="color: #bbb; font-size: 0.85rem;">—</span>
+                        {% endif %}
                     </td>
                     <td><span class="local-time"
                             data-utc="{{ post.date_created.isoformat() if post.date_created else '' }}"

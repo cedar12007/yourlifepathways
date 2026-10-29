@@ -3,7 +3,7 @@ import re
 from flask import Blueprint, render_template, jsonify, abort, make_response, request, redirect, flash, url_for
 from flask_login import current_user
 
-from models import Post, db, Comment, PostLike, PostShare, CommentLike
+from models import Post, db, Comment, PostLike, PostShare, CommentLike, PostView
 from extensions import executor
 from utils import slugify, verify_recaptcha, send_email_notification, send_comment_like_notification, get_client_ip, vercel_edge_cache
 
@@ -37,24 +37,33 @@ def get_active_posts():
         func.count(Comment.id).label('comments_count')
     ).filter(Comment.is_approved == True, Comment.is_deleted == False).group_by(Comment.post_id).subquery()
 
+    # Subquery for Views
+    views_sub = db.session.query(
+        PostView.post_id,
+        func.count(PostView.id).label('views_count')
+    ).group_by(PostView.post_id).subquery()
+
     # Main Query
     posts = db.session.query(Post, 
                            func.coalesce(likes_sub.c.likes_count, 0).label('num_likes'),
                            func.coalesce(shares_sub.c.shares_count, 0).label('num_shares'),
-                           func.coalesce(comments_sub.c.comments_count, 0).label('num_comments'))\
+                           func.coalesce(comments_sub.c.comments_count, 0).label('num_comments'),
+                           func.coalesce(views_sub.c.views_count, 0).label('num_views'))\
         .outerjoin(likes_sub, Post.id == likes_sub.c.post_id)\
         .outerjoin(shares_sub, Post.id == shares_sub.c.post_id)\
         .outerjoin(comments_sub, Post.id == comments_sub.c.post_id)\
+        .outerjoin(views_sub, Post.id == views_sub.c.post_id)\
         .filter(Post.is_deleted == False)\
         .order_by(Post.date_created.desc())\
         .all()
     
     # Attach the counts to the post objects so templates don't hit the DB
     result = []
-    for post, nl, ns, nc in posts:
+    for post, nl, ns, nc, nv in posts:
         post.num_likes = nl
         post.num_shares = ns
         post.num_comments = nc
+        post.num_views = nv
         result.append(post)
     return result
 
@@ -147,8 +156,10 @@ def view_post(slug):
     approved_count = Comment.query.filter_by(post_id=post.id, is_approved=True, is_deleted=False).count()
     likes_count = PostLike.query.filter_by(post_id=post.id, is_deleted=False).count()
     shares_count = PostShare.query.filter_by(post_id=post.id).count()
+    views_count = PostView.query.filter_by(post_id=post.id).count()
+    post.num_views = views_count
 
-    print(f"Post interaction stats: Likes:{likes_count}, Shares:{shares_count}, Comments:{approved_count}")
+    print(f"Post interaction stats: Likes:{likes_count}, Shares:{shares_count}, Comments:{approved_count}, Views:{views_count}")
 
     # Prepare meta data for SEO
     meta_title = f"{post.title} | YourLifePathways Blog"
@@ -158,7 +169,7 @@ def view_post(slug):
     # Use post's canonical_url if set (for syndicated content), otherwise use our site's URL
     canonical_url = post.canonical_url or f"https://www.yourlifepathways.com/blog/{post.slug}"
 
-    return render_template('blog_detail.html', post=post, comments=comments, approved_count=approved_count, likes_count=likes_count, shares_count=shares_count, is_admin=is_admin(), prev_post=prev_post, next_post=next_post, meta_title=meta_title, meta_description=meta_description, canonical_url=canonical_url)
+    return render_template('blog_detail.html', post=post, comments=comments, approved_count=approved_count, likes_count=likes_count, shares_count=shares_count, views_count=views_count, is_admin=is_admin(), prev_post=prev_post, next_post=next_post, meta_title=meta_title, meta_description=meta_description, canonical_url=canonical_url)
 
 
 @blog.route('/like/<int:post_id>', methods=['POST'])

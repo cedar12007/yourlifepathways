@@ -11,7 +11,7 @@
 {% block twitter_image %}{{ url_for('static', filename='images/blog/' + post.image_file, _external=True) }}{% endblock %}
 
 {% block extra_head_elements %}
-<link rel="stylesheet" href="{{ url_for('static', filename='css/blog.min.css') }}?v=1.1" />
+<link rel="stylesheet" href="{{ url_for('static', filename='css/blog.min.css') }}?v=1.4" />
 
 
 <!-- JSON-LD Structured Data -->
@@ -113,11 +113,14 @@
 </div>
 {% endmacro %}
 
-<nav class="breadcrumb" aria-label="Breadcrumb" style="display: flex; align-items: center;">
-    <ol style="flex: 1;">
+<nav class="breadcrumb" aria-label="Breadcrumb" style="display: flex; align-items: center; justify-content: space-between;">
+    <ol style="flex: 1;" class="desktop-only">
         <li><a href="{{ url_for('blog.list_posts') }}">Blog</a></li>
         <li class="active" aria-current="page"><span>{{ post.title }}</span></li>
     </ol>
+    <a href="{{ url_for('blog.list_posts') }}" class="mobile-back-btn mobile-only">
+        <i class="fa-solid fa-chevron-left"></i> Blog
+    </a>
     <div class="interaction-group">
         <button class="icon-only like-btn" data-id="{{ post.id }}" title="Like this post">
             <i class="fa-regular fa-heart"></i>
@@ -133,6 +136,11 @@
             <i class="fa-solid fa-share-nodes"></i>
             <span class="count">{{ shares_count }}</span>
         </button>
+
+        <span class="icon-only view-stat" style="cursor: default;" title="Views">
+            <i class="fa-regular fa-eye"></i>
+            <span class="count">{{ views_count }}</span>
+        </span>
     </div>
 </nav>
 <div class="centered-nav" style="display: flex; justify-content: center; gap: 40px;">
@@ -184,6 +192,11 @@
                 <i class="fa-solid fa-share-nodes"></i>
                 <span class="count">{{ shares_count }}</span>
             </button>
+
+            <span class="icon-only view-stat" style="cursor: default;" title="Views">
+                <i class="fa-regular fa-eye"></i>
+                <span class="count">{{ views_count }}</span>
+            </span>
         </div>
     </div>
 
