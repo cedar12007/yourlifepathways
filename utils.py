@@ -5,7 +5,10 @@ import ssl
 import certifi
 import requests
 import smtplib
-from redis import Redis
+try:
+    from redis import Redis
+except ImportError:
+    Redis = None
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from flask import request
@@ -436,3 +439,94 @@ def parse_referrer_query(referrer_url):
         return None
     except:
         return None
+
+
+def resolve_referrer(raw_referrer=None, args=None, target_url=None):
+    """
+    Resolves the canonical external referrer source from:
+    1. Query string parameters (ref, i, r, utm_source, utm_medium) from request.args or target_url
+    2. HTTP Referer header (raw_referrer)
+    
+    Keys checked for referral campaign shortcuts: 'ref', 'i', 'r' (case-insensitive).
+    Mapped sources:
+      - 'nac', 'notaicoach', 'not-ai-coach', 'not_ai_coach' -> 'https://notaicoach.substack.com/'
+      - 'ig', 'instagram' -> 'https://instagram.com/'
+      - 'fb', 'facebook' -> 'https://facebook.com/'
+      - 'li', 'linkedin' -> 'https://linkedin.com/'
+      - 'sig', 'email_sig', 'email', 'signature' -> 'referral://email-signature'
+      - 'pfi' -> 'referral://pfi'
+      - Any URL starting with http:// or https:// -> preserved as full URL
+      - Other shortcuts -> 'referral://{r_clean}'
+      - utm_source -> 'social://{utm_source}' (+ '/{utm_medium}' if present)
+    """
+    from urllib.parse import urlparse, parse_qs
+
+    def get_param(source_dict, *keys):
+        if not source_dict:
+            return None
+        # Direct lookup
+        for k in keys:
+            if hasattr(source_dict, 'get'):
+                v = source_dict.get(k)
+                if v:
+                    return v[0] if isinstance(v, list) else v
+        # Case-insensitive scan
+        lower_keys = {k.lower() for k in keys}
+        items = source_dict.items() if hasattr(source_dict, 'items') else []
+        for k, v in items:
+            if k and k.lower() in lower_keys and v:
+                val = v[0] if isinstance(v, list) else v
+                if val:
+                    return str(val).strip()
+        return None
+
+    # Parse query parameters from target_url if available
+    url_params = {}
+    if target_url and '?' in target_url:
+        try:
+            parsed = urlparse(target_url)
+            if parsed.query:
+                url_params = parse_qs(parsed.query)
+        except Exception:
+            pass
+
+    # 1. Check for referral key (order: ref, i, r)
+    r_val = (
+        get_param(args, 'ref', 'i', 'r') or
+        get_param(url_params, 'ref', 'i', 'r')
+    )
+
+    if r_val:
+        r_clean = str(r_val).strip()
+        r_lower = r_clean.lower()
+        if r_lower in ('ig', 'instagram'):
+            return "https://instagram.com/"
+        elif r_lower in ('fb', 'facebook'):
+            return "https://facebook.com/"
+        elif r_lower in ('li', 'linkedin'):
+            return "https://linkedin.com/"
+        elif r_lower in ('nac', 'notaicoach', 'not-ai-coach', 'not_ai_coach'):
+            return "https://notaicoach.substack.com/"
+        elif r_lower in ('sig', 'email_sig', 'email', 'signature'):
+            return "referral://email-signature"
+        elif r_lower == 'pfi':
+            return "referral://pfi"
+        elif r_lower.startswith(('http://', 'https://')):
+            return r_clean
+        else:
+            return f"referral://{r_lower}"
+
+    # 2. Check for UTM campaign tags
+    utm_source = get_param(args, 'utm_source') or get_param(url_params, 'utm_source')
+    utm_medium = get_param(args, 'utm_medium') or get_param(url_params, 'utm_medium')
+    if utm_source:
+        # If we have UTM tags but no external referrer, return synthetic social referrer
+        if not raw_referrer or any(host in raw_referrer for host in ['yourlifepathways.com', 'localhost', '127.0.0.1']):
+            res = f"social://{utm_source}"
+            if utm_medium:
+                res += f"/{utm_medium}"
+            return res
+
+    # 3. Fall back to raw_referrer
+    return raw_referrer
+

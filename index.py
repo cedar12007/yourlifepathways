@@ -153,31 +153,9 @@ def log_visit():
             return
         app._recent_visits[visit_key] = now_ts
         
-        # 3. Enhanced Referrer Logic (Capture UTM and short campaign tags like ?r=ig or ?ref=sig)
-        utm_source = request.args.get('utm_source')
-        utm_medium = request.args.get('utm_medium')
-        r_param = request.args.get('r') or request.args.get('ref')
-        
-        if r_param:
-            r_clean = r_param.lower().strip()
-            if r_clean in ('ig', 'instagram'):
-                referrer = "https://instagram.com/"
-            elif r_clean in ('fb', 'facebook'):
-                referrer = "https://facebook.com/"
-            elif r_clean in ('li', 'linkedin'):
-                referrer = "https://linkedin.com/"
-            elif r_clean in ('sig', 'email_sig', 'email', 'signature'):
-                referrer = "referral://email-signature"
-            elif r_clean == 'pfi':
-                referrer = "referral://pfi"
-            else:
-                referrer = f"referral://{r_clean}"
-        elif utm_source:
-            # If we have UTM tags but no referrer, create a synthetic social referrer
-            if not referrer or any(host in referrer for host in ['yourlifepathways.com', 'localhost', '127.0.0.1']):
-                referrer = f"social://{utm_source}"
-                if utm_medium:
-                    referrer += f"/{utm_medium}"
+        # 3. Enhanced Referrer Logic (Capture ref, i, r, UTM tags, and custom shortcuts like i=nac)
+        from utils import resolve_referrer
+        referrer = resolve_referrer(raw_referrer=referrer, args=request.args, target_url=url)
 
         def save_log_task(app_context, ip, url, ua, endpoint, view_args, referrer):
             from utils import get_ip_location
@@ -303,26 +281,9 @@ def log_event():
     if is_bot(ua):
         return '', 204
     
-    # Enhanced Referrer Logic for events (e.g. LinkedIn scroll, ?r=ig, ?ref=sig)
-    referrer = request.referrer or request.args.get('referrer')
-    utm_source = request.args.get('utm_source')
-    r_param = request.args.get('r') or request.args.get('ref')
-    if r_param:
-        r_clean = r_param.lower().strip()
-        if r_clean in ('ig', 'instagram'):
-            referrer = "https://instagram.com/"
-        elif r_clean in ('fb', 'facebook'):
-            referrer = "https://facebook.com/"
-        elif r_clean in ('li', 'linkedin'):
-            referrer = "https://linkedin.com/"
-        elif r_clean in ('sig', 'email_sig', 'email', 'signature'):
-            referrer = "referral://email-signature"
-        elif r_clean == 'pfi':
-            referrer = "referral://pfi"
-        else:
-            referrer = f"referral://{r_clean}"
-    elif utm_source and (not referrer or any(host in referrer for host in ['yourlifepathways.com', 'localhost', '127.0.0.1'])):
-        referrer = f"social://{utm_source}"
+    # Enhanced Referrer Logic for events (e.g. LinkedIn scroll, ?r=ig, ?ref=sig, ?i=nac)
+    from utils import resolve_referrer
+    referrer = resolve_referrer(raw_referrer=(request.referrer or request.args.get('referrer')), args=request.args, target_url=target_url)
     
     # Run synchronously so Vercel Serverless (AWS Lambda) does not freeze before writing to Supabase
     from utils import get_ip_location
