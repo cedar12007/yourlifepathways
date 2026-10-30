@@ -70,134 +70,137 @@ def log_visit():
             if not os.path.exists(direct_path) and os.path.exists(blog_path):
                 return redirect(f'/static/images/blog/{rel_name}', code=301)
 
-    # 0. Check if logging is enabled via environment variable
-    if os.getenv('TRAFFIC_LOGGING', 'no').lower() != 'yes':
-        return
-
-    # Check session-based exclusion (for users who started with /admin)
-    from flask import session
-    if session.get('skip_tracking'):
-        return
-
-    # 1. Skip static files, favicon, custom logging endpoint, AND authenticated admins
-    if any(request.path.startswith(prefix) for prefix in ['/static', '/favicon.ico', '/log_event']):
-        return
-        
-    # Mark user as admin/exclude if they hit the admin path
-    if request.path.startswith('/admin'):
-        session['skip_tracking'] = True
-        return
-    
-    # Also skip if user is logged in (admin)
-    if current_user.is_authenticated:
-        return
-    
-    # 2. Domain Restriction: ONLY log if accessing these specific domains
-    host = request.host.lower()
-    allowed_domains = ['yourlifepathways.com', 'www.yourlifepathways.com']
-    
-    is_allowed_domain = any(domain in host for domain in allowed_domains)
-    is_local = 'localhost' in host or '127.0.0.1' in host
-    log_local = os.getenv('TRAFFIC_LOGGING_LOCAL', 'no').lower() == 'yes'
-
-    if not is_allowed_domain and not (is_local and log_local):
-        return
-
-    # 2. Get data immediately while request context is available
-    ip = get_client_ip()
-    url = request.url
-    endpoint = request.endpoint
-    view_args = request.view_args.copy() if request.view_args else {}
-    ua = request.headers.get('User-Agent', 'Unknown')
-
-    # 2a. Ignore 404 / Non-existent routes (exploit scanners probing dead paths)
-    if not endpoint:
-        return
-
-    # 2b. Do NOT log bots/scrapers to database (Cloudflare tracks bots at edge)
-    from utils import is_bot
-    if is_bot(ua):
-        return
-
-    # 2c. Ignore exploit scanning query strings, probe signatures, and referral spam
-    probe_signatures = (
-        'robots.txt', 'sitemap.xml', 'ads.txt',
-        'rest_route', '.git', '.env', '.json', '.sql', '.php', 'xmlrpc',
-        'backup', 'wp-', 'well-known', 'eval(', 'base64', 'author=', 'sftp',
-        'step=1', 'step=', 'install.php', 'option=com_', 'passwd', 'import&raw',
-        'feed=rss', 'backlink', 'linkbuilding', 'seochecker', 'dapachecker',
-        '.ssh', 'id_rsa', 'deploy.sh', 'graphql', 'updraftplus', 'core.js',
-        'sppagebuilder', 'livewire', ':8443', ':8880', ':2083', ':2087', ':2096'
-    )
-    req_full = (request.path + '?' + request.query_string.decode('utf-8', 'ignore')).lower()
-    ref_lower = (referrer or '').lower()
-    if any(sig in req_full for sig in probe_signatures) or any(sig in ref_lower for sig in probe_signatures):
-        return
-
-    # 2d. Drop raw IP referrers (e.g. http://172.67.220.28) - automated IP sweeps
-    if ref_lower and re.match(r'^https?://\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}', ref_lower):
-        if '127.0.0.1' not in ref_lower and 'localhost' not in ref_lower:
+    try:
+        # 0. Check if logging is enabled via environment variable
+        if os.getenv('TRAFFIC_LOGGING', 'no').lower() != 'yes':
             return
 
-    # 2e. Deduplicate rapid identical page reloads from same IP within 10 seconds
-    import time
-    if not hasattr(app, '_recent_visits'):
-        app._recent_visits = {}
-    now_ts = time.time()
-    if len(app._recent_visits) > 1000:
-        app._recent_visits = {k: v for k, v in app._recent_visits.items() if now_ts - v < 60}
-    visit_key = (ip, url)
-    if now_ts - app._recent_visits.get(visit_key, 0) < 10:
-        return
-    app._recent_visits[visit_key] = now_ts
-    
-    # 3. Enhanced Referrer Logic (Capture UTM and short campaign tags like ?r=ig or ?ref=sig)
-    referrer = request.referrer or request.args.get('referrer')
-    utm_source = request.args.get('utm_source')
-    utm_medium = request.args.get('utm_medium')
-    r_param = request.args.get('r') or request.args.get('ref')
-    
-    if r_param:
-        r_clean = r_param.lower().strip()
-        if r_clean in ('ig', 'instagram'):
-            referrer = "https://instagram.com/"
-        elif r_clean in ('fb', 'facebook'):
-            referrer = "https://facebook.com/"
-        elif r_clean in ('li', 'linkedin'):
-            referrer = "https://linkedin.com/"
-        elif r_clean in ('sig', 'email_sig', 'email', 'signature'):
-            referrer = "referral://email-signature"
-        elif r_clean == 'pfi':
-            referrer = "referral://pfi"
-        else:
-            referrer = f"referral://{r_clean}"
-    elif utm_source:
-        # If we have UTM tags but no referrer, create a synthetic social referrer
-        if not referrer or any(host in referrer for host in ['yourlifepathways.com', 'localhost', '127.0.0.1']):
-            referrer = f"social://{utm_source}"
-            if utm_medium:
-                referrer += f"/{utm_medium}"
+        # Check session-based exclusion (for users who started with /admin)
+        from flask import session
+        if session.get('skip_tracking'):
+            return
 
-    def save_log_task(app_context, ip, url, ua, endpoint, view_args, referrer):
-        from utils import get_ip_location
+        # 1. Skip static files, favicon, custom logging endpoint, AND authenticated admins
+        if any(request.path.startswith(prefix) for prefix in ['/static', '/favicon.ico', '/log_event']):
+            return
+            
+        # Mark user as admin/exclude if they hit the admin path
+        if request.path.startswith('/admin'):
+            session['skip_tracking'] = True
+            return
         
-        # 1. DO GEOLOCATION FIRST (Slow network I/O)
-        location = get_ip_location(ip)
+        # Also skip if user is logged in (admin)
+        if current_user.is_authenticated:
+            return
         
-        # 2. OPEN DB CONTEXT ONLY FOR THE WRITE (Fast)
-        with app_context:
-            try:
-                # Save general visit
-                visit = SiteVisit(url=url, visitor_ip=ip, visitor_location=location, user_agent=ua, referrer=referrer)
-                db.session.add(visit)
-                
-                db.session.commit()
-            except Exception as e:
-                db.session.rollback()
-                print(f"    - Background logging error: {e}")
+        # 2. Domain Restriction: ONLY log if accessing these specific domains
+        host = request.host.lower()
+        allowed_domains = ['yourlifepathways.com', 'www.yourlifepathways.com']
+        
+        is_allowed_domain = any(domain in host for domain in allowed_domains)
+        is_local = 'localhost' in host or '127.0.0.1' in host
+        log_local = os.getenv('TRAFFIC_LOGGING_LOCAL', 'no').lower() == 'yes'
 
-    # Use a thread pool executor instead of spawning new threads manually
-    executor.submit(save_log_task, app.app_context(), ip, url, ua, endpoint, view_args, referrer)
+        if not is_allowed_domain and not (is_local and log_local):
+            return
+
+        # 2. Get data immediately while request context is available
+        ip = get_client_ip()
+        url = request.url
+        endpoint = request.endpoint
+        view_args = request.view_args.copy() if request.view_args else {}
+        ua = request.headers.get('User-Agent', 'Unknown')
+        referrer = request.referrer or request.args.get('referrer')
+
+        # 2a. Ignore 404 / Non-existent routes (exploit scanners probing dead paths)
+        if not endpoint:
+            return
+
+        # 2b. Do NOT log bots/scrapers to database (Cloudflare tracks bots at edge)
+        from utils import is_bot
+        if is_bot(ua):
+            return
+
+        # 2c. Ignore exploit scanning query strings, probe signatures, and referral spam
+        probe_signatures = (
+            'robots.txt', 'sitemap.xml', 'ads.txt',
+            'rest_route', '.git', '.env', '.json', '.sql', '.php', 'xmlrpc',
+            'backup', 'wp-', 'well-known', 'eval(', 'base64', 'author=', 'sftp',
+            'step=1', 'step=', 'install.php', 'option=com_', 'passwd', 'import&raw',
+            'feed=rss', 'backlink', 'linkbuilding', 'seochecker', 'dapachecker',
+            '.ssh', 'id_rsa', 'deploy.sh', 'graphql', 'updraftplus', 'core.js',
+            'sppagebuilder', 'livewire', ':8443', ':8880', ':2083', ':2087', ':2096'
+        )
+        req_full = (request.path + '?' + request.query_string.decode('utf-8', 'ignore')).lower()
+        ref_lower = (referrer or '').lower()
+        if any(sig in req_full for sig in probe_signatures) or any(sig in ref_lower for sig in probe_signatures):
+            return
+
+        # 2d. Drop raw IP referrers (e.g. http://172.67.220.28) - automated IP sweeps
+        if ref_lower and re.match(r'^https?://\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}', ref_lower):
+            if '127.0.0.1' not in ref_lower and 'localhost' not in ref_lower:
+                return
+
+        # 2e. Deduplicate rapid identical page reloads from same IP within 10 seconds
+        import time
+        if not hasattr(app, '_recent_visits'):
+            app._recent_visits = {}
+        now_ts = time.time()
+        if len(app._recent_visits) > 1000:
+            app._recent_visits = {k: v for k, v in app._recent_visits.items() if now_ts - v < 60}
+        visit_key = (ip, url)
+        if now_ts - app._recent_visits.get(visit_key, 0) < 10:
+            return
+        app._recent_visits[visit_key] = now_ts
+        
+        # 3. Enhanced Referrer Logic (Capture UTM and short campaign tags like ?r=ig or ?ref=sig)
+        utm_source = request.args.get('utm_source')
+        utm_medium = request.args.get('utm_medium')
+        r_param = request.args.get('r') or request.args.get('ref')
+        
+        if r_param:
+            r_clean = r_param.lower().strip()
+            if r_clean in ('ig', 'instagram'):
+                referrer = "https://instagram.com/"
+            elif r_clean in ('fb', 'facebook'):
+                referrer = "https://facebook.com/"
+            elif r_clean in ('li', 'linkedin'):
+                referrer = "https://linkedin.com/"
+            elif r_clean in ('sig', 'email_sig', 'email', 'signature'):
+                referrer = "referral://email-signature"
+            elif r_clean == 'pfi':
+                referrer = "referral://pfi"
+            else:
+                referrer = f"referral://{r_clean}"
+        elif utm_source:
+            # If we have UTM tags but no referrer, create a synthetic social referrer
+            if not referrer or any(host in referrer for host in ['yourlifepathways.com', 'localhost', '127.0.0.1']):
+                referrer = f"social://{utm_source}"
+                if utm_medium:
+                    referrer += f"/{utm_medium}"
+
+        def save_log_task(app_context, ip, url, ua, endpoint, view_args, referrer):
+            from utils import get_ip_location
+            
+            # 1. DO GEOLOCATION FIRST (Slow network I/O)
+            location = get_ip_location(ip)
+            
+            # 2. OPEN DB CONTEXT ONLY FOR THE WRITE (Fast)
+            with app_context:
+                try:
+                    # Save general visit
+                    visit = SiteVisit(url=url, visitor_ip=ip, visitor_location=location, user_agent=ua, referrer=referrer)
+                    db.session.add(visit)
+                    
+                    db.session.commit()
+                except Exception as e:
+                    db.session.rollback()
+                    print(f"    - Background logging error: {e}")
+
+        # Use a thread pool executor instead of spawning new threads manually
+        executor.submit(save_log_task, app.app_context(), ip, url, ua, endpoint, view_args, referrer)
+    except Exception as e:
+        print(f"[log_visit] Error: {e}")
 
 @app.route('/log_event', methods=['GET'])
 def log_event():
