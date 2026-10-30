@@ -219,6 +219,16 @@ def log_event():
     # Also skip if user is logged in (admin) or has the session flag
     from flask import session
     if current_user.is_authenticated or session.get('skip_tracking'):
+        # For blog posts, return live view count so admin UI stays synced without recording an artificial visit
+        blog_post_match = re.search(r'/blog/([^/?#]+)', target_url)
+        if blog_post_match:
+            slug = blog_post_match.group(1).strip('/')
+            if slug and slug != 'blog':
+                from models import Post, PostView
+                post = Post.query.filter_by(slug=slug).first()
+                if post:
+                    current_views_count = PostView.query.filter_by(post_id=post.id).count()
+                    return jsonify({'status': 'ok', 'views': current_views_count})
         return '', 204
     
     # Domain/Local check (match log_visit logic)
@@ -268,6 +278,16 @@ def log_event():
         app._recent_events = {k: v for k, v in app._recent_events.items() if now - v < 60}
     event_key = (ip, target_url)
     if now - app._recent_events.get(event_key, 0) < 10:
+        # If this is a blog post, return current count so UI stays updated even if ping was debounced
+        blog_post_match = re.search(r'/blog/([^/?#]+)', target_url)
+        if blog_post_match:
+            slug = blog_post_match.group(1).strip('/')
+            if slug and slug != 'blog':
+                from models import Post, PostView
+                post = Post.query.filter_by(slug=slug).first()
+                if post:
+                    current_views_count = PostView.query.filter_by(post_id=post.id).count()
+                    return jsonify({'status': 'ok', 'views': current_views_count})
         return '', 204
     app._recent_events[event_key] = now
     

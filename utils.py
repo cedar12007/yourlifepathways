@@ -269,7 +269,7 @@ def is_bot(ua_string):
     if chrome_match:
         try:
             ver = int(chrome_match.group(1))
-            if ver > 135 or ver < 70:
+            if ver > 300 or ver < 70:
                 return True
         except ValueError:
             pass
