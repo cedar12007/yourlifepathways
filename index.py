@@ -216,9 +216,11 @@ def log_event():
         if '127.0.0.1' not in ref_lower and 'localhost' not in ref_lower:
             return '', 204
     
-    # Also skip if user is logged in (admin) or has the session flag
+    # Also skip if user is logged in (admin) or has the session flag (unless test_view=1 is requested for testing)
     from flask import session
-    if current_user.is_authenticated or session.get('skip_tracking'):
+    is_admin_user = current_user.is_authenticated or session.get('skip_tracking')
+    is_test_mode = request.args.get('test_view') == '1' or 'test_view=1' in target_url
+    if is_admin_user and not is_test_mode:
         # For blog posts, return live view count so admin UI stays synced without recording an artificial visit
         blog_post_match = re.search(r'/blog/([^/?#]+)', target_url)
         if blog_post_match:
@@ -344,10 +346,12 @@ def log_event():
             if slug and slug != 'blog':
                 post = Post.query.filter_by(slug=slug).first()
                 if post:
-                    # Avoid duplicate views from same visitor within 10 minutes
+                    # Avoid duplicate views from same visitor within 10 minutes (bypassed in test mode)
                     ten_min_ago = now_dt - timedelta(minutes=10)
-                    already_viewed = PostView.query.filter_by(post_id=post.id, visitor_ip=ip)\
-                                                   .filter(PostView.timestamp > ten_min_ago).first()
+                    already_viewed = False if is_test_mode else (
+                        PostView.query.filter_by(post_id=post.id, visitor_ip=ip)
+                                      .filter(PostView.timestamp > ten_min_ago).first()
+                    )
                     if not already_viewed:
                         p_view = PostView(post_id=post.id, visitor_ip=ip, visitor_location=location, user_agent=ua)
                         db.session.add(p_view)
