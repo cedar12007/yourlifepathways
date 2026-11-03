@@ -2591,3 +2591,209 @@ body.is-navPanel-visible #navPanelClose {
 	flex-shrink: 0;
 	margin-top: 2px;
 }
+
+/* Coaching Details Drawer & Sports Thumbnails */
+.coaching-details-drawer {
+	margin: 1.5em 0;
+	background: #ffffff;
+	border: 1px solid rgba(0, 0, 0, 0.12);
+	border-radius: 12px;
+	padding: 16px 20px;
+	box-shadow: 0 4px 14px rgba(0, 0, 0, 0.05);
+	transition: all 0.3s ease;
+}
+
+.coaching-details-drawer:hover {
+	box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+	border-color: rgba(29, 58, 94, 0.25);
+}
+
+.coaching-details-drawer summary {
+	cursor: pointer;
+	list-style: none;
+	user-select: none;
+	outline: none;
+	padding: 0;
+}
+
+/* Hide native summary markers */
+.coaching-details-drawer summary::-webkit-details-marker {
+	display: none;
+}
+
+.coaching-details-drawer summary::marker {
+	display: none;
+}
+
+.sports-drawer-header {
+	display: flex;
+	align-items: center;
+	gap: 16px;
+	width: 100%;
+}
+
+.sports-thumbnails-preview {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	flex-shrink: 0;
+}
+
+.sports-thumb-wrapper {
+	position: relative;
+	width: 68px;
+	height: 50px;
+	flex-shrink: 0;
+	cursor: pointer;
+}
+
+.sports-thumb-img {
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+	display: block;
+	border-radius: 8px;
+	border: 2px solid #ffffff;
+	box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+	transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.sports-thumb-wrapper:hover .sports-thumb-img {
+	transform: scale(1.06);
+	box-shadow: 0 4px 12px rgba(29, 58, 94, 0.25);
+}
+
+/* Floating Full Picture on Hover */
+.sports-hover-preview {
+	visibility: hidden;
+	opacity: 0;
+	position: absolute;
+	bottom: calc(100% + 14px);
+	left: 50%;
+	transform: translateX(-50%) translateY(8px);
+	width: 320px;
+	max-width: 85vw;
+	background: #ffffff;
+	border-radius: 12px;
+	padding: 6px;
+	box-shadow: 0 16px 36px rgba(0, 0, 0, 0.3);
+	border: 2px solid #ffffff;
+	z-index: 10005;
+	pointer-events: none;
+	transition: opacity 0.25s ease, transform 0.25s ease;
+}
+
+.sports-thumb-wrapper:hover .sports-hover-preview {
+	visibility: visible;
+	opacity: 1;
+	transform: translateX(-50%) translateY(0);
+}
+
+.sports-hover-preview img {
+	width: 100%;
+	height: auto;
+	max-height: 240px;
+	object-fit: cover;
+	border-radius: 8px;
+	display: block;
+}
+
+.sports-hover-caption {
+	display: block;
+	text-align: center;
+	font-size: 0.78em;
+	font-weight: 700;
+	color: #1d3a5e;
+	padding: 6px 4px 2px 4px;
+}
+
+/* Downward arrow indicator for the hover preview */
+.sports-hover-preview:after {
+	content: "";
+	position: absolute;
+	top: 100%;
+	left: 50%;
+	margin-left: -8px;
+	border-width: 8px;
+	border-style: solid;
+	border-color: #ffffff transparent transparent transparent;
+}
+
+@media screen and (max-width: 980px) {
+	.sports-hover-preview {
+		display: none !important;
+	}
+}
+
+.sports-drawer-text {
+	display: flex;
+	flex-direction: column;
+	text-align: left;
+	flex-grow: 1;
+}
+
+.sports-drawer-title {
+	font-weight: 700;
+	color: #1d3a5e;
+	font-size: 1.05em;
+	line-height: 1.3;
+}
+
+.sports-drawer-subtitle {
+	font-size: 0.82em;
+	color: #666666;
+	margin-top: 3px;
+	line-height: 1.3;
+}
+
+.sports-drawer-toggle {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	flex-shrink: 0;
+	color: #1d3a5e;
+	font-size: 0.88em;
+	font-weight: 600;
+	padding: 6px 12px;
+	border-radius: 6px;
+	background: #f0f4f9;
+	transition: background 0.2s ease;
+}
+
+.coaching-details-drawer summary:hover .sports-drawer-toggle {
+	background: #e2ecf7;
+}
+
+.sports-drawer-toggle .toggle-icon {
+	transition: transform 0.3s ease;
+	font-size: 0.85em;
+}
+
+.coaching-details-drawer[open] .sports-drawer-toggle .toggle-icon {
+	transform: rotate(180deg);
+}
+
+.coaching-details-drawer[open] summary {
+	margin-bottom: 16px;
+	border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+	padding-bottom: 14px;
+}
+
+@media screen and (max-width: 680px) {
+	.sports-drawer-header {
+		flex-wrap: wrap;
+		gap: 12px;
+	}
+	.sports-drawer-toggle {
+		width: 100%;
+		justify-content: center;
+		margin-top: 4px;
+	}
+	.sports-thumb-wrapper {
+		width: 58px;
+		height: 44px;
+	}
+	.sports-drawer-title {
+		font-size: 0.98em;
+	}
+}

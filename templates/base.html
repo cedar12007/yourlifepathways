@@ -83,6 +83,7 @@
                         class="scrolly">Overview</a>
                 </li>
                 <li><a href="{{ url_for('main.index') }}#about_me" class="scrolly">About</a></li>
+                <li><a href="{% if request.path == '/' %}#pathways{% else %}{{ url_for('main.index') }}#pathways{% endif %}" class="scrolly">Pathways</a></li>
                 <li><a href="{{ url_for('main.index') }}#community" class="scrolly {% if request.endpoint in ['main.educational_institutions', 'main.non_profits_and_mission_driven_organizations'] %}active{% endif %}">Community</a></li>
                 <li><a href="{{ url_for('main.index') }}#contact" class="scrolly">Contact</a></li>
                 <li>
