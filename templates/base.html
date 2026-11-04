@@ -200,40 +200,35 @@
         <script src="{{ url_for('static', filename='js/modal.min.js') }}" defer></script>
         <script src="{{ url_for('static', filename='js/admin.min.js') }}" defer></script>
         <script src="{{ url_for('static', filename='js/main.min.js') }}?v=2.0" defer></script>
-        <script src="{{ url_for('static', filename='js/telemetry.min.js') }}?v=1.0" defer></script>
+        <script src="{{ url_for('static', filename='js/telemetry.min.js') }}?v=1.1" defer></script>
 
 
     </div>
 
     {% block scripts %}{% endblock %}
 
-    <!-- Google Analytics (async, at bottom) -->
     <script>
-        // Only load Google Analytics if not on localhost
-        if (window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
-            (function() {
-                var script = document.createElement('script');
-                script.async = true;
-                script.src = 'https://www.googletagmanager.com/gtag/js?id=G-RJB6N19SME';
-                document.head.appendChild(script);
-                
-                window.dataLayer = window.dataLayer || [];
-                function gtag() { dataLayer.push(arguments); }
-                gtag('js', new Date());
-                gtag('config', 'G-RJB6N19SME');
-            })();
-        }
+        // If visiting an admin page or using ?skip=1 / ?admin=1 (handy for Incognito), flag this browser so public browsing is never tracked
+        (function() {
+            try {
+                var search = window.location.search;
+                var isExplicitSkip = search.indexOf('skip=1') !== -1 || search.indexOf('admin=1') !== -1;
+                if (window.location.pathname.startsWith('/admin') || isExplicitSkip) {
+                    localStorage.setItem('skip_tracking', 'true');
+                    document.cookie = "skip_tracking=true; path=/; max-age=31536000; SameSite=Lax";
+                } else if (search.indexOf('clear_admin=1') !== -1) {
+                    localStorage.removeItem('skip_tracking');
+                    document.cookie = "skip_tracking=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC; SameSite=Lax";
+                }
+            } catch (e) {}
+        })();
     </script>
 
     {% if scroll_target %}
     <script>
         document.addEventListener("DOMContentLoaded", function () {
-            // Scroll to the target element if it exists
             const target = document.querySelector("{{ scroll_target }}");
             if (target) {
-                // Determine offset: use a fixed value or calculate from nav height
-                // Here we assume a fixed header height of around 80px (desktop) or 100px (mobile)
-                // Adjust this value based on your actual sticky header height
                 const headerOffset = 100;
                 const elementPosition = target.getBoundingClientRect().top;
                 const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
@@ -246,10 +241,42 @@
         });
     </script>
     {% endif %}
-    <!-- Microsoft Clarity (Lazy Loaded) -->
-    <script type="text/javascript">
-        // Only load Clarity if not on localhost
-        if (window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+
+    {% set host_clean = (request.host.split(':')[0] if request.host else '') | lower %}
+    {% set is_prod_domain = host_clean in ['yourlifepathways.com', 'www.yourlifepathways.com'] %}
+    {% set is_admin_context = current_user.is_authenticated or request.path.startswith('/admin') or session.get('skip_tracking') or request.cookies.get('skip_tracking') == 'true' or request.args.get('skip') == '1' or request.args.get('admin') == '1' %}
+    {% if is_prod_domain and not is_admin_context %}
+    <!-- Google Analytics & Microsoft Clarity (Production Only, Excludes Admins & Localhost) -->
+    <script>
+        (function() {
+            try {
+                var host = window.location.hostname.toLowerCase();
+                // 1. Strict production whitelist: only allow official domains (never localhost, 127.0.0.1, 0.0.0.0, LAN IPs, or preview branches)
+                if (host !== 'yourlifepathways.com' && host !== 'www.yourlifepathways.com') return;
+
+                // 2. Exclude /admin paths
+                if (window.location.pathname.toLowerCase().startsWith('/admin')) return;
+
+                // 3. Exclude admin browser (localStorage or cookie flag, or ?skip=1 / ?admin=1 query param)
+                if (window.location.search.indexOf('skip=1') !== -1 || window.location.search.indexOf('admin=1') !== -1) return;
+                if (localStorage.getItem('skip_tracking') === 'true') return;
+                if (document.cookie.indexOf('skip_tracking=true') !== -1) return;
+            } catch (e) {
+                return;
+            }
+
+            // --- Google Analytics (async) ---
+            var gaScript = document.createElement('script');
+            gaScript.async = true;
+            gaScript.src = 'https://www.googletagmanager.com/gtag/js?id=G-RJB6N19SME';
+            document.head.appendChild(gaScript);
+
+            window.dataLayer = window.dataLayer || [];
+            function gtag() { dataLayer.push(arguments); }
+            gtag('js', new Date());
+            gtag('config', 'G-RJB6N19SME');
+
+            // --- Microsoft Clarity (Lazy Loaded) ---
             function loadClarity() {
                 (function (c, l, a, r, i, t, y) {
                     c[a] = c[a] || function () { (c[a].q = c[a].q || []).push(arguments) };
@@ -258,7 +285,6 @@
                 })(window, document, "clarity", "script", "vcuoka7bri");
             }
 
-            // Delay loading until browser is idle to minimize performance impact
             if ('requestIdleCallback' in window) {
                 window.requestIdleCallback(function () {
                     setTimeout(loadClarity, 2000);
@@ -268,8 +294,9 @@
                     setTimeout(loadClarity, 2000);
                 });
             }
-        }
+        })();
     </script>
+    {% endif %}
 
 
     <script>

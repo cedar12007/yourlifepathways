@@ -75,17 +75,17 @@ def log_visit():
         if os.getenv('TRAFFIC_LOGGING', 'no').lower() != 'yes':
             return
 
-        # Check session-based exclusion (for users who started with /admin)
+        # Check session or cookie based exclusion (for users who started with /admin)
         from flask import session
-        if session.get('skip_tracking'):
+        if session.get('skip_tracking') or request.cookies.get('skip_tracking') == 'true':
             return
 
         # 1. Skip static files, favicon, custom logging endpoint, AND authenticated admins
         if any(request.path.startswith(prefix) for prefix in ['/static', '/favicon.ico', '/log_event']):
             return
             
-        # Mark user as admin/exclude if they hit the admin path
-        if request.path.startswith('/admin'):
+        # Mark user as admin/exclude if they hit the admin path or pass ?skip=1 / ?admin=1
+        if request.path.startswith('/admin') or request.args.get('skip') == '1' or request.args.get('admin') == '1':
             session['skip_tracking'] = True
             return
         
@@ -197,9 +197,17 @@ def log_event():
         if '127.0.0.1' not in ref_lower and 'localhost' not in ref_lower:
             return '', 204
     
-    # Also skip if user is logged in (admin) or has the session flag (unless test_view=1 is requested for testing)
+    # Also skip if user is logged in (admin) or has the session/cookie flag (unless test_view=1 is requested for testing)
     from flask import session
-    is_admin_user = current_user.is_authenticated or session.get('skip_tracking')
+    is_admin_user = (
+        current_user.is_authenticated 
+        or session.get('skip_tracking') 
+        or request.cookies.get('skip_tracking') == 'true'
+        or request.args.get('skip') == '1'
+        or request.args.get('admin') == '1'
+        or 'skip=1' in target_url
+        or 'admin=1' in target_url
+    )
     is_test_mode = request.args.get('test_view') == '1' or 'test_view=1' in target_url
     if is_admin_user and not is_test_mode:
         # For blog posts, return live view count so admin UI stays synced without recording an artificial visit

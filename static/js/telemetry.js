@@ -6,7 +6,18 @@
 (function () {
     // Only track if running in browser and not inside an iframe or admin dashboard
     if (typeof window === 'undefined' || window.self !== window.top) return;
+
+    // Strict production domain check: do not track localhost, 127.0.0.1, LAN IPs, or preview environments
+    var host = window.location.hostname.toLowerCase();
+    if (host !== 'yourlifepathways.com' && host !== 'www.yourlifepathways.com') return;
+
+    // Do not track admin routes
     if (window.location.pathname.startsWith('/admin')) return;
+
+    // Do not track admin browser
+    try {
+        if (localStorage.getItem('skip_tracking') === 'true' || document.cookie.indexOf('skip_tracking=true') !== -1) return;
+    } catch (e) {}
 
     var maxScrollDepth = 0;
     var currentSection = null;
@@ -127,6 +138,8 @@
     document.addEventListener('visibilitychange', function () {
         if (document.visibilityState === 'hidden') {
             flushTelemetry(true);
+        } else if (document.visibilityState === 'visible') {
+            sectionStartTime = Date.now();
         }
     });
 
