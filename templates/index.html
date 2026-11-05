@@ -1,6 +1,72 @@
 {% extends "base.html" %}
 
 {% block extra_head_elements %}
+<style>
+.executive-spotlight-card {
+	background: linear-gradient(135deg, #f8fafc 0%, #ffffff 100%);
+	border: 1px solid #e2e8f0;
+	border-left: 5px solid #1d3a5e;
+	border-radius: 12px;
+	box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+	padding: 2.2em 2em;
+	max-width: 860px;
+	margin: 0 auto;
+}
+.executive-spotlight-card blockquote {
+	font-size: 1.1em;
+	line-height: 1.6;
+	border-left: none;
+	margin: 0 0 1.25em 0;
+	font-style: italic;
+	color: #334155;
+	padding: 0;
+}
+@media screen and (max-width: 768px) {
+	#spotlight {
+		margin: 2em 0 !important;
+	}
+	.executive-spotlight-card {
+		padding: 1.25em 1.1em !important;
+		border-left-width: 4px !important;
+		border-radius: 8px !important;
+	}
+	.executive-spotlight-card blockquote {
+		font-size: 0.95em !important;
+		line-height: 1.45 !important;
+		margin-bottom: 1em !important;
+	}
+	.spotlight-author-wrap {
+		flex-direction: column !important;
+		align-items: flex-start !important;
+		gap: 12px !important;
+	}
+	.spotlight-cta-btn {
+		width: 100% !important;
+		text-align: center !important;
+	}
+	.spotlight-cta-btn a {
+		width: 100% !important;
+		display: block !important;
+	}
+	.spotlight-avatar {
+		width: 64px !important;
+		height: 64px !important;
+	}
+}
+
+#contact {
+	margin-top: 4em !important;
+	padding-top: 2.5em !important;
+	border-top: 1px solid #e2e8f0 !important;
+}
+
+@media screen and (max-width: 768px) {
+	#contact {
+		margin-top: 2.5em !important;
+		padding-top: 1.5em !important;
+	}
+}
+</style>
 {% endblock %}
 
 
@@ -55,24 +121,13 @@
 				<h2>About Me</h2>
 			</header>
 			<p>
-				For over 25 years, I have worked in companies spanning from startups and education technology to
-				consulting and large multinational software companies. With over two decades of experience as a leader,
-				managing teams of upwards of 40 employees, and working directly with C-level executives, I have
-				acquired a keen awareness of what it takes to grow and achieve career goals at every level of an
-				organization.
-			</p>
-			<p>As the head of a global platform engineering organization at SAP, I lead teams building highly-secure
-				cloud platforms for the world's most regulated industries. Beyond the technology, I am deeply committed
-				to the professional development of our talent—mentoring everyone from interns and early-career
-				individuals to experienced professionals and leaders. In
-				parallel, I serve as an <b>SAP Global Coach</b>, helping individuals navigate and scale their own
-				professional journeys.
+				For over 25 years, my career has bridged technology, organizational leadership, and executive strategy. My background spans fast-growth startups and tech consulting to leadership within major multinational software enterprises. From collaborating with C-suite leaders to guiding global teams, I know firsthand what it takes to scale an organization, navigate corporate dynamics, and perform under high-stakes pressure.
 			</p>
 			<p>
-				As a father of three, a long-time youth sports coach, and a Big Brothers Big Sisters volunteer,
-				I’ve spent much of my life helping young people find their footing. Whether it's on a court or in an
-				office, my goal is the same: to help someone see their own potential and then give them the tools to
-				reach it.
+				As the head of a global platform engineering organization at SAP, I lead teams building highly-secure cloud platforms for the world's most regulated industries. Beyond technology, I am deeply committed to developing high-impact talent and leadership. In parallel, I serve as an <b>SAP Global Coach</b>, helping leaders, managers, and growth-minded professionals navigate organizational complexity and scale their impact.
+			</p>
+			<p>
+				As a father of three, a long-time youth sports coach, and a Big Brothers Big Sisters volunteer, I’ve always been drawn to helping people grow. Whether coaching on the court or partnering with leaders in an office, the underlying mission is the same: helping you recognize your true potential, build resilience, and develop the tools to reach it.
 			</p>
 
 			<div style="margin-bottom: 0.5em; text-align: left; font-size: .8em;">
@@ -236,31 +291,31 @@
 
 <!-- Executive Spotlight Card -->
 <section id="spotlight" class="main" style="margin: 3.5em 0; padding-top: 0;">
-	<div style="background: linear-gradient(135deg, #f8fafc 0%, #ffffff 100%); border: 1px solid #e2e8f0; border-left: 5px solid #1d3a5e; border-radius: 12px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05); padding: 2.5em 2.2em; max-width: 860px; margin: 0 auto;">
+	<div class="executive-spotlight-card">
 		
 		<!-- Header Tag -->
-		<div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; margin-bottom: 1.2em; gap: 8px;">
+		<div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; margin-bottom: 1em; gap: 8px;">
 			<span style="font-size: 0.75em; text-transform: uppercase; letter-spacing: 2px; color: #1d3a5e; font-weight: 700; background: #e0e7ff; padding: 4px 10px; border-radius: 4px;">
 				Executive Spotlight
 			</span>
 		</div>
 
 		<!-- Quote -->
-		<blockquote style="font-size: 1.15em; line-height: 1.75; border-left: none; margin: 0 0 1.5em 0; font-style: italic; color: #334155; padding: 0;">
-			“Every session with Erez pushes me to think more critically and intentionally about our future. His coaching has helped me connect our immediate need for capital with the planning, staffing, and governance needed to support sustainable growth.”
+		<blockquote>
+			“Every session with Erez pushes me to think more critically and intentionally about H.O.P.E.’s future. His coaching has helped me connect our immediate need for capital with the planning, staffing, and governance needed to support sustainable growth.”
 		</blockquote>
 
 		<!-- Author Details & CTA -->
-		<div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px; padding-top: 1.2em; border-top: 1px solid #e2e8f0;">
-			<div style="display: flex; align-items: center; gap: 14px;">
-				<img src="{{ url_for('static', filename='images/donna_hurley.png') }}" alt="Donna B. Hurley, CEO of H.O.P.E." style="width: 60px; height: 60px; border-radius: 50%; object-fit: cover; border: 2px solid #cbd5e1; box-shadow: 0 2px 6px rgba(0,0,0,0.08); flex-shrink: 0;">
+		<div class="spotlight-author-wrap" style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px; padding-top: 1.2em; border-top: 1px solid #e2e8f0;">
+			<div style="display: flex; align-items: center; gap: 16px;">
+				<img src="{{ url_for('static', filename='images/donna_hurley.png') }}" alt="Donna B. Hurley, CEO of H.O.P.E." class="spotlight-avatar" style="width: 74px; height: 74px; border-radius: 50%; object-fit: cover; border: 2.5px solid #cbd5e1; box-shadow: 0 2px 8px rgba(0,0,0,0.1); flex-shrink: 0;">
 				<div>
-					<strong style="color: #1d3a5e; font-size: 1.05em; display: block; line-height: 1.2;">Donna B. Hurley</strong>
-					<span style="color: #475569; font-size: 0.9em; display: block; margin-top: 2px;">President &amp; CEO, Housing Options &amp; Planning Enterprises, Inc. (H.O.P.E.)</span>
-					<span style="color: #94a3b8; font-size: 0.8em; display: block;">HUD-Approved Housing Counseling Agency &bull; Washington DC Metro Area</span>
+					<strong style="color: #1d3a5e; font-size: 1.05em; display: block; line-height: 1.25;">Donna B. Hurley</strong>
+					<span style="color: #475569; font-size: 0.88em; display: block; margin-top: 3px; line-height: 1.35;">President &amp; CEO, Housing Options &amp; Planning Enterprises, Inc. (H.O.P.E.)</span>
+					<span style="color: #94a3b8; font-size: 0.8em; display: block; margin-top: 2px; line-height: 1.3;">HUD-Approved Housing Counseling Agency &bull; Washington DC Metro Area</span>
 				</div>
 			</div>
-			<div>
+			<div class="spotlight-cta-btn">
 				<a href="{{ url_for('main.non_profits_and_mission_driven_organizations') }}#impact-story" class="button small">Read Impact Story</a>
 			</div>
 		</div>
@@ -328,7 +383,7 @@
 			Volunteerism</h3>
 	</header>
 
-	<p><strong>Youth Sports Coaching:</strong></p>
+	<p><strong>Youth Athletics &amp; Mentorship:</strong></p>
 	<p>I've spent over a decade coaching youth sports, including <a href="#" id="soccer-coaching-link"
 			class="link-preview">soccer<span class="thumbnail-preview"><img
 					src="{{ url_for('static', filename='images/soccer_coaching.jpg') }}"
@@ -336,11 +391,8 @@
 			class="link-preview">volleyball<span class="thumbnail-preview"><img
 					src="{{ url_for('static', filename='images/volleyball_coaching.jpeg') }}"
 					alt="Volleyball Coaching"></span></a> from elementary through high school.
-		While it began as a once-in-a-lifetime opportunity to share unique high-pressure and social settings with my children,
-		my passion quickly expanded far beyond being a "parent coach." Today, I coach JV boys volleyball at a local high school—working
-		with student-athletes in a competitive interscholastic environment to develop not just their athletic skills, but their
-		resilience, communication, leadership, and sportsmanship. Whether on the court or in an office setting, the underlying
-		mission is the same: helping individuals recognize their potential and giving them the tools to reach it.</p>
+		While it began as an opportunity to share unique settings with my children, my passion quickly expanded far beyond being a "parent coach."</p>
+	<p>Today, I coach JV boys volleyball at a local high school. While athletic coaching involves drills and tactics, my true passion has always been the mindset: developing resilience under pressure, building trust within a team, and helping individuals discover what they are capable of. Whether on the court or in an executive setting, the underlying mission is the same: helping you recognize your true potential and giving you the tools to reach it.</p>
 
 	<!-- Soccer Coaching Modal -->
 	<div id="soccerCoachingModal" class="modal">
@@ -634,10 +686,9 @@ I especially appreciated the personalized coaching and expert guidance. Thanks t
 			<input type="email" id="email" name="email" placeholder="Email (Required)" required>
 
 			<label for="message">Message</label>
-			<textarea id="message" name="message" placeholder="Message (Required)" rows="5" required></textarea>
+			<textarea id="message" name="message" placeholder="Message (Required)" rows="5" required style="margin-bottom: 1.25em;"></textarea>
 
-			
-			<button type="submit" id="submit_btn">Submit</button>
+			<button type="submit" id="submit_btn" style="margin-top: 0.5em;">Submit</button>
 		</form>
 
 
