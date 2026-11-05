@@ -235,7 +235,39 @@
 	</div>
 </section>
 
+<!-- Executive Spotlight Card -->
+<section id="spotlight" class="main" style="margin: 3.5em 0; padding-top: 0;">
+	<div style="background: linear-gradient(135deg, #f8fafc 0%, #ffffff 100%); border: 1px solid #e2e8f0; border-left: 5px solid #1d3a5e; border-radius: 12px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05); padding: 2.5em 2.2em; max-width: 860px; margin: 0 auto;">
+		
+		<!-- Header Tag -->
+		<div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; margin-bottom: 1.2em; gap: 8px;">
+			<span style="font-size: 0.75em; text-transform: uppercase; letter-spacing: 2px; color: #1d3a5e; font-weight: 700; background: #e0e7ff; padding: 4px 10px; border-radius: 4px;">
+				Executive Spotlight
+			</span>
+		</div>
 
+		<!-- Quote -->
+		<blockquote style="font-size: 1.15em; line-height: 1.75; border-left: none; margin: 0 0 1.5em 0; font-style: italic; color: #334155; padding: 0;">
+			“Every session with Erez pushes me to think more critically and intentionally about our future. His coaching has helped me connect our immediate need for capital with the planning, staffing, and governance needed to support sustainable growth.”
+		</blockquote>
+
+		<!-- Author Details & CTA -->
+		<div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px; padding-top: 1.2em; border-top: 1px solid #e2e8f0;">
+			<div style="display: flex; align-items: center; gap: 14px;">
+				<img src="{{ url_for('static', filename='images/donna_hurley.png') }}" alt="Donna B. Hurley, CEO of H.O.P.E." style="width: 60px; height: 60px; border-radius: 50%; object-fit: cover; border: 2px solid #cbd5e1; box-shadow: 0 2px 6px rgba(0,0,0,0.08); flex-shrink: 0;">
+				<div>
+					<strong style="color: #1d3a5e; font-size: 1.05em; display: block; line-height: 1.2;">Donna B. Hurley</strong>
+					<span style="color: #475569; font-size: 0.9em; display: block; margin-top: 2px;">President &amp; CEO, Housing Options &amp; Planning Enterprises, Inc. (H.O.P.E.)</span>
+					<span style="color: #94a3b8; font-size: 0.8em; display: block;">HUD-Approved Housing Counseling Agency &bull; Washington DC Metro Area</span>
+				</div>
+			</div>
+			<div>
+				<a href="{{ url_for('main.non_profits_and_mission_driven_organizations') }}#impact-story" class="button small">Read Impact Story</a>
+			</div>
+		</div>
+
+	</div>
+</section>
 
 <!-- Community Section -->
 <section id="community" class="main">
