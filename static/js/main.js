@@ -792,6 +792,32 @@ $(document).ready(function () {
 		$navButton.hide();
 	});
 
+	// Track CTA and key internal link clicks (Google Analytics & internal traffic logger)
+	$(document).on('click', 'a[data-track], .spotlight-cta-btn a, .cta-flow', function () {
+		var $el = $(this);
+		var trackName = $el.attr('data-track') || $el.text().trim().toLowerCase().replace(/[^a-z0-9]+/g, '_');
+		var href = $el.attr('href') || '';
+		
+		// 1. Google Analytics (GA4) Event
+		if (typeof gtag === 'function') {
+			gtag('event', 'cta_click', {
+				'cta_name': trackName,
+				'link_url': href,
+				'link_text': $el.text().trim()
+			});
+		}
+		
+		// 2. Internal traffic logger
+		if (href && href !== '#') {
+			var eventUrl = window.location.origin + '/cta/' + encodeURIComponent(trackName);
+			if (navigator.sendBeacon) {
+				navigator.sendBeacon('/log_event?url=' + encodeURIComponent(eventUrl) + '&_cb=' + Date.now());
+			} else {
+				fetch('/log_event?url=' + encodeURIComponent(eventUrl) + '&_cb=' + Date.now(), { keepalive: true }).catch(function () {});
+			}
+		}
+	});
+
 	// Track anchor link clicks for traffic logs
 	$('a[href^="#"]').on('click', function () {
 		var href = $(this).attr('href');

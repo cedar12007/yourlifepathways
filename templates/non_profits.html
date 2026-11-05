@@ -2,6 +2,9 @@
 
 {% block extra_head_elements %}
 <style>
+#impact-story {
+	scroll-margin-top: 130px !important;
+}
 .executive-spotlight-card {
 	background: linear-gradient(135deg, #f8fafc 0%, #ffffff 100%);
 	border: 1px solid #e2e8f0;
@@ -31,6 +34,9 @@
 	margin-bottom: 0 !important;
 }
 @media screen and (max-width: 768px) {
+	#impact-story {
+		scroll-margin-top: 85px !important;
+	}
 	.executive-spotlight-card {
 		padding: 1.25em 1.1em !important;
 		margin: 1.75em 0 !important;
@@ -82,43 +88,49 @@ non-profit and Mission-Driven organizations and leaders in the Washington DC Met
 		<img src="{{ url_for('static', filename='images/mission_oriented_orgs_logo.png') }}" alt="Mission Oriented Orgs Logo" style="position: absolute; right: 0; top: 50%; transform: translateY(-50%); max-width: 100px; height: auto; border-radius: 8px;" />
 	</header>
 	<div class="content">
-		<h2>Community-rooted, empathetic, and impact-driven.</h2>
-		<div class="highlight-box">
-			I am currently offering a limited number of pro-bono 'Strategic Leadership Sessions' (3 sessions) to local
-			non-profit and mission-driven organizations and leaders in the Washington DC Metro area. My goal is to
-			support
-			the DC community while expanding my
-			portfolio in the
-			mission-driven sector.
+		<h2 style="font-size: 1.35em; color: #1d3a5e; margin: 0 0 1.25em 0; line-height: 1.3;">Community-rooted, empathetic, and impact-driven.</h2>
+		
+		<div style="background: #f8fafc; border: 1px solid #e2e8f0; border-left: 4px solid #1d3a5e; border-radius: 10px; padding: 1.5em 1.75em; margin-bottom: 2.25em; line-height: 1.7; color: #334155; box-shadow: 0 2px 10px rgba(0,0,0,0.03);">
+			<div style="font-size: 0.75em; text-transform: uppercase; letter-spacing: 1.5px; font-weight: 700; color: #1d3a5e; margin-bottom: 0.6em;">
+				Pro-Bono Initiative
+			</div>
+			<p style="margin: 0; line-height: 1.7;">
+				I am currently offering a limited number of pro-bono 'Strategic Leadership Sessions' (3 sessions) to local
+				non-profit and mission-driven organizations and leaders in the Washington DC Metro area. My goal is to
+				support the DC community while expanding my portfolio in the mission-driven sector.
+			</p>
 		</div>
-		<p>
+
+		<p style="line-height: 1.75; margin-bottom: 1.5em;">
 			Focusing primarily on the Washington DC Metro area, I aim to empower those who dedicate their lives to
 			helping others. In the non-profit and mission-driven sector, leadership requires a unique blend of empathy
-			and strategic
-			foresight. I provide an intentional space for mission-driven leaders to unpack organizational challenges,
+			and strategic foresight. I provide an intentional space for mission-driven leaders to unpack organizational challenges,
 			build effective leadership habits, and scale their impact.
 		</p>
-		<p>
+		<p style="line-height: 1.75; margin-bottom: 2.5em;">
 			These strategic leadership sessions are constructed to address the real-world complexities non-profit
 			leaders face daily—from board management and resource limitations to team motivation and personal burnout.
 		</p>
 
-		<hr>
-		<h3>Structure of the 3 Strategic Leadership Sessions</h3>
-		<p>The engagement is structured to deliver immediate, practical value to mission-driven leadership:</p>
-		<ul>
-			<li><strong>Targeted Objectives:</strong> By the end of our 3 sessions, you will walk away with a clear
+		<hr style="margin: 3em 0 2.5em 0; border: none; border-top: 1px solid #e2e8f0;">
+
+		<h3 style="margin-bottom: 0.8em; color: #1d3a5e;">Structure of the 3 Strategic Leadership Sessions</h3>
+		<p style="margin-bottom: 1.5em; line-height: 1.7;">The engagement is structured to deliver immediate, practical value to mission-driven leadership:</p>
+		<ul style="padding-left: 1.5em; margin-bottom: 2.5em; line-height: 1.7;">
+			<li style="margin-bottom: 1.25em;"><strong>Targeted Objectives:</strong> By the end of our 3 sessions, you will walk away with a clear
 				90-day action plan addressing your most pressing leadership challenge.</li>
-			<li><strong>Executive Insight:</strong> We will tackle topics such as effective board communication,
+			<li style="margin-bottom: 1.25em;"><strong>Executive Insight:</strong> We will tackle topics such as effective board communication,
 				retaining top talent on a budget, and avoiding leader burnout.</li>
-			<li><strong>Team Workshops:</strong> Beyond one-on-one sessions, I am available to host "Strategic
+			<li style="margin-bottom: 0;"><strong>Team Workshops:</strong> Beyond one-on-one sessions, I am available to host "Strategic
 				Leadership" lunch-and-learns for your broader team, offering impactful insights to multiple members of
 				your organization simultaneously.</li>
 		</ul>
 
-		<p><i>As part of this pro-bono initiative, my only request is a professional testimonial or the opportunity to
-				develop a brief case study detailing our success, allowing us to showcase the value of our work to the
-				broader community.</i></p>
+		<p style="margin: 2.5em 0 2em 0; font-style: italic; line-height: 1.65; color: #475569; padding: 1.1em 1.35em; background: #fafbfc; border-radius: 8px; border: 1px dashed #cbd5e1;">
+			As part of this pro-bono initiative, my only request is a professional testimonial or the opportunity to
+			develop a brief case study detailing our partnership, allowing me to showcase the value of this work to the
+			broader community.
+		</p>
 
 		<!-- Leadership Impact Story -->
 		<div id="impact-story" class="executive-spotlight-card">
@@ -127,10 +139,17 @@ non-profit and Mission-Driven organizations and leaders in the Washington DC Met
 				<span style="font-size: 0.8em; color: #1d3a5e; text-transform: uppercase; letter-spacing: 1px; font-weight: 700; background: #e0e7ff; padding: 4px 10px; border-radius: 4px;">Executive Case Example</span>
 			</div>
 
-			<p style="color: #4b5563; font-size: 0.95em; margin-bottom: 1.25em;">
-				<strong>Housing Options &amp; Planning Enterprises, Inc. (H.O.P.E.)</strong> is a nonprofit, HUD-approved housing counseling agency founded in 2005 serving the Washington DC metropolitan area.
-			</p>
+			<!-- Organization Context Inset -->
+			<div style="background: #f1f5f9; border-radius: 8px; border-left: 3px solid #94a3b8; padding: 1.1em 1.35em; margin-bottom: 1.75em;">
+				<div style="font-size: 0.72em; text-transform: uppercase; letter-spacing: 1.5px; font-weight: 700; color: #64748b; margin-bottom: 0.4em;">
+					About the Organization
+				</div>
+				<p style="color: #475569; font-size: 0.9em; line-height: 1.65; margin: 0;">
+					Founded in 2005, <strong>Housing Options &amp; Planning Enterprises, Inc. (H.O.P.E.)</strong> is a nonprofit, HUD-approved housing counseling agency serving the Washington DC metropolitan area. Their mission is to promote equal access to housing for all through counseling, education, advocacy, and community revitalization—fostering self-sufficiency, sustainable housing, and economic development.
+				</p>
+			</div>
 
+			<!-- Testimonial Quote -->
 			<blockquote>
 				<p>
 					“Erez’s coaching style encourages thoughtful reflection. He asks questions that challenge me to examine issues more deeply, develop solutions, and identify practical next steps. Our conversations helped me recognize that raising capital required a broader look at H.O.P.E.’s strategy and organizational structure.”
