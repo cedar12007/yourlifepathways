@@ -2797,3 +2797,380 @@ body.is-navPanel-visible #navPanelClose {
 		font-size: 0.98em;
 	}
 }
+
+/* ==========================================================================
+   Sticky Contact Widget
+   ========================================================================== */
+
+.sticky-contact-widget {
+	position: fixed;
+	bottom: 24px;
+	right: 24px;
+	z-index: 9999;
+	font-family: "Lato", sans-serif;
+}
+
+.sticky-contact-btn-wrapper {
+	position: relative;
+	display: inline-flex;
+	align-items: center;
+}
+
+/* Dismiss badge on top right of pill */
+button.sticky-contact-dismiss-badge,
+.sticky-contact-dismiss-badge {
+	all: unset !important;
+	box-sizing: border-box !important;
+	position: absolute !important;
+	top: -5px !important;
+	right: -5px !important;
+	z-index: 20 !important;
+	width: 20px !important;
+	height: 20px !important;
+	min-width: 0 !important;
+	max-width: 20px !important;
+	min-height: 0 !important;
+	max-height: 20px !important;
+	border-radius: 50% !important;
+	background: #ffffff !important;
+	color: #1d3a5e !important;
+	border: 1.5px solid #1d3a5e !important;
+	box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25) !important;
+	display: inline-flex !important;
+	align-items: center !important;
+	justify-content: center !important;
+	text-align: center !important;
+	font-size: 0.95rem !important;
+	font-weight: 700 !important;
+	line-height: 1 !important;
+	cursor: pointer !important;
+	padding: 0 !important;
+	margin: 0 !important;
+	transition: all 0.2s ease !important;
+}
+
+button.sticky-contact-dismiss-badge:hover,
+.sticky-contact-dismiss-badge:hover {
+	background: #f1f5f9 !important;
+	color: #ef4444 !important;
+	border-color: #ef4444 !important;
+	transform: scale(1.15) !important;
+}
+
+/* Floating Trigger Button */
+.sticky-contact-btn {
+	display: inline-flex;
+	align-items: center;
+	gap: 10px;
+	height: 48px;
+	padding: 0 20px 0 16px;
+	border-radius: 9999px;
+	background: #1d3a5e !important;
+	color: #ffffff !important;
+	border: 1.5px solid #8cc9f0 !important;
+	box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35), 0 0 0 1px rgba(255, 255, 255, 0.2);
+	cursor: pointer;
+	text-decoration: none;
+	font-weight: 700;
+	font-size: 0.95rem;
+	letter-spacing: 0.02em;
+	transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+	position: relative;
+	user-select: none;
+	-webkit-tap-highlight-color: transparent;
+}
+
+.sticky-contact-btn:hover {
+	background: #254975 !important;
+	border-color: #ffffff !important;
+	transform: translateY(-2px);
+	box-shadow: 0 6px 24px rgba(0, 0, 0, 0.45), 0 0 0 2px #8cc9f0;
+}
+
+.sticky-contact-btn:active {
+	transform: translateY(0);
+	box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+}
+
+.sticky-contact-btn .sticky-contact-btn-text {
+	color: #ffffff !important;
+	font-weight: 700 !important;
+	font-size: 0.95rem;
+	display: inline-block;
+}
+
+.sticky-contact-btn-icon {
+	position: relative;
+	width: 22px;
+	height: 22px;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	font-size: 1.15rem;
+	color: #8cc9f0 !important;
+}
+
+.sticky-contact-btn-icon i {
+	color: #8cc9f0 !important;
+}
+
+.sticky-contact-btn:hover .sticky-contact-btn-icon i {
+	color: #ffffff !important;
+}
+
+.sticky-contact-btn:hover .sticky-contact-btn-text {
+	color: #ffffff !important;
+}
+
+.sticky-contact-btn-icon .icon-open,
+.sticky-contact-btn-icon .icon-close {
+	position: absolute;
+	transition: opacity 0.2s ease, transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.sticky-contact-btn-icon .icon-close {
+	opacity: 0;
+	transform: rotate(-90deg) scale(0.6);
+	color: #ffffff !important;
+}
+
+.sticky-contact-btn[aria-expanded="true"] .sticky-contact-btn-icon .icon-open {
+	opacity: 0;
+	transform: rotate(90deg) scale(0.6);
+}
+
+.sticky-contact-btn[aria-expanded="true"] .sticky-contact-btn-icon .icon-close {
+	opacity: 1;
+	transform: rotate(0deg) scale(1);
+	color: #ffffff !important;
+}
+
+/* Popover Contact Card */
+.sticky-contact-card {
+	position: absolute;
+	bottom: calc(100% + 14px);
+	right: 0;
+	width: 336px;
+	max-width: calc(100vw - 36px);
+	background: #ffffff;
+	border-radius: 16px;
+	border: 1px solid rgba(0, 0, 0, 0.1);
+	box-shadow: 0 16px 44px rgba(0, 0, 0, 0.25), 0 3px 12px rgba(0, 0, 0, 0.08);
+	overflow: hidden;
+	opacity: 0;
+	visibility: hidden;
+	transform: translateY(12px) scale(0.96);
+	transform-origin: bottom right;
+	transition: opacity 0.25s cubic-bezier(0.16, 1, 0.3, 1),
+	            transform 0.25s cubic-bezier(0.16, 1, 0.3, 1),
+	            visibility 0.25s;
+	pointer-events: none;
+}
+
+.sticky-contact-card.is-active {
+	opacity: 1;
+	visibility: visible;
+	transform: translateY(0) scale(1);
+	pointer-events: auto;
+}
+
+.sticky-contact-header {
+	display: flex;
+	align-items: flex-start;
+	justify-content: space-between;
+	padding: 16px 18px 12px 18px;
+	background: #ffffff;
+	border-bottom: 1px solid #f1f5f9;
+	border-top: 3px solid #8cc9f0;
+}
+
+.sticky-contact-header-text {
+	flex-grow: 1;
+	padding-right: 12px;
+}
+
+.sticky-contact-title {
+	margin: 0;
+	font-size: 1.15rem;
+	font-weight: 700;
+	color: #1d3a5e !important;
+	letter-spacing: 0.01em;
+	line-height: 1.25;
+}
+
+.sticky-contact-subtitle {
+	margin: 4px 0 0 0;
+	font-size: 0.82rem;
+	color: #64748b !important;
+	line-height: 1.4;
+}
+
+button.sticky-contact-close,
+.sticky-contact-close {
+	all: unset !important;
+	box-sizing: border-box !important;
+	width: 28px !important;
+	height: 28px !important;
+	min-width: 0 !important;
+	max-width: 28px !important;
+	min-height: 0 !important;
+	max-height: 28px !important;
+	padding: 0 !important;
+	margin: 0 !important;
+	line-height: 26px !important;
+	border-radius: 50% !important;
+	background: #f1f5f9 !important;
+	color: #64748b !important;
+	display: inline-flex !important;
+	align-items: center !important;
+	justify-content: center !important;
+	text-align: center !important;
+	cursor: pointer !important;
+	font-size: 1.25rem !important;
+	font-weight: 400 !important;
+	border: none !important;
+	box-shadow: none !important;
+	flex-shrink: 0 !important;
+	transition: all 0.15s ease !important;
+}
+
+button.sticky-contact-close:hover,
+.sticky-contact-close:hover {
+	color: #1d3a5e !important;
+	background: #e2e8f0 !important;
+	transform: scale(1.1);
+}
+
+.sticky-contact-body {
+	padding: 10px 12px;
+	display: flex;
+	flex-direction: column;
+	gap: 6px;
+	background: #ffffff;
+}
+
+.sticky-contact-action {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	padding: 10px 12px;
+	border-radius: 10px;
+	text-decoration: none;
+	color: #1d3a5e !important;
+	background: #f7fafc;
+	border: 1px solid #edf2f7;
+	transition: all 0.18s ease;
+	cursor: pointer;
+}
+
+.sticky-contact-action:hover {
+	background: #ebf4fc;
+	border-color: #8cc9f0;
+	transform: translateX(2px);
+}
+
+.sticky-contact-icon {
+	width: 36px;
+	height: 36px;
+	border-radius: 50%;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	font-size: 0.95rem;
+	flex-shrink: 0;
+	transition: transform 0.2s ease;
+}
+
+.sticky-contact-action:hover .sticky-contact-icon {
+	transform: scale(1.08);
+}
+
+.sticky-contact-icon.message-icon {
+	background: #e1effa;
+	color: #1d3a5e !important;
+}
+
+.sticky-contact-icon.call-icon {
+	background: #e6f7ec;
+	color: #16a34a !important;
+}
+
+.sticky-contact-icon.email-icon {
+	background: #fef3e7;
+	color: #ea580c !important;
+}
+
+.sticky-contact-details {
+	flex-grow: 1;
+	min-width: 0;
+	display: flex;
+	flex-direction: column;
+	text-align: left;
+}
+
+.action-label {
+	font-size: 0.92rem;
+	font-weight: 700;
+	color: #1d3a5e !important;
+	line-height: 1.25;
+}
+
+.action-desc {
+	font-size: 0.76rem;
+	color: #475569 !important;
+	line-height: 1.3;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+.action-arrow {
+	font-size: 0.75rem;
+	color: #64748b !important;
+	transition: transform 0.18s ease, color 0.18s ease;
+}
+
+.sticky-contact-action:hover .action-arrow {
+	color: #1d3a5e !important;
+	transform: translateX(3px);
+}
+
+.sticky-contact-footer {
+	padding: 9px 14px;
+	background: #f8fafc;
+	border-top: 1px solid #edf2f7;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 6px;
+	font-size: 0.75rem;
+	color: #475569 !important;
+	font-weight: 500;
+}
+
+.sticky-contact-footer span {
+	color: #475569 !important;
+}
+
+.sticky-contact-footer i {
+	color: #0284c7 !important;
+	font-size: 0.82rem;
+}
+
+/* Mobile Responsiveness */
+@media screen and (max-width: 480px) {
+	.sticky-contact-widget {
+		bottom: 16px;
+		right: 16px;
+	}
+	.sticky-contact-btn {
+		height: 44px;
+		padding: 0 16px 0 14px;
+		font-size: 0.88rem;
+	}
+	.sticky-contact-card {
+		right: 0;
+		width: calc(100vw - 32px);
+		max-width: 320px;
+	}
+}

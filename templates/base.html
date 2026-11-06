@@ -32,7 +32,7 @@
     <link rel="preconnect" href="https://cdnjs.cloudflare.com">
 
     <!-- Critical CSS -->
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.min.css') }}?v=3.3">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.min.css') }}?v=3.8">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <noscript>
         <link rel="stylesheet" href="{{ url_for('static', filename='css/noscript.css') }}" />
@@ -342,6 +342,174 @@
         // Run on load
         document.addEventListener('DOMContentLoaded', convertLocalTimestamps);
     </script>
+
+    {% if not request.path.startswith('/admin') %}
+    <!-- Sticky Contact Widget -->
+    <div id="sticky-contact-widget" class="sticky-contact-widget" aria-label="Quick Contact Options">
+        <!-- Popover Contact Card -->
+        <div id="sticky-contact-card" class="sticky-contact-card" aria-hidden="true">
+            <div class="sticky-contact-header">
+                <div class="sticky-contact-header-text">
+                    <h4 class="sticky-contact-title">Let’s Connect</h4>
+                    <p class="sticky-contact-subtitle">Schedule a consultation or ask a question</p>
+                </div>
+                <button type="button" class="sticky-contact-close" id="sticky-contact-close" aria-label="Close Contact Widget" style="all: unset !important; box-sizing: border-box !important; min-width: 0 !important; width: 28px !important; max-width: 28px !important; height: 28px !important; max-height: 28px !important; padding: 0 !important; margin: 0 !important; line-height: 26px !important; border-radius: 50% !important; background: #f1f5f9 !important; color: #64748b !important; display: inline-flex !important; align-items: center !important; justify-content: center !important; cursor: pointer !important; text-align: center !important; font-size: 1.25rem !important;">&times;</button>
+            </div>
+            <div class="sticky-contact-body">
+                <!-- Option 1: Send Message / Form -->
+                <a href="{% if request.path == '/' %}#contact{% else %}{{ url_for('main.index') }}#contact{% endif %}"
+                   class="sticky-contact-action {% if request.path == '/' %}scrolly{% endif %}"
+                   id="sticky-action-message"
+                   data-track="sticky_contact_message">
+                    <div class="sticky-contact-icon message-icon">
+                        <i class="fa-solid fa-paper-plane"></i>
+                    </div>
+                    <div class="sticky-contact-details">
+                        <span class="action-label">Send a Message</span>
+                        <span class="action-desc">Direct inquiry or consultation</span>
+                    </div>
+                    <i class="fa-solid fa-chevron-right action-arrow"></i>
+                </a>
+
+                <!-- Option 2: Direct Call or Text -->
+                <a href="tel:5713588898" class="sticky-contact-action" id="sticky-action-call" data-track="sticky_contact_call">
+                    <div class="sticky-contact-icon call-icon">
+                        <i class="fa-solid fa-phone"></i>
+                    </div>
+                    <div class="sticky-contact-details">
+                        <span class="action-label">Call or Text</span>
+                        <span class="action-desc">(571) 358-8898</span>
+                    </div>
+                    <i class="fa-solid fa-chevron-right action-arrow"></i>
+                </a>
+
+                <!-- Option 3: Direct Email -->
+                <a href="mailto:erez.asif.coaching@gmail.com" class="sticky-contact-action" id="sticky-action-email" data-track="sticky_contact_email">
+                    <div class="sticky-contact-icon email-icon">
+                        <i class="fa-solid fa-envelope"></i>
+                    </div>
+                    <div class="sticky-contact-details">
+                        <span class="action-label">Email Erez</span>
+                        <span class="action-desc">erez.asif.coaching@gmail.com</span>
+                    </div>
+                    <i class="fa-solid fa-chevron-right action-arrow"></i>
+                </a>
+            </div>
+            <div class="sticky-contact-footer">
+                <i class="fa-solid fa-shield-halved"></i> <span>Prompt response · Confidential</span>
+            </div>
+        </div>
+
+        <!-- Floating Trigger Button / Pill -->
+        <div class="sticky-contact-btn-wrapper">
+            <button type="button" id="sticky-contact-trigger" class="sticky-contact-btn" aria-expanded="false" aria-controls="sticky-contact-card" aria-label="Open Contact Options">
+                <span class="sticky-contact-btn-icon" style="color: #8cc9f0 !important;">
+                    <i class="fa-solid fa-comment-dots icon-open" style="color: #8cc9f0 !important;"></i>
+                    <i class="fa-solid fa-xmark icon-close" style="color: #ffffff !important;"></i>
+                </span>
+                <span class="sticky-contact-btn-text" style="color: #ffffff !important;">Get in Touch</span>
+            </button>
+            <button type="button" id="sticky-contact-dismiss" class="sticky-contact-dismiss-badge" aria-label="Dismiss Contact Widget" title="Dismiss">&times;</button>
+        </div>
+    </div>
+
+    <script>
+        (function () {
+            var widget = document.getElementById('sticky-contact-widget');
+            var trigger = document.getElementById('sticky-contact-trigger');
+            var card = document.getElementById('sticky-contact-card');
+            var closeBtn = document.getElementById('sticky-contact-close');
+            var dismissBtn = document.getElementById('sticky-contact-dismiss');
+            var messageAction = document.getElementById('sticky-action-message');
+
+            if (!widget || !trigger || !card) return;
+
+            function openWidget() {
+                card.classList.add('is-active');
+                card.setAttribute('aria-hidden', 'false');
+                trigger.setAttribute('aria-expanded', 'true');
+            }
+
+            function closeWidget() {
+                card.classList.remove('is-active');
+                card.setAttribute('aria-hidden', 'true');
+                trigger.setAttribute('aria-expanded', 'false');
+            }
+
+            function toggleWidget() {
+                if (card.classList.contains('is-active')) {
+                    closeWidget();
+                } else {
+                    openWidget();
+                }
+            }
+
+            trigger.addEventListener('click', function (e) {
+                e.stopPropagation();
+                toggleWidget();
+            });
+
+            if (closeBtn) {
+                closeBtn.addEventListener('click', function (e) {
+                    e.stopPropagation();
+                    closeWidget();
+                });
+            }
+
+            if (dismissBtn) {
+                dismissBtn.addEventListener('click', function (e) {
+                    e.stopPropagation();
+                    closeWidget();
+                    widget.style.transition = 'opacity 0.25s ease, transform 0.25s ease';
+                    widget.style.opacity = '0';
+                    widget.style.transform = 'scale(0.85)';
+                    widget.style.pointerEvents = 'none';
+                    setTimeout(function () {
+                        widget.style.display = 'none';
+                    }, 250);
+                });
+            }
+
+            // Close on click outside
+            document.addEventListener('click', function (e) {
+                if (!widget.contains(e.target)) {
+                    closeWidget();
+                }
+            });
+
+            // Close on Escape key
+            document.addEventListener('keydown', function (e) {
+                if (e.key === 'Escape' || e.key === 'Esc') {
+                    closeWidget();
+                }
+            });
+
+            // Special smooth scroll & focus for "Send a Message" if on homepage
+            if (messageAction && (window.location.pathname === '/' || window.location.pathname === '/index.html')) {
+                messageAction.addEventListener('click', function (e) {
+                    var contactSec = document.getElementById('contact');
+                    if (contactSec) {
+                        e.preventDefault();
+                        closeWidget();
+                        var headerOffset = 80;
+                        var elemPos = contactSec.getBoundingClientRect().top;
+                        var offsetPos = elemPos + window.pageYOffset - headerOffset;
+                        window.scrollTo({
+                            top: offsetPos,
+                            behavior: 'smooth'
+                        });
+                        setTimeout(function () {
+                            var nameInput = document.getElementById('name');
+                            if (nameInput) {
+                                nameInput.focus();
+                            }
+                        }, 600);
+                    }
+                });
+            }
+        })();
+    </script>
+    {% endif %}
 </body>
 
 </html>
