@@ -406,15 +406,6 @@ def tracking_stats():
         dead_cnt = ip_dead_routes.get(ip, 0)
         is_scanner_bot = dead_cnt >= 2
         is_dc_bot = is_datacenter_location(loc)
-        is_auto_bot = is_bot(ua) or is_scanner_bot or is_dc_bot
-        bot_status = 'auto' if is_auto_bot else None
-
-        if hide_bots and bot_status:
-            hidden_bots_count += 1
-            continue
-            
-        first_ref = referrers[0] if referrers else None
-        search_term = parse_referrer_query(first_ref)
         
         lifetime = ip_to_lifetime.get(ip, {'views': views, 'days': 1, 'first': first})
         active_sec = ip_active_seconds.get(ip, 0)
@@ -424,7 +415,19 @@ def tracking_stats():
         lifetime['valid_views'] = max(0, views - dead_cnt)
         lifetime['is_scanner_bot'] = is_scanner_bot
         lifetime['is_dc_bot'] = is_dc_bot
+        # A visitor who probes across multiple days but spends < 2s total with 0 reading dwell is an automated probe
+        lifetime['is_multi_day_bot'] = (lifetime.get('days', 1) > 1 and active_sec < 2)
         lifetime['is_single_page_reader'] = (lifetime['valid_views'] <= 1 and active_sec >= 15)
+
+        is_auto_bot = is_bot(ua) or is_scanner_bot or is_dc_bot or lifetime['is_multi_day_bot']
+        bot_status = 'auto' if is_auto_bot else None
+
+        if hide_bots and bot_status:
+            hidden_bots_count += 1
+            continue
+            
+        first_ref = referrers[0] if referrers else None
+        search_term = parse_referrer_query(first_ref)
         
         journeys.append((ip, loc, first, last, views, referrers, clean_ua, search_term, bot_status, lifetime))
     
@@ -1119,79 +1122,84 @@ def cleanup_tracking_data():
 def purge_noise_visits(older_than_days=0, include_bots=True, dry_run=False):
     """
     Finds and purges noise traffic:
-    1. Single-hit drive-by visits (< 1s) with no reading telemetry (scroll_depth < 25, no section_views)
+    1. Sub-second visits (< 2s total active duration, 0 reading telemetry), including multi-day probes
     2. Automated bots (datacenter IPs, bot user agents, 404 path scanners)
     """
     from datetime import datetime, timezone, timedelta
     from models import SiteVisit
     from extensions import db
-    from sqlalchemy import func, or_
     from utils import is_bot, is_datacenter_location
+    from collections import defaultdict
 
     cutoff = None
     if older_than_days > 0:
         cutoff = datetime.now(timezone.utc) - timedelta(days=older_than_days)
 
-    q = db.session.query(SiteVisit.visitor_ip)
+    q = db.session.query(
+        SiteVisit.id,
+        SiteVisit.visitor_ip,
+        SiteVisit.timestamp,
+        SiteVisit.user_agent,
+        SiteVisit.visitor_location,
+        SiteVisit.scroll_depth,
+        SiteVisit.section_views
+    )
     if cutoff:
         q = q.filter(SiteVisit.timestamp < cutoff)
 
-    # 1. IPs where all visits are single-hit (<1s) with NO reading telemetry
-    zero_sec_ips_query = q.group_by(SiteVisit.visitor_ip).having(
-        func.max(SiteVisit.timestamp) == func.min(SiteVisit.timestamp),
-        func.coalesce(func.max(SiteVisit.scroll_depth), 0) < 25,
-        or_(func.max(SiteVisit.section_views).is_(None), func.max(SiteVisit.section_views) == '')
-    )
-    zero_sec_ips = [r[0] for r in zero_sec_ips_query.all()]
-    
-    target_visit_ids = set()
-    chunk_size = 500
-    if zero_sec_ips:
-        for i in range(0, len(zero_sec_ips), chunk_size):
-            chunk = zero_sec_ips[i:i + chunk_size]
-            visits_q = db.session.query(SiteVisit.id).filter(
-                SiteVisit.visitor_ip.in_(chunk),
-                func.coalesce(SiteVisit.scroll_depth, 0) < 25,
-                or_(SiteVisit.section_views.is_(None), SiteVisit.section_views == '')
-            )
-            if cutoff:
-                visits_q = visits_q.filter(SiteVisit.timestamp < cutoff)
-            for v_id, in visits_q.all():
-                target_visit_ids.add(v_id)
+    all_rows = q.order_by(SiteVisit.visitor_ip, SiteVisit.timestamp.asc()).all()
 
-    # 2. Check for bot visits if include_bots is True
-    detected_bot_ips = set()
-    if include_bots:
-        bot_cand_query = db.session.query(
-            SiteVisit.visitor_ip,
-            SiteVisit.user_agent,
-            SiteVisit.visitor_location
-        ).distinct(SiteVisit.visitor_ip)
-        if cutoff:
-            bot_cand_query = bot_cand_query.filter(SiteVisit.timestamp < cutoff)
-        
-        for b_ip, b_ua, b_loc in bot_cand_query.all():
-            if b_ip in zero_sec_ips:
-                continue
-            if is_bot(b_ua or '') or is_datacenter_location(b_loc or ''):
-                detected_bot_ips.add(b_ip)
-        
-        if detected_bot_ips:
-            b_list = list(detected_bot_ips)
-            for i in range(0, len(b_list), chunk_size):
-                chunk = b_list[i:i + chunk_size]
-                b_visits = db.session.query(SiteVisit.id).filter(SiteVisit.visitor_ip.in_(chunk))
-                if cutoff:
-                    b_visits = b_visits.filter(SiteVisit.timestamp < cutoff)
-                for v_id, in b_visits.all():
-                    target_visit_ids.add(v_id)
+    ip_visits_map = defaultdict(list)
+    for row in all_rows:
+        ip_visits_map[row.visitor_ip].append(row)
 
-    total_visits = len(target_visit_ids)
-    all_affected_ips = set(zero_sec_ips) | detected_bot_ips
+    noise_visit_ids = set()
+    noise_ips = set()
+
+    for ip, v_list in ip_visits_map.items():
+        max_depth = max((v.scroll_depth or 0) for v in v_list)
+        has_dwell = any(bool(v.section_views and v.section_views.strip()) for v in v_list)
+        
+        ua = v_list[0].user_agent or ''
+        loc = v_list[-1].visitor_location or ''
+        is_known_bot = is_bot(ua) or is_datacenter_location(loc)
+
+        if include_bots and is_known_bot:
+            for v in v_list:
+                noise_visit_ids.add(v.id)
+            noise_ips.add(ip)
+            continue
+
+        # If they logged real reading telemetry, protect them from purge
+        if max_depth >= 25 or has_dwell:
+            continue
+
+        # Calculate true active session time across all sessions for this IP
+        t_list = [v.timestamp for v in v_list]
+        sessions = []
+        curr = [t_list[0]]
+        for t in t_list[1:]:
+            if (t - curr[-1]).total_seconds() > 1800:
+                sessions.append(curr)
+                curr = [t]
+            else:
+                curr.append(t)
+        sessions.append(curr)
+        total_active_seconds = sum(int((s[-1] - s[0]).total_seconds()) for s in sessions)
+
+        # If total active duration is < 2s with 0 reading depth:
+        # Whether single-day or multi-day crawler probe, it is 100% automated noise!
+        if total_active_seconds < 2:
+            for v in v_list:
+                noise_visit_ids.add(v.id)
+            noise_ips.add(ip)
+
+    total_visits = len(noise_visit_ids)
     estimated_kb = (total_visits * 500) / 1024
 
     if not dry_run and total_visits > 0:
-        id_list = list(target_visit_ids)
+        id_list = list(noise_visit_ids)
+        chunk_size = 500
         for i in range(0, len(id_list), chunk_size):
             chunk = id_list[i:i + chunk_size]
             SiteVisit.query.filter(SiteVisit.id.in_(chunk)).delete(synchronize_session=False)
@@ -1199,7 +1207,7 @@ def purge_noise_visits(older_than_days=0, include_bots=True, dry_run=False):
 
     return {
         'total_visits': total_visits,
-        'unique_ips': len(all_affected_ips),
+        'unique_ips': len(noise_ips),
         'estimated_kb': round(estimated_kb, 1),
         'dry_run': dry_run,
         'older_than_days': older_than_days

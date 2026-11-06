@@ -268,13 +268,13 @@
                         {% if is_bot == 'auto' %}
                         <span
                             style="background: #e74c3c; color: white; padding: 2px 8px; border-radius: 4px; font-size: 0.7rem; font-weight: bold; vertical-align: middle; margin-left: 8px;"
-                            title="Auto-detected Bot{% if lifetime.is_dc_bot %} (Datacenter / Cloud Server Probe){% elif lifetime.is_scanner_bot %} (404 Scanner: probed non-existent paths){% endif %}">BOT{% if lifetime.is_dc_bot %} (Datacenter){% elif lifetime.is_scanner_bot %} (Scanner){% endif %}</span>
+                            title="Auto-detected Bot{% if lifetime.is_dc_bot %} (Datacenter / Cloud Server Probe){% elif lifetime.is_scanner_bot %} (404 Scanner: probed non-existent paths){% elif lifetime.is_multi_day_bot %} (Multi-day sub-second probe){% endif %}">BOT{% if lifetime.is_dc_bot %} (Datacenter){% elif lifetime.is_scanner_bot %} (Scanner){% elif lifetime.is_multi_day_bot %} (Multi-Day Probe){% endif %}</span>
                         {% elif is_bot == 'manual' %}
                         <span
                             style="background: #c0392b; color: white; padding: 2px 8px; border-radius: 4px; font-size: 0.7rem; font-weight: bold; vertical-align: middle; margin-left: 8px; border: 1px dotted #ffcccb;"
                             title="Manually Flagged Bot">BOT (Manual)</span>
                         {% endif %}
-                        {% if lifetime.days > 1 and duration.total_seconds() > 0 %}
+                        {% if not is_bot and lifetime.days > 1 and lifetime.active_seconds >= 2 %}
                         <span
                             style="background: #3498db; color: white; padding: 2px 8px; border-radius: 4px; font-size: 0.7rem; font-weight: bold; vertical-align: middle; margin-left: 8px;">RETURN
                             VISITOR ({{ lifetime.days }} days)</span>
