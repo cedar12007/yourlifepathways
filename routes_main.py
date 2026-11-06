@@ -217,6 +217,14 @@ Sitemap: https://www.yourlifepathways.com/sitemap.xml"""
     return response
 
 
+@main_bp.route('/llms.txt')
+def llms_txt():
+    static_file_path = os.path.join(current_app.root_path, 'static', 'llms.txt')
+    if os.path.exists(static_file_path):
+        return send_file(static_file_path, mimetype='text/plain; charset=utf-8')
+    return make_response("YourLifePathways | Erez Asif Coaching", 200, {'Content-Type': 'text/plain; charset=utf-8'})
+
+
 @main_bp.route('/BingSiteAuth.xml')
 def bing_site_auth():
     bing_content = """<?xml version="1.0"?>
