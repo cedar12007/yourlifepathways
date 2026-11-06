@@ -131,9 +131,10 @@
                     style="display: block; font-size: 0.75rem; font-weight: bold; margin-bottom: 0.5rem; color: #666; text-transform: uppercase;">Sort
                     By</label>
                 <select name="sort_by"
-                    style="height: 40px; padding: 0 0.75rem; border-radius: 4px; border: 1px solid #ddd; font-size: 0.85rem; background: white; width: 130px; color: #333;">
+                    style="height: 40px; padding: 0 0.75rem; border-radius: 4px; border: 1px solid #ddd; font-size: 0.85rem; background: white; width: 145px; color: #333;">
                     <option value="recent" {% if sort_by=='recent' %}selected{% endif %}>Most Recent</option>
                     <option value="views" {% if sort_by=='views' %}selected{% endif %}>Most Views</option>
+                    <option value="duration" {% if sort_by in ['duration', 'session_length'] %}selected{% endif %}>Session Length</option>
                 </select>
             </div>
 
@@ -240,8 +241,7 @@
                         {% else %}
                         All time
                         {% endif %}
-                        • Ordered by <strong></strong>{% if sort_by == 'views' %}Most Views{% else %}Recency{% endif
-                        %}</strong>
+                        • Ordered by <strong>{% if sort_by == 'views' %}Most Views{% elif sort_by in ['duration', 'session_length'] %}Session Length{% else %}Recency{% endif %}</strong>
                         {% if showing_count < filtered_count %} <span style="color: #e67e22;">• Limited to 100
                             results</span>
                             {% endif %}
@@ -260,7 +260,7 @@
                         {% if is_bot == 'auto' %}
                         <span
                             style="background: #e74c3c; color: white; padding: 2px 8px; border-radius: 4px; font-size: 0.7rem; font-weight: bold; vertical-align: middle; margin-left: 8px;"
-                            title="Auto-detected Bot">BOT</span>
+                            title="Auto-detected Bot{% if lifetime.is_scanner_bot %} (404 Scanner: probed non-existent paths){% endif %}">BOT{% if lifetime.is_scanner_bot %} (Scanner){% endif %}</span>
                         {% elif is_bot == 'manual' %}
                         <span
                             style="background: #c0392b; color: white; padding: 2px 8px; border-radius: 4px; font-size: 0.7rem; font-weight: bold; vertical-align: middle; margin-left: 8px; border: 1px dotted #ffcccb;"
@@ -295,19 +295,38 @@
                             data-utc="{{ last_visit.isoformat() if last_visit else '' }}">{{
                             last_visit.strftime('%Y-%m-%d %H:%M:%S') if last_visit else 'Unknown' }}</span></p>
                     <p><strong>Duration:</strong>
-                        {% if duration.total_seconds() > 86400 and lifetime.days > 1 %}
+                        {% if lifetime.days > 1 %}
                             <span style="color: #2b6cb0; font-weight: 600;">Visited across {{ lifetime.days }} days</span>
-                        {% elif duration.total_seconds() < 60 %}
-                            {{ duration.total_seconds()|int }}s
-                        {% elif duration.total_seconds() < 3600 %}
-                            {{ (duration.total_seconds() / 60)|int }}m {{ (duration.total_seconds() % 60)|int }}s
+                            <span style="color: #a0aec0; margin: 0 4px;">•</span>
+                            <span style="font-weight: 600; color: {% if lifetime.active_seconds and lifetime.active_seconds >= 60 %}#2e7d32{% elif lifetime.active_seconds and lifetime.active_seconds >= 10 %}#2b6cb0{% else %}#718096{% endif %};">
+                                <i class="fa-solid fa-stopwatch" style="margin-right: 3px;"></i>Total: {{ lifetime.formatted_active }}
+                            </span>
+                        {% elif lifetime.active_seconds is defined %}
+                            {% if lifetime.active_seconds < 1 %}
+                                <span style="color: #a0aec0;">&lt; 1s (single hit)</span>
+                            {% else %}
+                                <span style="font-weight: 600; color: {% if lifetime.active_seconds >= 60 %}#2e7d32{% else %}#2b6cb0{% endif %};">
+                                    <i class="fa-solid fa-stopwatch" style="margin-right: 3px;"></i>{{ lifetime.formatted_active }}
+                                </span>
+                            {% endif %}
                         {% else %}
-                            {{ (duration.total_seconds() / 3600)|int }}h {{ ((duration.total_seconds() % 3600) / 60)|int }}m
+                            {% if duration.total_seconds() < 60 %}
+                                {{ duration.total_seconds()|int }}s
+                            {% elif duration.total_seconds() < 3600 %}
+                                {{ (duration.total_seconds() / 60)|int }}m {{ (duration.total_seconds() % 60)|int }}s
+                            {% else %}
+                                {{ (duration.total_seconds() / 3600)|int }}h {{ ((duration.total_seconds() % 3600) / 60)|int }}m
+                            {% endif %}
                         {% endif %}
                     </p>
                 </div>
                 <div class="journey-stats">
-                    <strong>{{ page_views }} Pages Viewed</strong><br>
+                    {% if lifetime.dead_routes and lifetime.dead_routes > 0 %}
+                        <strong>{{ lifetime.valid_views }} Real Pages</strong><br>
+                        <span style="color: #c53030; font-size: 0.72rem; font-weight: 700;">+{{ lifetime.dead_routes }} 404 Probes</span><br>
+                    {% else %}
+                        <strong>{{ page_views }} Pages Viewed</strong><br>
+                    {% endif %}
                     <a href="{{ url_for('admin.view_journey', ip=ip, period=period, custom_date=custom_date, start_date=start_date, end_date=end_date, has_referrer=('true' if has_referrer else 'false'), referrer_filter=referrer_filter, show_all=('true' if show_all else 'false'), sort_by=sort_by) }}"
                         class="button primary journey-btn">View
                         Journey</a>

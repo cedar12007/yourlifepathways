@@ -60,7 +60,7 @@ from utils import get_client_ip
 # Using executor from extensions.py
 
 @app.before_request
-def log_visit():
+def handle_legacy_image_redirects():
     # Fallback redirect if an external crawler/cache requests a moved blog image at /static/images/<file>
     if request.path.startswith('/static/images/'):
         rel_name = request.path[len('/static/images/'):]
@@ -70,28 +70,34 @@ def log_visit():
             if not os.path.exists(direct_path) and os.path.exists(blog_path):
                 return redirect(f'/static/images/blog/{rel_name}', code=301)
 
+@app.after_request
+def log_visit(response):
     try:
+        # Ignore 404 Not Found, dead routes, and client/server error responses (bots scanning dictionary paths)
+        if response.status_code >= 400:
+            return response
+
         # 0. Check if logging is enabled via environment variable
         if os.getenv('TRAFFIC_LOGGING', 'no').lower() != 'yes':
-            return
+            return response
 
         # Check session or cookie based exclusion (for users who started with /admin)
         from flask import session
         if session.get('skip_tracking') or request.cookies.get('skip_tracking') == 'true':
-            return
+            return response
 
         # 1. Skip static files, favicon, custom logging endpoint, AND authenticated admins
-        if any(request.path.startswith(prefix) for prefix in ['/static', '/favicon.ico', '/log_event']):
-            return
+        if any(request.path.startswith(prefix) for prefix in ['/static', '/favicon.ico', '/log_event', '/log_telemetry']):
+            return response
             
         # Mark user as admin/exclude if they hit the admin path or pass ?skip=1 / ?admin=1
         if request.path.startswith('/admin') or request.args.get('skip') == '1' or request.args.get('admin') == '1':
             session['skip_tracking'] = True
-            return
+            return response
         
         # Also skip if user is logged in (admin)
         if current_user.is_authenticated:
-            return
+            return response
         
         # 2. Domain Restriction: ONLY log if accessing these specific domains
         host = request.host.lower()
@@ -102,7 +108,7 @@ def log_visit():
         log_local = os.getenv('TRAFFIC_LOGGING_LOCAL', 'no').lower() == 'yes'
 
         if not is_allowed_domain and not (is_local and log_local):
-            return
+            return response
 
         # 2. Get data immediately while request context is available
         ip = get_client_ip()
@@ -114,12 +120,12 @@ def log_visit():
 
         # 2a. Ignore 404 / Non-existent routes (exploit scanners probing dead paths)
         if not endpoint:
-            return
+            return response
 
         # 2b. Do NOT log bots/scrapers to database (Cloudflare tracks bots at edge)
         from utils import is_bot
         if is_bot(ua):
-            return
+            return response
 
         # 2c. Ignore exploit scanning query strings, probe signatures, and referral spam
         probe_signatures = (
@@ -134,12 +140,12 @@ def log_visit():
         req_full = (request.path + '?' + request.query_string.decode('utf-8', 'ignore')).lower()
         ref_lower = (referrer or '').lower()
         if any(sig in req_full for sig in probe_signatures) or any(sig in ref_lower for sig in probe_signatures):
-            return
+            return response
 
         # 2d. Drop raw IP referrers (e.g. http://172.67.220.28) - automated IP sweeps
         if ref_lower and re.match(r'^https?://\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}', ref_lower):
             if '127.0.0.1' not in ref_lower and 'localhost' not in ref_lower:
-                return
+                return response
 
         # 2e. Deduplicate rapid identical page reloads from same IP within 10 seconds
         import time
@@ -150,7 +156,7 @@ def log_visit():
             app._recent_visits = {k: v for k, v in app._recent_visits.items() if now_ts - v < 60}
         visit_key = (ip, url)
         if now_ts - app._recent_visits.get(visit_key, 0) < 10:
-            return
+            return response
         app._recent_visits[visit_key] = now_ts
         
         # 3. Enhanced Referrer Logic (Capture ref, i, r, UTM tags, and custom shortcuts like i=nac)
@@ -177,8 +183,10 @@ def log_visit():
 
         # Use a thread pool executor instead of spawning new threads manually
         executor.submit(save_log_task, app.app_context(), ip, url, ua, endpoint, view_args, referrer)
+        return response
     except Exception as e:
         print(f"[log_visit] Error: {e}")
+        return response
 
 @app.route('/log_event', methods=['GET'])
 def log_event():

@@ -224,6 +224,8 @@ def tracking_stats():
     # 5. Apply Sorting and Execute main query with limit
     if sort_by == 'views':
         query = query.order_by(func.count(SiteVisit.id).desc(), func.max(SiteVisit.timestamp).desc())
+    elif sort_by in ('duration', 'session_length'):
+        query = query.order_by((func.max(SiteVisit.timestamp) - func.min(SiteVisit.timestamp)).desc(), func.max(SiteVisit.timestamp).desc())
     else: # Default: recent
         query = query.order_by(func.max(SiteVisit.timestamp).desc())
         
@@ -291,6 +293,82 @@ def tracking_stats():
             'days': row.total_days,
             'first': row.earliest_visit
         } for row in lifetime_stats_query}
+
+        # OPTIMIZATION: Fetch true active session time and detect 404 scanners in ONE query
+        ip_active_seconds = defaultdict(int)
+        ip_dead_routes = defaultdict(int)
+        ts_query = db.session.query(
+            SiteVisit.visitor_ip,
+            SiteVisit.timestamp,
+            SiteVisit.url
+        ).filter(SiteVisit.visitor_ip.in_(ip_list))
+        if date_filter is not None:
+            ts_query = ts_query.filter(date_filter)
+        ts_rows = ts_query.order_by(SiteVisit.visitor_ip, SiteVisit.timestamp.asc()).all()
+        
+        from urllib.parse import urlparse
+        valid_blog_slugs = {p.slug for p in Post.query.with_entities(Post.slug).all()}
+
+        VALID_STATIC_PATHS = {
+            '/',
+            '/index.html',
+            '/connect',
+            '/discovery-call',
+            '/overview',
+            '/about',
+            '/community-involvement-and-mentorship',
+            '/educational-institutions',
+            '/non-profits-and-mission-driven-organizations',
+            '/blog',
+            '/main_life_professional_business_leadership_executive_coaching_blog',
+            '/cedar_login',
+            '/validate-captcha'
+        }
+
+        def is_valid_site_path(path, valid_slugs):
+            if not path or path == '/':
+                return True
+            if path in VALID_STATIC_PATHS:
+                return True
+            if path.startswith('/blog/'):
+                slug = path[len('/blog/'):].strip('/')
+                return slug in valid_slugs
+            if any(path.startswith(prefix) for prefix in ('/r=', '/r/', '/i=', '/i/', '/ref=', '/ref/')):
+                return True
+            if path == '/log_telemetry' or '/signature/' in path or path.startswith('/static/'):
+                return True
+            return False
+
+        ip_ts_map = defaultdict(list)
+        for r_ip, r_ts, r_url in ts_rows:
+            ip_ts_map[r_ip].append(r_ts)
+            r_path = urlparse(r_url or '').path.rstrip('/') or '/'
+            if not is_valid_site_path(r_path, valid_blog_slugs):
+                ip_dead_routes[r_ip] += 1
+            
+        for r_ip, t_list in ip_ts_map.items():
+            if not t_list:
+                continue
+            sessions = []
+            curr = [t_list[0]]
+            for t in t_list[1:]:
+                if (t - curr[-1]).total_seconds() > 1800:
+                    sessions.append(curr)
+                    curr = [t]
+                else:
+                    curr.append(t)
+            sessions.append(curr)
+            ip_active_seconds[r_ip] = sum(int((s[-1] - s[0]).total_seconds()) for s in sessions)
+
+    def format_secs_short(s):
+        if s < 1:
+            return "< 1s"
+        elif s < 60:
+            return f"{s}s"
+        elif s < 3600:
+            return f"{s // 60}m {s % 60}s"
+        else:
+            return f"{s // 3600}h {(s % 3600) // 60}m"
     
     from utils import is_bot, parse_user_agent, parse_referrer_query
     
@@ -303,7 +381,9 @@ def tracking_stats():
         referrers = ip_to_referrers.get(ip, []) if ip_list else []
         clean_ua = parse_user_agent(ua)
         
-        is_auto_bot = is_bot(ua)
+        dead_cnt = ip_dead_routes.get(ip, 0)
+        is_scanner_bot = dead_cnt >= 2
+        is_auto_bot = is_bot(ua) or is_scanner_bot
         bot_status = 'auto' if is_auto_bot else None
 
         if hide_bots and bot_status:
@@ -313,8 +393,19 @@ def tracking_stats():
         search_term = parse_referrer_query(first_ref)
         
         lifetime = ip_to_lifetime.get(ip, {'views': views, 'days': 1, 'first': first})
+        active_sec = ip_active_seconds.get(ip, 0)
+        lifetime['active_seconds'] = active_sec
+        lifetime['formatted_active'] = format_secs_short(active_sec)
+        lifetime['dead_routes'] = dead_cnt
+        lifetime['valid_views'] = max(0, views - dead_cnt)
+        lifetime['is_scanner_bot'] = is_scanner_bot
         
         journeys.append((ip, loc, first, last, views, referrers, clean_ua, search_term, bot_status, lifetime))
+    
+    if sort_by == 'views':
+        journeys.sort(key=lambda j: j[9].get('valid_views', 0), reverse=True)
+    elif sort_by in ('duration', 'session_length'):
+        journeys.sort(key=lambda j: j[9].get('active_seconds', 0), reverse=True)
     
     import os
     logging_enabled = os.getenv('TRAFFIC_LOGGING', 'no').lower() == 'yes'
@@ -420,6 +511,8 @@ def view_journey(ip):
     
     if sort_by == 'views':
         query = query.order_by(func.count(SiteVisit.id).desc(), func.max(SiteVisit.timestamp).desc())
+    elif sort_by in ('duration', 'session_length'):
+        query = query.order_by((func.max(SiteVisit.timestamp) - func.min(SiteVisit.timestamp)).desc(), func.max(SiteVisit.timestamp).desc())
     else: # Default: recent
         query = query.order_by(func.max(SiteVisit.timestamp).desc())
         
@@ -444,6 +537,33 @@ def view_journey(ip):
         if hide_bots and is_auto:
             continue
         filtered_ips.append(ip_addr)
+
+    if sort_by in ('duration', 'session_length') and filtered_ips:
+        from collections import defaultdict
+        ip_ts_map = defaultdict(list)
+        all_ts_q = db.session.query(SiteVisit.visitor_ip, SiteVisit.timestamp)\
+            .filter(SiteVisit.visitor_ip.in_(filtered_ips))
+        if date_filter is not None:
+            all_ts_q = all_ts_q.filter(date_filter)
+        for f_ip, f_ts in all_ts_q.order_by(SiteVisit.visitor_ip, SiteVisit.timestamp.asc()).all():
+            ip_ts_map[f_ip].append(f_ts)
+        
+        def calc_active(ip_addr):
+            t_list = ip_ts_map.get(ip_addr, [])
+            if len(t_list) < 2:
+                return 0
+            sessions = []
+            curr = [t_list[0]]
+            for t in t_list[1:]:
+                if (t - curr[-1]).total_seconds() > 1800:
+                    sessions.append(curr)
+                    curr = [t]
+                else:
+                    curr.append(t)
+            sessions.append(curr)
+            return sum(int((s[-1] - s[0]).total_seconds()) for s in sessions)
+            
+        filtered_ips.sort(key=calc_active, reverse=True)
         
     # Find next and previous
     prev_ip = None
@@ -497,6 +617,365 @@ def view_journey(ip):
     is_auto_bot_journey = any(is_bot(v.user_agent) for v in visits)
     bot_status = 'auto' if is_auto_bot_journey else None
 
+    # Helper to synthesize raw visits into an Executive Story Analysis and clean human-readable steps
+    valid_blog_slugs = {p.slug for p in Post.query.with_entities(Post.slug).all()}
+
+    VALID_STATIC_PATHS = {
+        '/',
+        '/index.html',
+        '/connect',
+        '/discovery-call',
+        '/overview',
+        '/about',
+        '/community-involvement-and-mentorship',
+        '/educational-institutions',
+        '/non-profits-and-mission-driven-organizations',
+        '/blog',
+        '/main_life_professional_business_leadership_executive_coaching_blog',
+        '/cedar_login',
+        '/validate-captcha'
+    }
+
+    def is_valid_site_path(path):
+        if not path or path == '/':
+            return True
+        if path in VALID_STATIC_PATHS:
+            return True
+        if path.startswith('/blog/'):
+            slug = path[len('/blog/'):].strip('/')
+            return slug in valid_blog_slugs
+        if any(path.startswith(prefix) for prefix in ('/r=', '/r/', '/i=', '/i/', '/ref=', '/ref/')):
+            return True
+        if path == '/log_telemetry' or '/signature/' in path or path.startswith('/static/'):
+            return True
+        return False
+
+    SECTION_NAMES = {
+        'intro': 'Introduction & Overview',
+        'spotlight': 'Executive Spotlight (Donna Hurley Quote)',
+        'pathways': 'Career Pathways & Programs',
+        'about_me': 'About Me & Credentials',
+        'community': 'Community & Giving Back',
+        'cost': 'Pricing & Investment',
+        'testimonials': 'Client Testimonials',
+        'contact': 'Contact Form & Discovery Call',
+        'latest-blog-posts': 'Latest Articles',
+        'comments': 'Comments & Discussion',
+        'post-content': 'Article Content',
+        'ericksonCertModal': 'Erickson Coaching Certification Modal',
+        'sapGlobalCoachModal': 'SAP Global Coach Modal',
+        'soccerCoachingModal': 'US Soccer Coaching Modal',
+        'volleyballCoachingModal': 'Volleyball Coaching Modal',
+        'jvVolleyballModal': 'JV Volleyball Coaching Modal',
+        'soccerLicenseModal': 'USSF National C License Modal'
+    }
+
+    def format_secs(s):
+        if s < 60:
+            return f"{s}s"
+        elif s < 3600:
+            return f"{s // 60}m {s % 60}s"
+        else:
+            return f"{s // 3600}h {(s % 3600) // 60}m"
+
+    def build_session_object(v_list, num):
+        from urllib.parse import urlparse, parse_qs
+        from models import Post
+
+        s_start = v_list[0].timestamp
+        s_end = v_list[-1].timestamp
+        s_dur = int((s_end - s_start).total_seconds())
+
+        steps = []
+        raw_steps = []
+        distinct_pages = set()
+        section_dwell = {}
+        total_dwell_seconds = 0
+        max_overall_depth = 0
+        dead_probes_count = 0
+
+        for v in v_list:
+            ts = v.timestamp
+            url = v.url or ''
+            depth = getattr(v, 'scroll_depth', 0) or 0
+            s_views = getattr(v, 'section_views', None) or ''
+
+            raw_steps.append({
+                'url': url,
+                'timestamp': ts,
+                'scroll_depth': depth,
+                'section_views': s_views
+            })
+
+            parsed = urlparse(url)
+            path = parsed.path.rstrip('/') or '/'
+            frag = parsed.fragment
+
+            # Accumulate dwell from section_views field
+            if s_views:
+                for part in s_views.split(','):
+                    if ':' in part:
+                        k, val = part.split(':', 1)
+                        try:
+                            clean_sec = int(val.rstrip('s'))
+                            section_dwell[k] = section_dwell.get(k, 0) + clean_sec
+                            total_dwell_seconds += clean_sec
+                        except ValueError:
+                            pass
+
+            # Handle /log_telemetry queries (fold into previous steps)
+            if path == '/log_telemetry':
+                qs = parse_qs(parsed.query)
+                if 'sections' in qs:
+                    for item in qs['sections'][0].split(','):
+                        if ':' in item:
+                            k, val = item.split(':', 1)
+                            try:
+                                clean_sec = int(val.rstrip('s'))
+                                section_dwell[k] = section_dwell.get(k, 0) + clean_sec
+                                total_dwell_seconds += clean_sec
+                                if steps and steps[-1].get('item_key') == k:
+                                    steps[-1]['active_reading_seconds'] = steps[-1].get('active_reading_seconds', 0) + clean_sec
+                            except ValueError:
+                                pass
+                if 'depth' in qs:
+                    try:
+                        d_val = int(qs['depth'][0])
+                        if d_val > max_overall_depth:
+                            max_overall_depth = d_val
+                        if steps and d_val > steps[-1]['depth']:
+                            steps[-1]['depth'] = d_val
+                    except ValueError:
+                        pass
+                if steps and ts > steps[-1]['end_time']:
+                    steps[-1]['end_time'] = ts
+                continue
+
+            # Skip standalone email signature fetches from website journey
+            if '/signature/' in path:
+                continue
+
+            if depth > max_overall_depth:
+                max_overall_depth = depth
+
+            is_page_valid = is_valid_site_path(path)
+
+            # Human-friendly action title, name & icon
+            if not is_page_valid:
+                dead_probes_count += 1
+                friendly_name = f"404 Dead Path: {path}"
+                friendly_title = f'404 Probe: "{path}" (Non-Existing Page)'
+                icon = "fa-solid fa-ban"
+                badge_color = "#e53e3e"
+                step_type = "probe_404"
+                item_key = "404_probes"
+                # Do NOT add to distinct_pages!
+            elif frag and frag in SECTION_NAMES:
+                distinct_pages.add(path)
+                friendly_name = SECTION_NAMES[frag]
+                friendly_title = f"Explored Section: {friendly_name}"
+                icon = "fa-solid fa-compass"
+                badge_color = "#3182ce"
+                step_type = "section"
+                item_key = frag
+            elif path == '/':
+                distinct_pages.add(path)
+                friendly_name = "Homepage"
+                friendly_title = "Landed on Homepage" if not steps else "Returned to Homepage"
+                icon = "fa-solid fa-house"
+                badge_color = "#2e7d32"
+                step_type = "page"
+                item_key = "homepage"
+            elif path.startswith('/blog/'):
+                distinct_pages.add(path)
+                slug = path.replace('/blog/', '')
+                try:
+                    post = Post.query.filter_by(slug=slug).first()
+                    p_title = post.title if post else slug.replace('-', ' ').title()
+                except Exception:
+                    p_title = slug.replace('-', ' ').title()
+                friendly_name = f'Blog: "{p_title}"'
+                friendly_title = f'Read Blog: "{p_title}"'
+                icon = "fa-solid fa-newspaper"
+                badge_color = "#805ad5"
+                step_type = "blog"
+                item_key = path
+            elif path == '/non-profits-and-mission-driven-organizations':
+                distinct_pages.add(path)
+                friendly_name = "Non-Profits & Mission-Driven Organizations"
+                friendly_title = "Viewed: Non-Profits & Mission-Driven Organizations"
+                icon = "fa-solid fa-handshake-angle"
+                badge_color = "#319795"
+                step_type = "page"
+                item_key = path
+            elif path == '/connect' or path == '/discovery-call':
+                distinct_pages.add(path)
+                friendly_name = "Connect & Discovery Booking"
+                friendly_title = "Viewed: Connect & Discovery Booking"
+                icon = "fa-solid fa-calendar-check"
+                badge_color = "#dd6b20"
+                step_type = "page"
+                item_key = path
+            elif path == '/overview' or path == '/about':
+                distinct_pages.add(path)
+                clean_name = path.strip('/').replace('-', ' ').title()
+                friendly_name = clean_name
+                friendly_title = f"Viewed Page: {clean_name}"
+                icon = "fa-solid fa-circle-info"
+                badge_color = "#3182ce"
+                step_type = "page"
+                item_key = path
+            else:
+                distinct_pages.add(path)
+                clean_name = path.strip('/').replace('-', ' ').title()
+                friendly_name = clean_name
+                friendly_title = f"Viewed Page: {clean_name}"
+                icon = "fa-solid fa-globe"
+                badge_color = "#4a5568"
+                step_type = "page"
+                item_key = path
+
+            # Consolidate consecutive identical actions
+            if steps and steps[-1]['title'] == friendly_title:
+                steps[-1]['count'] += 1
+                steps[-1]['end_time'] = ts
+                if depth > steps[-1]['depth']:
+                    steps[-1]['depth'] = depth
+            else:
+                steps.append({
+                    'title': friendly_title,
+                    'item_name': friendly_name,
+                    'item_key': item_key,
+                    'icon': icon,
+                    'badge_color': badge_color,
+                    'step_type': step_type,
+                    'is_404': not is_page_valid,
+                    'url': url,
+                    'timestamp': ts,
+                    'end_time': ts,
+                    'depth': depth,
+                    'count': 1,
+                    'duration_seconds': 0,
+                    'formatted_duration': '',
+                    'active_reading_seconds': 0,
+                    'section_views': s_views
+                })
+
+        # Calculate time spent on each step
+        session_end = v_list[-1].timestamp
+        for i, step in enumerate(steps):
+            if i < len(steps) - 1:
+                next_ts = steps[i+1]['timestamp']
+                dur = max(0, int((next_ts - step['timestamp']).total_seconds()))
+            else:
+                dur = max(0, int((session_end - step['timestamp']).total_seconds()))
+
+            if step['end_time'] > step['timestamp']:
+                end_diff = int((step['end_time'] - step['timestamp']).total_seconds())
+                if end_diff > dur:
+                    dur = end_diff
+
+            if step.get('active_reading_seconds', 0) > dur:
+                dur = step['active_reading_seconds']
+
+            step['duration_seconds'] = dur
+            step['formatted_duration'] = format_secs(dur) if dur > 0 else "< 1s"
+
+        # Calculate aggregated time spent per section and page across the session
+        content_breakdown = {}
+        for step in steps:
+            k = step.get('item_key') or 'other'
+            if k not in content_breakdown:
+                content_breakdown[k] = {
+                    'key': k,
+                    'name': step.get('item_name') or step['title'],
+                    'icon': step['icon'],
+                    'type': step['step_type'],
+                    'elapsed_seconds': 0,
+                    'active_reading_seconds': 0,
+                    'views_count': 0
+                }
+            content_breakdown[k]['elapsed_seconds'] += step['duration_seconds']
+            content_breakdown[k]['active_reading_seconds'] += step.get('active_reading_seconds', 0)
+            content_breakdown[k]['views_count'] += step.get('count', 1)
+
+        # Consolidate 404 dead routes in breakdown
+        if '404_probes' in content_breakdown:
+            content_breakdown['404_probes']['name'] = f"Dead Routes Probed (404s: {dead_probes_count} attempts)"
+            content_breakdown['404_probes']['icon'] = "fa-solid fa-triangle-exclamation"
+
+        # Merge telemetry dwell times into content_breakdown
+        for sec_k, d_sec in section_dwell.items():
+            if sec_k in content_breakdown:
+                if d_sec > content_breakdown[sec_k]['active_reading_seconds']:
+                    content_breakdown[sec_k]['active_reading_seconds'] = d_sec
+            else:
+                content_breakdown[sec_k] = {
+                    'key': sec_k,
+                    'name': SECTION_NAMES.get(sec_k, sec_k.title()),
+                    'icon': 'fa-solid fa-compass',
+                    'type': 'section',
+                    'elapsed_seconds': d_sec,
+                    'active_reading_seconds': d_sec,
+                    'views_count': 1
+                }
+
+        section_breakdown = []
+        for item in content_breakdown.values():
+            eff_secs = max(item['elapsed_seconds'], item['active_reading_seconds'])
+            if eff_secs > 0:
+                item['total_seconds'] = eff_secs
+                item['formatted_total'] = format_secs(eff_secs)
+                item['formatted_active'] = format_secs(item['active_reading_seconds'])
+                section_breakdown.append(item)
+
+        # Sort by highest time spent first
+        section_breakdown.sort(key=lambda x: x['total_seconds'], reverse=True)
+
+        # Top attention sections (sorted by dwell time)
+        top_sections = []
+        for sec_id, secs in sorted(section_dwell.items(), key=lambda x: x[1], reverse=True)[:5]:
+            top_sections.append({
+                'id': sec_id,
+                'name': SECTION_NAMES.get(sec_id, sec_id.title()),
+                'seconds': secs,
+                'formatted': format_secs(secs)
+            })
+
+        # Engagement level badge
+        if dead_probes_count >= 2 and (dead_probes_count / max(1, len(steps))) >= 0.3:
+            engagement = {'label': 'Automated 404 Scanner (Bot)', 'color': '#c53030', 'bg': '#fff5f5', 'icon': 'fa-solid fa-shield-virus'}
+        elif max_overall_depth >= 85 or total_dwell_seconds >= 120:
+            engagement = {'label': 'High Engagement (Deep Read)', 'color': '#2e7d32', 'bg': '#e8f5e9', 'icon': 'fa-solid fa-fire'}
+        elif max_overall_depth >= 45 or total_dwell_seconds >= 30:
+            engagement = {'label': 'Moderate Engagement', 'color': '#1976d2', 'bg': '#e3f2fd', 'icon': 'fa-solid fa-chart-line'}
+        else:
+            engagement = {'label': 'Quick Skim', 'color': '#f57c00', 'bg': '#fff3e0', 'icon': 'fa-solid fa-eye'}
+
+        analysis = {
+            'unique_pages_count': max(1 if distinct_pages else 0, len(distinct_pages)),
+            'distinct_pages': list(distinct_pages),
+            'dead_probes_count': dead_probes_count,
+            'top_sections': top_sections,
+            'section_breakdown': section_breakdown,
+            'total_dwell_seconds': total_dwell_seconds,
+            'formatted_dwell': format_secs(total_dwell_seconds),
+            'max_depth': max_overall_depth,
+            'engagement': engagement
+        }
+
+        return {
+            'num': num,
+            'start': s_start,
+            'end': s_end,
+            'duration_seconds': s_dur,
+            'visits': v_list,
+            'steps': steps,
+            'raw_steps': raw_steps,
+            'raw_count': len(v_list),
+            'analysis': analysis
+        }
+
     # Group visits into distinct sessions using standard 30-minute inactivity threshold
     sessions = []
     current_session_visits = []
@@ -508,80 +987,21 @@ def view_journey(ip):
             prev_v = current_session_visits[-1]
             time_diff = (v.timestamp - prev_v.timestamp).total_seconds()
             if time_diff > 1800: # > 30 min gap -> new session
-                s_start = current_session_visits[0].timestamp
-                s_end = current_session_visits[-1].timestamp
-                s_dur = int((s_end - s_start).total_seconds())
-                
-                # Consolidate consecutive hits to the exact same URL (reloads/refreshes)
-                session_steps = []
-                for v in current_session_visits:
-                    s_depth = getattr(v, 'scroll_depth', 0) or 0
-                    s_views = getattr(v, 'section_views', None) or ''
-                    if session_steps and session_steps[-1]['url'] == v.url:
-                        session_steps[-1]['count'] += 1
-                        session_steps[-1]['end_time'] = v.timestamp
-                        if s_depth > session_steps[-1]['scroll_depth']:
-                            session_steps[-1]['scroll_depth'] = s_depth
-                        if s_views:
-                            session_steps[-1]['section_views'] = s_views
-                    else:
-                        session_steps.append({
-                            'url': v.url,
-                            'timestamp': v.timestamp,
-                            'end_time': v.timestamp,
-                            'scroll_depth': s_depth,
-                            'section_views': s_views,
-                            'count': 1
-                        })
-                        
-                sessions.append({
-                    'num': len(sessions) + 1,
-                    'start': s_start,
-                    'end': s_end,
-                    'duration_seconds': s_dur,
-                    'visits': current_session_visits,
-                    'steps': session_steps
-                })
+                sessions.append(build_session_object(current_session_visits, len(sessions) + 1))
                 current_session_visits = [v]
             else:
                 current_session_visits.append(v)
                 
     if current_session_visits:
-        s_start = current_session_visits[0].timestamp
-        s_end = current_session_visits[-1].timestamp
-        s_dur = int((s_end - s_start).total_seconds())
-        
-        session_steps = []
-        for v in current_session_visits:
-            s_depth = getattr(v, 'scroll_depth', 0) or 0
-            s_views = getattr(v, 'section_views', None) or ''
-            if session_steps and session_steps[-1]['url'] == v.url:
-                session_steps[-1]['count'] += 1
-                session_steps[-1]['end_time'] = v.timestamp
-                if s_depth > session_steps[-1]['scroll_depth']:
-                    session_steps[-1]['scroll_depth'] = s_depth
-                if s_views:
-                    session_steps[-1]['section_views'] = s_views
-            else:
-                session_steps.append({
-                    'url': v.url,
-                    'timestamp': v.timestamp,
-                    'end_time': v.timestamp,
-                    'scroll_depth': s_depth,
-                    'section_views': s_views,
-                    'count': 1
-                })
-                
-        sessions.append({
-            'num': len(sessions) + 1,
-            'start': s_start,
-            'end': s_end,
-            'duration_seconds': s_dur,
-            'visits': current_session_visits,
-            'steps': session_steps
-        })
+        sessions.append(build_session_object(current_session_visits, len(sessions) + 1))
         
     total_active_seconds = sum(s['duration_seconds'] for s in sessions)
+    
+    # Auto-flag as bot if multiple dead 404 paths were scanned
+    has_scanner_behavior = any(s['analysis'].get('dead_probes_count', 0) >= 2 for s in sessions)
+    if has_scanner_behavior:
+        is_auto_bot_journey = True
+        bot_status = 'auto'
 
     return render_template('admin/journey_details.html', 
                           ip=ip, 

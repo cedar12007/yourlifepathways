@@ -137,7 +137,7 @@
             {% if referrer_filter %}
                 <br><span style="font-size: 0.8em; color: #2b6cb0; font-weight: 600;"><i class="fa-solid fa-filter"></i> {{ referrer_filter|truncate(40) }}</span>
             {% endif %}
-            <br><span style="font-size: 0.8em;">(Sorted by {{ 'Views' if sort_by == 'views' else 'Recent' }})</span>
+            <br><span style="font-size: 0.8em;">(Sorted by {{ 'Views' if sort_by == 'views' else ('Session Length' if sort_by in ['duration', 'session_length'] else 'Recent') }})</span>
         </div>
 
         {% if next_ip %}
@@ -155,7 +155,7 @@
         <i class="fa-solid fa-robot" style="font-size: 1.5rem;"></i>
         <div>
             IDENTIFIED AS BOT / AUTOMATED TRAFFIC
-            <div style="font-size: 0.75rem; font-weight: normal; margin-top: 0.2rem;">This activity was auto-detected based on its user agent string.</div>
+            <div style="font-size: 0.75rem; font-weight: normal; margin-top: 0.2rem;">This activity was auto-detected based on automated scanner probe behavior or user agent signature.</div>
         </div>
     </div>
     {% endif %}
@@ -231,14 +231,14 @@
 
     <div style="margin-top: 2rem;">
         {% for session in sessions %}
-        <div style="margin-bottom: 1.5rem; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 8px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.04);">
-            <div style="background: #f8fafc; padding: 0.75rem 1.25rem; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e2e8f0;">
+        <div style="margin-bottom: 2rem; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 10px; overflow: hidden; box-shadow: 0 2px 5px rgba(0,0,0,0.04);">
+            <div style="background: #f8fafc; padding: 0.85rem 1.25rem; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e2e8f0; flex-wrap: wrap; gap: 8px;">
                 <div style="font-weight: 700; color: #0f2d59; font-size: 0.95rem; display: flex; align-items: center; gap: 8px;">
                     <i class="fa-solid fa-clock-rotate-left" style="color: #3182ce;"></i>
                     Session {{ session.num }}
                     <span style="color: #718096; font-weight: normal; font-size: 0.85rem;">• {{ session.start.strftime('%Y-%m-%d') }}</span>
                 </div>
-                <div style="font-size: 0.85rem; color: #4a5568;">
+                <div style="font-size: 0.85rem; color: #4a5568; display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
                     <span style="font-weight: 600; color: #2e7d32;">
                         {% if session.duration_seconds < 60 %}
                             {{ session.duration_seconds }}s
@@ -248,51 +248,144 @@
                             {{ (session.duration_seconds / 3600)|int }}h {{ ((session.duration_seconds % 3600) / 60)|int }}m
                         {% endif %}
                     </span>
-                    <span style="color: #a0aec0; margin: 0 4px;">|</span>
-                    {{ session.visits|length }} page{{ 's' if session.visits|length != 1 else '' }}
+                    <span style="color: #a0aec0;">|</span>
+                    <strong style="color: #1d3a5e;">{{ session.analysis.unique_pages_count }}</strong> page{{ 's' if session.analysis.unique_pages_count != 1 else '' }}
+                    {% if session.analysis.dead_probes_count and session.analysis.dead_probes_count > 0 %}
+                        <span style="color: #c53030; font-size: 0.75rem; font-weight: 700;">(+{{ session.analysis.dead_probes_count }} 404 probes)</span>
+                    {% endif %}
+                    <span style="color: #a0aec0; font-size: 0.75rem;">({{ session.raw_count }} events)</span>
+                    <span style="color: #a0aec0;">|</span>
+                    <button type="button" onclick="toggleRawView({{ session.num }}, this)" style="background: none; border: 1px solid #cbd5e0; border-radius: 4px; padding: 2px 8px; font-size: 0.72rem; color: #4a5568; cursor: pointer; display: inline-flex; align-items: center; gap: 4px;" title="Toggle unedited raw database URLs">
+                        <i class="fa-solid fa-code"></i> Raw Log
+                    </button>
                 </div>
             </div>
-            <div class="journey-timeline" style="margin: 0; padding: 1rem 1.25rem;">
-                {% for step in (session.steps if session.steps is defined else session.visits) %}
+
+            <!-- Executive Session Insights Box -->
+            <div style="background: #fdfdfd; border-bottom: 1px solid #edf2f7; padding: 1rem 1.25rem;">
+                <div style="display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 8px;">
+                    <span style="background: {{ session.analysis.engagement.bg }}; color: {{ session.analysis.engagement.color }}; border: 1px solid {{ session.analysis.engagement.color }}33; padding: 3px 10px; border-radius: 12px; font-size: 0.76rem; font-weight: 700; display: inline-flex; align-items: center; gap: 5px;">
+                        <i class="{{ session.analysis.engagement.icon }}"></i> {{ session.analysis.engagement.label }}
+                    </span>
+                    <span style="background: #ffffff; color: #2d3748; border: 1px solid #e2e8f0; padding: 3px 10px; border-radius: 12px; font-size: 0.76rem; font-weight: 600; display: inline-flex; align-items: center; gap: 5px;">
+                        <i class="fa-solid fa-file-lines" style="color: #4a5568;"></i> {{ session.analysis.unique_pages_count }} Unique Page{{ 's' if session.analysis.unique_pages_count != 1 else '' }} Visited
+                    </span>
+                    {% if session.analysis.dead_probes_count and session.analysis.dead_probes_count > 0 %}
+                    <span style="background: #fff5f5; color: #c53030; border: 1px solid #feb2b2; padding: 3px 10px; border-radius: 12px; font-size: 0.76rem; font-weight: 700; display: inline-flex; align-items: center; gap: 5px;" title="Requests to non-existing pages that returned 404 Not Found">
+                        <i class="fa-solid fa-ban"></i> {{ session.analysis.dead_probes_count }} Dead Routes Probed (404s)
+                    </span>
+                    {% endif %}
+                    {% if session.analysis.total_dwell_seconds > 0 %}
+                    <span style="background: #ffffff; color: #2e7d32; border: 1px solid #c8e6c9; padding: 3px 10px; border-radius: 12px; font-size: 0.76rem; font-weight: 600; display: inline-flex; align-items: center; gap: 5px;">
+                        <i class="fa-solid fa-stopwatch" style="color: #2e7d32;"></i> Active Read: {{ session.analysis.formatted_dwell }}
+                    </span>
+                    {% endif %}
+                    {% if session.analysis.max_depth > 0 %}
+                    <span style="background: #ffffff; color: #3182ce; border: 1px solid #bee3f8; padding: 3px 10px; border-radius: 12px; font-size: 0.76rem; font-weight: 600; display: inline-flex; align-items: center; gap: 5px;">
+                        <i class="fa-solid fa-arrows-up-down" style="color: #3182ce;"></i> Max Scroll: {{ session.analysis.max_depth }}%
+                    </span>
+                    {% endif %}
+                </div>
+                
+                {% if session.analysis.section_breakdown and session.analysis.section_breakdown|length > 0 %}
+                <div style="margin-top: 10px; padding-top: 10px; border-top: 1px solid #edf2f7;">
+                    <div style="font-size: 0.72rem; font-weight: 700; color: #1a202c; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; display: flex; align-items: center; gap: 6px;">
+                        <i class="fa-solid fa-stopwatch" style="color: #3182ce;"></i> Time Spent per Section & Page (Calculated):
+                    </div>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 8px;">
+                        {% for item in session.analysis.section_breakdown %}
+                        <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 8px; padding: 7px 11px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 1px 2px rgba(0,0,0,0.02);">
+                            <div style="display: flex; align-items: center; gap: 8px; min-width: 0;">
+                                <i class="{{ item.icon }}" style="color: #4a5568; font-size: 0.8rem; flex-shrink: 0;"></i>
+                                <span style="font-size: 0.78rem; font-weight: 600; color: #2d3748; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="{{ item.name }}">
+                                    {{ item.name }}
+                                </span>
+                            </div>
+                            <div style="text-align: right; flex-shrink: 0; margin-left: 8px;">
+                                <span style="background: #ebf8ff; color: #2b6cb0; border: 1px solid #bee3f8; border-radius: 12px; padding: 2px 7px; font-size: 0.74rem; font-weight: 700; white-space: nowrap;">
+                                    {{ item.formatted_total }}
+                                </span>
+                                {% if item.active_reading_seconds > 0 and item.active_reading_seconds != item.total_seconds %}
+                                <div style="font-size: 0.64rem; color: #718096; margin-top: 1px;" title="Active reading attention in viewport">
+                                    {{ item.formatted_active }} active
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Synthesized Story Analysis Timeline -->
+            <div id="session-analysis-{{ session.num }}" class="journey-timeline" style="margin: 0; padding: 1.25rem;">
+                {% for step in session.steps %}
                 <div class="timeline-item" style="padding-bottom: 0.85rem; margin-bottom: 0.85rem; border-bottom: 1px dashed #edf2f7;">
                     <div class="timeline-date">
                         <span class="local-time" data-utc="{{ step.timestamp.isoformat() if step.timestamp else '' }}">{{
                             step.timestamp.strftime('%H:%M:%S') if step.timestamp else '' }}</span>
                     </div>
                     <div style="flex-grow: 1;">
-                        <div class="timeline-url" style="display: flex; align-items: center; flex-wrap: wrap; gap: 8px;">
-                            <a href="{{ step.url }}" target="_blank" style="color: #2b6cb0; text-decoration: none; font-weight: 500;">{{ step.url }}</a>
-                            
-                            {% if step.count is defined and step.count > 1 %}
-                                <span style="background: #edf2f7; color: #4a5568; font-size: 0.72rem; font-weight: 600; padding: 2px 7px; border-radius: 12px; border: 1px solid #cbd5e0; white-space: nowrap;">
-                                    <i class="fa-solid fa-rotate-right" style="font-size: 0.65rem; color: #718096; margin-right: 3px;"></i> Reloaded {{ step.count }}x
+                        <div style="display: flex; align-items: center; flex-wrap: wrap; gap: 8px;">
+                            <span style="font-weight: 700; font-size: 0.92rem; color: #0f2d59; display: inline-flex; align-items: center; gap: 6px;">
+                                <i class="{{ step.icon }}" style="color: {{ step.badge_color }};"></i>
+                                {{ step.title }}
+                            </span>
+
+                            {% if step.is_404 %}
+                                <span style="background: #fed7d7; color: #9b2c2c; border: 1px solid #feb2b2; padding: 2px 8px; border-radius: 12px; font-size: 0.72rem; font-weight: 700; white-space: nowrap;">
+                                    <i class="fa-solid fa-triangle-exclamation" style="margin-right: 3px;"></i> 404 Not Found
                                 </span>
                             {% endif %}
                             
-                            {% if step.scroll_depth is defined and step.scroll_depth > 0 %}
-                                {% if step.scroll_depth >= 85 %}
+                            <!-- Time Spent on this Step -->
+                            {% if step.duration_seconds and step.duration_seconds > 0 %}
+                                <span style="background: #e6fffa; color: #234e52; border: 1px solid #b2f5ea; padding: 2px 8px; border-radius: 12px; font-size: 0.72rem; font-weight: 700; white-space: nowrap;" title="Time spent on this section/page before moving to next action">
+                                    <i class="fa-regular fa-clock" style="color: #319795; margin-right: 3px;"></i> {{ step.formatted_duration }} spent
+                                </span>
+                            {% else %}
+                                <span style="background: #f7fafc; color: #718096; border: 1px solid #e2e8f0; padding: 2px 8px; border-radius: 12px; font-size: 0.72rem; font-weight: 500; white-space: nowrap;" title="Instant transition (< 1 second)">
+                                    <i class="fa-regular fa-clock" style="margin-right: 3px;"></i> &lt; 1s
+                                </span>
+                            {% endif %}
+
+                            {% if step.active_reading_seconds and step.active_reading_seconds > 0 and step.active_reading_seconds != step.duration_seconds %}
+                                <span style="background: #f0fff4; color: #22543d; border: 1px solid #c6f6d5; padding: 2px 7px; border-radius: 12px; font-size: 0.7rem; font-weight: 600; white-space: nowrap;" title="Active reading attention on this section">
+                                    <i class="fa-solid fa-eye" style="color: #38a169; margin-right: 3px;"></i> {{ step.active_reading_seconds }}s active read
+                                </span>
+                            {% endif %}
+
+                            {% if step.count > 1 %}
+                                <span style="background: #edf2f7; color: #4a5568; font-size: 0.7rem; font-weight: 600; padding: 2px 7px; border-radius: 12px; border: 1px solid #cbd5e0; white-space: nowrap;">
+                                    Viewed {{ step.count }}x
+                                </span>
+                            {% endif %}
+                            
+                            {% if step.depth and step.depth > 0 %}
+                                {% if step.depth >= 85 %}
                                     <span style="background: #e6fffa; color: #234e52; border: 1px solid #b2f5ea; padding: 2px 8px; border-radius: 12px; font-size: 0.72rem; font-weight: 600; white-space: nowrap;">
                                         <i class="fa-solid fa-check-double" style="color: #319795; margin-right: 3px;"></i> Read 100%
                                     </span>
-                                {% elif step.scroll_depth >= 45 %}
+                                {% elif step.depth >= 45 %}
                                     <span style="background: #ebf8ff; color: #2b6cb0; border: 1px solid #bee3f8; padding: 2px 8px; border-radius: 12px; font-size: 0.72rem; font-weight: 600; white-space: nowrap;">
-                                        <i class="fa-solid fa-arrows-up-down" style="color: #3182ce; margin-right: 3px;"></i> Scrolled {{ step.scroll_depth }}%
+                                        <i class="fa-solid fa-arrows-up-down" style="color: #3182ce; margin-right: 3px;"></i> Scrolled {{ step.depth }}%
                                     </span>
                                 {% else %}
                                     <span style="background: #fffaf0; color: #744210; border: 1px solid #feebc8; padding: 2px 8px; border-radius: 12px; font-size: 0.72rem; font-weight: 600; white-space: nowrap;">
-                                        <i class="fa-solid fa-arrow-down" style="color: #dd6b20; margin-right: 3px;"></i> Skimmed {{ step.scroll_depth }}%
+                                        <i class="fa-solid fa-arrow-down" style="color: #dd6b20; margin-right: 3px;"></i> Skimmed {{ step.depth }}%
                                     </span>
                                 {% endif %}
                             {% endif %}
                         </div>
 
-                        {% if step.section_views is defined and step.section_views %}
-                        <div style="margin-top: 6px; display: flex; align-items: center; flex-wrap: wrap; gap: 6px;">
+                        {% if step.section_views %}
+                        <div style="margin-top: 5px; display: flex; align-items: center; flex-wrap: wrap; gap: 6px;">
                             <span style="font-size: 0.72rem; color: #718096; font-weight: 600;">Attention:</span>
                             {% for sec_item in step.section_views.split(',') %}
                                 {% if ':' in sec_item %}
                                     {% set sec_parts = sec_item.split(':') %}
-                                    <span style="background: #f7fafc; color: #4a5568; border: 1px solid #e2e8f0; border-radius: 4px; padding: 2px 7px; font-size: 0.72rem; display: inline-flex; align-items: center; gap: 4px;">
+                                    <span style="background: #f7fafc; color: #4a5568; border: 1px solid #e2e8f0; border-radius: 4px; padding: 2px 7px; font-size: 0.7rem; display: inline-flex; align-items: center; gap: 4px;">
                                         <i class="fa-solid fa-eye" style="font-size: 0.65rem; color: #3182ce;"></i>
                                         <span>#{{ sec_parts[0] }}</span>
                                         <strong style="color: #2d3748;">{{ sec_parts[1] }}</strong>
@@ -300,6 +393,36 @@
                                 {% endif %}
                             {% endfor %}
                         </div>
+                        {% endif %}
+
+                        <div style="margin-top: 4px;">
+                            <a href="{{ step.url }}" target="_blank" style="color: #a0aec0; font-size: 0.7rem; text-decoration: none; word-break: break-all;">
+                                {{ step.url|truncate(80) }}
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+
+            <!-- Raw Unedited Database Log (Collapsible) -->
+            <div id="session-raw-{{ session.num }}" class="journey-timeline" style="margin: 0; padding: 1.25rem; display: none;">
+                <div style="background: #fffaf0; border: 1px solid #feebc8; color: #7b341e; padding: 6px 12px; border-radius: 6px; font-size: 0.75rem; margin-bottom: 12px;">
+                    <i class="fa-solid fa-terminal"></i> Showing unedited raw database entries recorded for this session.
+                </div>
+                {% for r in session.raw_steps %}
+                <div class="timeline-item" style="padding-bottom: 0.5rem; margin-bottom: 0.5rem; border-bottom: 1px dashed #edf2f7;">
+                    <div class="timeline-date">
+                        <span class="local-time" data-utc="{{ r.timestamp.isoformat() if r.timestamp else '' }}">{{
+                            r.timestamp.strftime('%H:%M:%S') if r.timestamp else '' }}</span>
+                    </div>
+                    <div style="font-family: monospace; font-size: 0.75rem; word-break: break-all;">
+                        <a href="{{ r.url }}" target="_blank" style="color: #2b6cb0;">{{ r.url }}</a>
+                        {% if r.scroll_depth > 0 %}
+                            <span style="color: #718096; margin-left: 6px;">[depth: {{ r.scroll_depth }}%]</span>
+                        {% endif %}
+                        {% if r.section_views %}
+                            <span style="color: #d69e2e; margin-left: 6px;">[sections: {{ r.section_views }}]</span>
                         {% endif %}
                     </div>
                 </div>
@@ -331,6 +454,25 @@
     </div>
 
     <script>
+        // Toggle between Synthesized Story View and Unedited Raw DB Log
+        function toggleRawView(sessionNum, btn) {
+            const analysisEl = document.getElementById('session-analysis-' + sessionNum);
+            const rawEl = document.getElementById('session-raw-' + sessionNum);
+            if (!analysisEl || !rawEl) return;
+            
+            if (rawEl.style.display === 'none' || rawEl.style.display === '') {
+                analysisEl.style.display = 'none';
+                rawEl.style.display = 'block';
+                btn.innerHTML = '<i class="fa-solid fa-list-check"></i> Story View';
+                btn.style.background = '#edf2f7';
+            } else {
+                analysisEl.style.display = 'block';
+                rawEl.style.display = 'none';
+                btn.innerHTML = '<i class="fa-solid fa-code"></i> Raw Log';
+                btn.style.background = 'none';
+            }
+        }
+
         // Keyboard Arrow Navigation (Left Arrow = Previous Journey, Right Arrow = Next Journey)
         document.addEventListener('keydown', function (e) {
             const tag = (e.target.tagName || '').toLowerCase();
