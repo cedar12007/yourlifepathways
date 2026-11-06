@@ -11,7 +11,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
     <meta name="description" content="{% block meta_description %}{{ meta_description if meta_description else (page_description if page_description else 'Navigate your career, leadership, and personal evolution with YourLifePathways. ICF-aligned career, business, executive, and life coaching by Erez Asif.') }}{% endblock %}">
     <meta name="keywords"
-        content="Career Coaching, Business Coaching, Executive Coaching, Life Coaching, Executive Leadership Coaching, Career Strategy & Growth, Professional Development Mentor, Leadership Presence, Performance Coaching, Career Transition Strategy, Hiring Manager Insider Coaching, Student Leadership Development, Youth Career Mentorship, ICF Certified Coach, Strategic Career Planning, High-Performance Coaching, Emotional Intelligence for Leaders, Career Foundations for Teens, Student Athlete Mentoring, Executive Presence Training, Authentic Leadership Coaching, Workplace Navigation Strategy, Career Milestones Coaching, Goal Achievement Coaching, Erez Asif.">
+        content="Career Coaching, Business Coaching, Executive Coaching, Life Coaching, Executive Leadership Coaching, Career Strategy & Growth, Professional Development Mentor, Leadership Presence, Performance Coaching, Career Transition Strategy, Hiring Manager Insider Coaching, Student Leadership Development, Youth Career Mentorship, ICF Certified Coach, Strategic Career Planning, High-Performance Coaching, Emotional Intelligence for Leaders, Career Foundations for Teens, Student Athlete Mentoring, Executive Presence Training, Authentic Leadership Coaching, Workplace Navigation Strategy, Career Milestones Coaching, Goal Achievement Coaching, Israeli Tech Career Coach, Bilingual Coaching English Hebrew, Relocation Coaching Israel to US, Israeli Expat Leadership Coach, Coaching for Israelis in Tech, Cross-Cultural Tech Coach, אימון קריירה, אימון מנהלים בעברית, אימון אישי עברית, אימון רילוקיישן לארהב, אימון קריירה הייטק, US-Israel Corporate Transition Coach, Erez Asif.">
     <meta name="author" content="YourLifePathways">
     <meta name="msvalidate.01" content="D49AD5CBA7A62DBB632CFB8979302D8C" />
     <title>{% block title %}{% if page_title %}{{ page_title }}{% else %}YourLifePathways | Career, Business, Executive & Life Coaching | Erez Asif{% endif %}{% endblock %}</title>
@@ -62,6 +62,82 @@
         content="{% block twitter_description %}{{ meta_description if meta_description else (page_description if page_description else 'Navigate your career, leadership, and personal evolution with YourLifePathways. ICF-aligned career, business, executive, and life coaching by Erez Asif.') }}{% endblock %}">
     <meta property="twitter:image"
         content="{% block twitter_image %}{{ url_for('static', filename='images/logo_yourlifepathways_coaching_horizontal.png', _external=True) }}{% endblock %}">
+
+    <!-- Schema.org JSON-LD Structured Data for Search Engines -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@type": "Person",
+          "@id": "https://www.yourlifepathways.com/#erez-asif",
+          "name": "Erez Asif",
+          "jobTitle": "Executive, Business, Career & Life Coach",
+          "worksFor": {
+            "@type": "Organization",
+            "name": "SAP"
+          },
+          "alumniOf": {
+            "@type": "EducationalOrganization",
+            "name": "Erickson Coaching International"
+          },
+          "knowsLanguage": [
+            {
+              "@type": "Language",
+              "name": "English",
+              "alternateName": "en"
+            },
+            {
+              "@type": "Language",
+              "name": "Hebrew",
+              "alternateName": "he"
+            }
+          ],
+          "sameAs": [
+            "https://www.linkedin.com/in/erez-asif",
+            "https://www.credly.com/badges/f0c77125-87ed-4ce2-9c6e-4c153ff211cb/public_url"
+          ],
+          "description": "SAP Global Coach, Erickson Professional Coach (ICF Level 2 Accredited), and global technology leader offering executive, career, and life coaching. Bilingual English and Hebrew sessions specializing in leadership presence, career strategy, and cross-cultural relocation coaching for tech leaders and Israeli expats."
+        },
+        {
+          "@type": "ProfessionalService",
+          "@id": "https://www.yourlifepathways.com/#organization",
+          "name": "YourLifePathways Coaching",
+          "url": "https://www.yourlifepathways.com",
+          "logo": "https://www.yourlifepathways.com/static/images/logo_your_life_pathways.png",
+          "image": "https://www.yourlifepathways.com/static/images/profile/profile_pic_circle.png",
+          "founder": {
+            "@id": "https://www.yourlifepathways.com/#erez-asif"
+          },
+          "areaServed": [
+            {
+              "@type": "Country",
+              "name": "United States"
+            },
+            {
+              "@type": "Country",
+              "name": "Israel"
+            },
+            {
+              "@type": "AdministrativeArea",
+              "name": "Global"
+            }
+          ],
+          "knowsLanguage": ["en", "he"],
+          "serviceType": [
+            "Executive Leadership Coaching",
+            "Career Strategy & Transition Coaching",
+            "Bilingual English/Hebrew Career Coaching",
+            "Israeli Tech Relocation & Cross-Cultural Coaching",
+            "Life & Mindset Coaching",
+            "ICF-Accredited Coaching",
+            "אימון קריירה ומנהלים בעברית"
+          ],
+          "description": "ICF-aligned career, business, executive, and life coaching by Erez Asif. Bilingual coaching in English and Hebrew (עברית) for global tech professionals, leaders, and Israeli expats navigating US corporate leadership."
+        }
+      ]
+    }
+    </script>
     {% block extra_head_elements %}{% endblock %}
 </head>
 
