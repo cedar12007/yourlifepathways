@@ -170,9 +170,16 @@ def tracking_stats():
     total_count_query = query
     total_visitors = total_count_query.count()
     
-    # 4. Apply Duration Filter (Hide 0s duration by default)
+    # 4. Apply Duration Filter (Hide 0s bounces by default, but keep single-page readers with verified telemetry)
+    from sqlalchemy import or_
     if not show_all:
-        query = query.having(func.max(SiteVisit.timestamp) > func.min(SiteVisit.timestamp))
+        query = query.having(
+            or_(
+                func.max(SiteVisit.timestamp) > func.min(SiteVisit.timestamp),
+                func.coalesce(func.max(SiteVisit.scroll_depth), 0) >= 50,
+                func.count(SiteVisit.section_views) > 0
+            )
+        )
     
     # Count after bounce filter, before limit
     filtered_count = query.count()
@@ -294,13 +301,15 @@ def tracking_stats():
             'first': row.earliest_visit
         } for row in lifetime_stats_query}
 
-        # OPTIMIZATION: Fetch true active session time and detect 404 scanners in ONE query
+        # OPTIMIZATION: Fetch true active session time, telemetry reading dwell, and detect 404 scanners in ONE query
         ip_active_seconds = defaultdict(int)
         ip_dead_routes = defaultdict(int)
         ts_query = db.session.query(
             SiteVisit.visitor_ip,
             SiteVisit.timestamp,
-            SiteVisit.url
+            SiteVisit.url,
+            SiteVisit.scroll_depth,
+            SiteVisit.section_views
         ).filter(SiteVisit.visitor_ip.in_(ip_list))
         if date_filter is not None:
             ts_query = ts_query.filter(date_filter)
@@ -340,11 +349,21 @@ def tracking_stats():
             return False
 
         ip_ts_map = defaultdict(list)
-        for r_ip, r_ts, r_url in ts_rows:
+        ip_telemetry_secs = defaultdict(int)
+        for r_ip, r_ts, r_url, r_depth, r_sections in ts_rows:
             ip_ts_map[r_ip].append(r_ts)
             r_path = urlparse(r_url or '').path.rstrip('/') or '/'
             if not is_valid_site_path(r_path, valid_blog_slugs):
                 ip_dead_routes[r_ip] += 1
+            if r_sections:
+                for part in r_sections.split(','):
+                    if ':' in part:
+                        try:
+                            ip_telemetry_secs[r_ip] += int(part.split(':')[1].rstrip('s'))
+                        except ValueError:
+                            pass
+            elif (r_depth or 0) >= 50 and ip_telemetry_secs[r_ip] == 0:
+                ip_telemetry_secs[r_ip] = max(ip_telemetry_secs[r_ip], 15)
             
         for r_ip, t_list in ip_ts_map.items():
             if not t_list:
@@ -358,7 +377,9 @@ def tracking_stats():
                 else:
                     curr.append(t)
             sessions.append(curr)
-            ip_active_seconds[r_ip] = sum(int((s[-1] - s[0]).total_seconds()) for s in sessions)
+            calc_active = sum(int((s[-1] - s[0]).total_seconds()) for s in sessions)
+            tel_active = ip_telemetry_secs.get(r_ip, 0)
+            ip_active_seconds[r_ip] = max(calc_active, tel_active)
 
     def format_secs_short(s):
         if s < 1:
@@ -373,6 +394,7 @@ def tracking_stats():
     from utils import is_bot, parse_user_agent, parse_referrer_query, is_datacenter_location
     
     journeys = []
+    hidden_bots_count = 0
     
     for row in raw_journeys:
         # Tuple unpacking: ip, location, first, last, views
@@ -388,6 +410,7 @@ def tracking_stats():
         bot_status = 'auto' if is_auto_bot else None
 
         if hide_bots and bot_status:
+            hidden_bots_count += 1
             continue
             
         first_ref = referrers[0] if referrers else None
@@ -401,6 +424,7 @@ def tracking_stats():
         lifetime['valid_views'] = max(0, views - dead_cnt)
         lifetime['is_scanner_bot'] = is_scanner_bot
         lifetime['is_dc_bot'] = is_dc_bot
+        lifetime['is_single_page_reader'] = (lifetime['valid_views'] <= 1 and active_sec >= 15)
         
         journeys.append((ip, loc, first, last, views, referrers, clean_ua, search_term, bot_status, lifetime))
     
@@ -427,6 +451,8 @@ def tracking_stats():
                           sort_by=sort_by,
                           showing_count=len(journeys),
                           filtered_count=filtered_count,
+                          hidden_bots_count=hidden_bots_count,
+                          raw_count=len(raw_journeys),
                           total_visitors=total_visitors,
                           top_referrers=top_referrers,
                           noindex=True)
@@ -509,7 +535,14 @@ def view_journey(ip):
     query = query.group_by(SiteVisit.visitor_ip)
     
     if not show_all:
-        query = query.having(func.max(SiteVisit.timestamp) > func.min(SiteVisit.timestamp))
+        from sqlalchemy import or_
+        query = query.having(
+            or_(
+                func.max(SiteVisit.timestamp) > func.min(SiteVisit.timestamp),
+                func.coalesce(func.max(SiteVisit.scroll_depth), 0) >= 50,
+                func.count(SiteVisit.section_views) > 0
+            )
+        )
     
     if sort_by == 'views':
         query = query.order_by(func.count(SiteVisit.id).desc(), func.max(SiteVisit.timestamp).desc())
@@ -880,6 +913,10 @@ def view_journey(ip):
             if step.get('active_reading_seconds', 0) > dur:
                 dur = step['active_reading_seconds']
 
+            # For single-step journeys, use total active dwell if dur would otherwise be 0
+            if dur == 0 and total_dwell_seconds > 0 and len(steps) == 1:
+                dur = total_dwell_seconds
+
             step['duration_seconds'] = dur
             step['formatted_duration'] = format_secs(dur) if dur > 0 else "< 1s"
 
@@ -970,7 +1007,7 @@ def view_journey(ip):
             'num': num,
             'start': s_start,
             'end': s_end,
-            'duration_seconds': s_dur,
+            'duration_seconds': max(s_dur, total_dwell_seconds),
             'visits': v_list,
             'steps': steps,
             'raw_steps': raw_steps,
@@ -1077,6 +1114,133 @@ def cleanup_tracking_data():
             'success': False,
             'error': str(e)
         }), 500
+
+
+def purge_noise_visits(older_than_days=0, include_bots=True, dry_run=False):
+    """
+    Finds and purges noise traffic:
+    1. Single-hit drive-by visits (< 1s) with no reading telemetry (scroll_depth < 25, no section_views)
+    2. Automated bots (datacenter IPs, bot user agents, 404 path scanners)
+    """
+    from datetime import datetime, timezone, timedelta
+    from models import SiteVisit
+    from extensions import db
+    from sqlalchemy import func, or_
+    from utils import is_bot, is_datacenter_location
+
+    cutoff = None
+    if older_than_days > 0:
+        cutoff = datetime.now(timezone.utc) - timedelta(days=older_than_days)
+
+    q = db.session.query(SiteVisit.visitor_ip)
+    if cutoff:
+        q = q.filter(SiteVisit.timestamp < cutoff)
+
+    # 1. IPs where all visits are single-hit (<1s) with NO reading telemetry
+    zero_sec_ips_query = q.group_by(SiteVisit.visitor_ip).having(
+        func.max(SiteVisit.timestamp) == func.min(SiteVisit.timestamp),
+        func.coalesce(func.max(SiteVisit.scroll_depth), 0) < 25,
+        or_(func.max(SiteVisit.section_views).is_(None), func.max(SiteVisit.section_views) == '')
+    )
+    zero_sec_ips = [r[0] for r in zero_sec_ips_query.all()]
+    
+    target_visit_ids = set()
+    chunk_size = 500
+    if zero_sec_ips:
+        for i in range(0, len(zero_sec_ips), chunk_size):
+            chunk = zero_sec_ips[i:i + chunk_size]
+            visits_q = db.session.query(SiteVisit.id).filter(
+                SiteVisit.visitor_ip.in_(chunk),
+                func.coalesce(SiteVisit.scroll_depth, 0) < 25,
+                or_(SiteVisit.section_views.is_(None), SiteVisit.section_views == '')
+            )
+            if cutoff:
+                visits_q = visits_q.filter(SiteVisit.timestamp < cutoff)
+            for v_id, in visits_q.all():
+                target_visit_ids.add(v_id)
+
+    # 2. Check for bot visits if include_bots is True
+    detected_bot_ips = set()
+    if include_bots:
+        bot_cand_query = db.session.query(
+            SiteVisit.visitor_ip,
+            SiteVisit.user_agent,
+            SiteVisit.visitor_location
+        ).distinct(SiteVisit.visitor_ip)
+        if cutoff:
+            bot_cand_query = bot_cand_query.filter(SiteVisit.timestamp < cutoff)
+        
+        for b_ip, b_ua, b_loc in bot_cand_query.all():
+            if b_ip in zero_sec_ips:
+                continue
+            if is_bot(b_ua or '') or is_datacenter_location(b_loc or ''):
+                detected_bot_ips.add(b_ip)
+        
+        if detected_bot_ips:
+            b_list = list(detected_bot_ips)
+            for i in range(0, len(b_list), chunk_size):
+                chunk = b_list[i:i + chunk_size]
+                b_visits = db.session.query(SiteVisit.id).filter(SiteVisit.visitor_ip.in_(chunk))
+                if cutoff:
+                    b_visits = b_visits.filter(SiteVisit.timestamp < cutoff)
+                for v_id, in b_visits.all():
+                    target_visit_ids.add(v_id)
+
+    total_visits = len(target_visit_ids)
+    all_affected_ips = set(zero_sec_ips) | detected_bot_ips
+    estimated_kb = (total_visits * 500) / 1024
+
+    if not dry_run and total_visits > 0:
+        id_list = list(target_visit_ids)
+        for i in range(0, len(id_list), chunk_size):
+            chunk = id_list[i:i + chunk_size]
+            SiteVisit.query.filter(SiteVisit.id.in_(chunk)).delete(synchronize_session=False)
+        db.session.commit()
+
+    return {
+        'total_visits': total_visits,
+        'unique_ips': len(all_affected_ips),
+        'estimated_kb': round(estimated_kb, 1),
+        'dry_run': dry_run,
+        'older_than_days': older_than_days
+    }
+
+
+@admin_bp.route('/tracking/cleanup-noise', methods=['POST'])
+@admin_required
+def cleanup_noise():
+    """Preview or delete noise visits (< 1s duration, no telemetry, bots)"""
+    try:
+        timeframe = request.form.get('timeframe', '7d')
+        include_bots = request.form.get('include_bots', 'true').lower() == 'true'
+        execute = request.form.get('execute') == 'true'
+
+        days_map = {
+            'all': 0,
+            '1d': 1,
+            '7d': 7,
+            '14d': 14,
+            '30d': 30
+        }
+        older_than_days = days_map.get(timeframe, 7)
+
+        result = purge_noise_visits(
+            older_than_days=older_than_days,
+            include_bots=include_bots,
+            dry_run=not execute
+        )
+
+        return jsonify({
+            'success': True,
+            'preview': not execute,
+            'total_visits': result['total_visits'],
+            'unique_ips': result['unique_ips'],
+            'estimated_kb': result['estimated_kb'],
+            'message': f"Found {result['total_visits']:,} noise visits (< 1s & bots) across {result['unique_ips']:,} IPs." if not execute else f"Successfully deleted {result['total_visits']:,} noise visits!"
+        })
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'success': False, 'error': str(e)}), 500
 
 
 @admin_bp.route('/update-ip-location', methods=['POST'])

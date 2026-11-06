@@ -59,6 +59,25 @@ from utils import get_client_ip
 
 # Using executor from extensions.py
 
+_last_noise_cleanup = 0
+
+def check_periodic_noise_cleanup(app_context):
+    global _last_noise_cleanup
+    import time
+    now = time.time()
+    if now - _last_noise_cleanup < 86400:  # Check at most once every 24 hours
+        return
+    _last_noise_cleanup = now
+    if os.getenv('AUTO_CLEAN_NOISE', 'no').lower() == 'yes':
+        try:
+            from routes_admin import purge_noise_visits
+            days = int(os.getenv('NOISE_RETENTION_DAYS', '7'))
+            with app_context:
+                res = purge_noise_visits(older_than_days=days, include_bots=True, dry_run=False)
+                print(f"[Periodic Cleanup] Purged {res['total_visits']} noise visits older than {days} days.")
+        except Exception as e:
+            print(f"[Periodic Cleanup] Error: {e}")
+
 @app.before_request
 def handle_legacy_image_redirects():
     # Fallback redirect if an external crawler/cache requests a moved blog image at /static/images/<file>
@@ -186,6 +205,9 @@ def log_visit(response):
                 except Exception as e:
                     db.session.rollback()
                     print(f"    - Background logging error: {e}")
+
+            # 4. Check for periodic automated noise purge (once per 24 hours if enabled)
+            check_periodic_noise_cleanup(app_context)
 
         # Use a thread pool executor instead of spawning new threads manually
         executor.submit(save_log_task, app.app_context(), ip, url, ua, endpoint, view_args, referrer)
