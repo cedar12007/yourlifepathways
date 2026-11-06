@@ -689,40 +689,38 @@ $(document).ready(function () {
 		if (isAtBottom) {
 			currentSection = $sections.last();
 		} else {
-			// 2. Otherwise find the section currently in view
+			// 2. Continuous scrollspy without margin dead-zones: find the active section
+			currentSection = $sections.first();
 			$sections.each(function () {
 				var $section = $(this);
 				var sectionTop = $section.offset().top - 130;
-				var sectionBottom = sectionTop + $section.outerHeight();
-				if (scrollTop >= sectionTop && scrollTop < sectionBottom) {
+				if (scrollTop >= sectionTop) {
 					currentSection = $section;
-					return false;
+				} else {
+					return false; // Sections are in DOM order; stop at first section ahead
 				}
 			});
-
-			// 3. Fallback for the space between sections or past last section
-			if (!currentSection) {
-				var $lastSection = $sections.last();
-				if (scrollTop >= $lastSection.offset().top - 130) {
-					currentSection = $lastSection;
-				}
-			}
 		}
 
 		// Update active classes
 		$navLinks.removeClass('active');
 		if (currentSection) {
 			var id = currentSection.attr('id');
+			var navTargetId = (id === 'spotlight') ? 'intro' : id;
 			var foundMatch = false;
 			$navLinks.each(function () {
 				var $link = $(this);
 				var href = $link.attr('href');
 				// Match both relative anchors and full path anchors
-				if (href && (href === '#' + id || href.endsWith('#' + id))) {
+				if (href && (href === '#' + navTargetId || href.endsWith('#' + navTargetId))) {
 					$link.addClass('active');
 					foundMatch = true;
 				}
 			});
+
+			if (!foundMatch) {
+				$navLinks.first().addClass('active');
+			}
 
 			// Log section view
 			if (id !== trackedSectionId) {

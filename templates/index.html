@@ -107,11 +107,91 @@
 					<span class="signature-name">Erez Asif</span>
 					<span class="signature-title">Business, Executive & Life Coach</span>
 				</div>
+
+				<!-- Proof & Credential Bar -->
+				<div class="hero-trust-bar" style="margin-top: 2em; clear: both;">
+					<!-- Item 1: SAP Global Coach -->
+					<div class="trust-item">
+						<div class="trust-item-icon">
+							<img src="{{ url_for('static', filename='images/sap_logo.png') }}" alt="SAP Logo">
+						</div>
+						<div class="trust-item-text">
+							<span class="trust-item-title">SAP Global Coach</span>
+							<span class="trust-item-desc">Enterprise Leadership Mentorship</span>
+						</div>
+					</div>
+
+					<!-- Item 2: Erickson / ICF -->
+					<div class="trust-item">
+						<div class="trust-item-icon">
+							<img src="{{ url_for('static', filename='images/erickson_logo.png') }}" alt="Erickson Coaching">
+						</div>
+						<div class="trust-item-text">
+							<span class="trust-item-title">Erickson Certified</span>
+							<span class="trust-item-desc">ICF Level 2 Accredited</span>
+						</div>
+					</div>
+
+					<!-- Item 3: 25+ Years Tech Leadership -->
+					<div class="trust-item">
+						<div class="trust-item-icon">
+							<i class="fa-solid fa-briefcase"></i>
+						</div>
+						<div class="trust-item-text">
+							<span class="trust-item-title">25+ Yrs Tech Leadership</span>
+							<span class="trust-item-desc">Global Engineering Leader</span>
+						</div>
+					</div>
+
+					<!-- Item 4: Free Discovery Call -->
+					<a href="#contact" class="trust-item trust-item-link scrolly" data-track="credential_bar_discovery_call" title="Click to book your free 30-minute discovery call">
+						<div class="trust-item-icon">
+							<i class="fa-solid fa-calendar-check" style="color: #16a34a !important;"></i>
+						</div>
+						<div class="trust-item-text">
+							<span class="trust-item-title">30-Min Discovery Call <i class="fa-solid fa-arrow-right" style="font-size: 0.72rem; margin-left: 3px; opacity: 0.7;"></i></span>
+							<span class="trust-item-desc">100% Free &amp; Confidential</span>
+						</div>
+					</a>
+				</div>
 			</div>
 		</div>
 	</div>
 </section>
 
+<!-- Executive Spotlight Card -->
+<section id="spotlight" class="main" style="margin: 2.5em 0 2em 0; padding-top: 0;">
+	<div class="executive-spotlight-card">
+		
+		<!-- Header Tag -->
+		<div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; margin-bottom: 1em; gap: 8px;">
+			<span style="font-size: 0.75em; text-transform: uppercase; letter-spacing: 2px; color: #1d3a5e; font-weight: 700; background: #e0e7ff; padding: 4px 10px; border-radius: 4px;">
+				Executive Spotlight
+			</span>
+		</div>
+
+		<!-- Quote -->
+		<blockquote>
+			“Every session with Erez pushes me to think more critically and intentionally about H.O.P.E.’s future. His coaching has helped me connect our immediate need for capital with the planning, staffing, and governance needed to support sustainable growth.”
+		</blockquote>
+
+		<!-- Author Details & CTA -->
+		<div class="spotlight-author-wrap" style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px; padding-top: 1.2em; border-top: 1px solid #e2e8f0;">
+			<div style="display: flex; align-items: center; gap: 16px;">
+				<img src="{{ url_for('static', filename='images/donna_hurley.png') }}" alt="Donna B. Hurley, CEO of H.O.P.E." class="spotlight-avatar" style="width: 74px; height: 74px; border-radius: 50%; object-fit: cover; border: 2.5px solid #cbd5e1; box-shadow: 0 2px 8px rgba(0,0,0,0.1); flex-shrink: 0;">
+				<div>
+					<strong style="color: #1d3a5e; font-size: 1.05em; display: block; line-height: 1.25;">Donna B. Hurley</strong>
+					<span style="color: #475569; font-size: 0.88em; display: block; margin-top: 3px; line-height: 1.35;">President &amp; CEO, Housing Options &amp; Planning Enterprises, Inc. (H.O.P.E.)</span>
+					<span style="color: #94a3b8; font-size: 0.8em; display: block; margin-top: 2px; line-height: 1.3;">HUD-Approved Housing Counseling Agency &bull; Washington DC Metro Area</span>
+				</div>
+			</div>
+			<div class="spotlight-cta-btn">
+				<a href="{{ url_for('main.non_profits_and_mission_driven_organizations') }}#impact-story" class="button small" data-track="read_impact_story">Read Impact Story</a>
+			</div>
+		</div>
+
+	</div>
+</section>
 
 <!-- About Me -->
 <section id="about_me" class="main">
@@ -289,40 +369,6 @@
 	</div>
 </section>
 
-<!-- Executive Spotlight Card -->
-<section id="spotlight" class="main" style="margin: 3.5em 0; padding-top: 0;">
-	<div class="executive-spotlight-card">
-		
-		<!-- Header Tag -->
-		<div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; margin-bottom: 1em; gap: 8px;">
-			<span style="font-size: 0.75em; text-transform: uppercase; letter-spacing: 2px; color: #1d3a5e; font-weight: 700; background: #e0e7ff; padding: 4px 10px; border-radius: 4px;">
-				Executive Spotlight
-			</span>
-		</div>
-
-		<!-- Quote -->
-		<blockquote>
-			“Every session with Erez pushes me to think more critically and intentionally about H.O.P.E.’s future. His coaching has helped me connect our immediate need for capital with the planning, staffing, and governance needed to support sustainable growth.”
-		</blockquote>
-
-		<!-- Author Details & CTA -->
-		<div class="spotlight-author-wrap" style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px; padding-top: 1.2em; border-top: 1px solid #e2e8f0;">
-			<div style="display: flex; align-items: center; gap: 16px;">
-				<img src="{{ url_for('static', filename='images/donna_hurley.png') }}" alt="Donna B. Hurley, CEO of H.O.P.E." class="spotlight-avatar" style="width: 74px; height: 74px; border-radius: 50%; object-fit: cover; border: 2.5px solid #cbd5e1; box-shadow: 0 2px 8px rgba(0,0,0,0.1); flex-shrink: 0;">
-				<div>
-					<strong style="color: #1d3a5e; font-size: 1.05em; display: block; line-height: 1.25;">Donna B. Hurley</strong>
-					<span style="color: #475569; font-size: 0.88em; display: block; margin-top: 3px; line-height: 1.35;">President &amp; CEO, Housing Options &amp; Planning Enterprises, Inc. (H.O.P.E.)</span>
-					<span style="color: #94a3b8; font-size: 0.8em; display: block; margin-top: 2px; line-height: 1.3;">HUD-Approved Housing Counseling Agency &bull; Washington DC Metro Area</span>
-				</div>
-			</div>
-			<div class="spotlight-cta-btn">
-				<a href="{{ url_for('main.non_profits_and_mission_driven_organizations') }}#impact-story" class="button small" data-track="read_impact_story">Read Impact Story</a>
-			</div>
-		</div>
-
-	</div>
-</section>
-
 <!-- Community Section -->
 <section id="community" class="main">
 	<header class="major">
@@ -392,7 +438,7 @@
 					src="{{ url_for('static', filename='images/volleyball_coaching.jpeg') }}"
 					alt="Volleyball Coaching"></span></a> from elementary through high school.
 		While it began as an opportunity to share unique settings with my children, my passion quickly expanded far beyond being a "parent coach."</p>
-	<p>Today, I coach JV boys volleyball at a local high school. While athletic coaching involves drills and tactics, my true passion has always been the mindset: developing resilience under pressure, building trust within a team, and helping individuals discover what they are capable of. Whether on the court or in an executive setting, the underlying mission is the same: helping you recognize your true potential and giving you the tools to reach it.</p>
+	<p>Today, I coach <a href="#" id="jv-volleyball-link" class="link-preview">JV boys volleyball<span class="thumbnail-preview"><img src="{{ url_for('static', filename='images/jv_volleyball.jpeg') }}" alt="JV Boys Volleyball Coaching"></span></a> at a local high school. While athletic coaching involves drills and tactics, my true passion has always been the mindset: developing resilience under pressure, building trust within a team, and helping individuals discover what they are capable of. Whether on the court or in an executive setting, the underlying mission is the same: helping you recognize your true potential and giving you the tools to reach it.</p>
 
 	<!-- Soccer Coaching Modal -->
 	<div id="soccerCoachingModal" class="modal">
@@ -414,12 +460,24 @@
 		</div>
 	</div>
 
+	<!-- JV Boys Volleyball Modal -->
+	<div id="jvVolleyballModal" class="modal">
+		<div class="modal-content large" style="padding: 10px; overflow: auto;">
+			<button class="close-btn" id="jvVolleyballClose"
+				style="position: absolute; top: 8px; right: 15px; z-index: 1; font-size: 32px; color: white; background: rgba(0,0,0,0.5); border-radius: 50%; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;">&times;</button>
+			<img src="{{ url_for('static', filename='images/jv_volleyball.jpeg') }}" alt="JV Boys Volleyball Coaching"
+				style="width: 100%; height: auto; border-radius: 4px; display: block;">
+		</div>
+	</div>
+
 	<script>
 		(function () {
 			function setupModal(linkId, modalId, closeId) {
 				var link = document.getElementById(linkId);
 				var modal = document.getElementById(modalId);
 				var closeBtn = document.getElementById(closeId);
+
+				if (!link || !modal || !closeBtn) return;
 
 				link.addEventListener('click', function (e) {
 					e.preventDefault();
@@ -436,6 +494,8 @@
 			}
 			setupModal('soccer-coaching-link', 'soccerCoachingModal', 'soccerCoachingClose');
 			setupModal('volleyball-coaching-link', 'volleyballCoachingModal', 'volleyballCoachingClose');
+			setupModal('jv-volleyball-link', 'jvVolleyballModal', 'jvVolleyballClose');
+			setupModal('table-jv-volleyball-link', 'jvVolleyballModal', 'jvVolleyballClose');
 
 			function setupThumbTrigger(thumbId, modalId) {
 				var thumb = document.getElementById(thumbId);
@@ -458,6 +518,7 @@
 
 			setupThumbTrigger('soccer-thumb-btn', 'soccerCoachingModal');
 			setupThumbTrigger('volleyball-thumb-btn', 'volleyballCoachingModal');
+			setupThumbTrigger('jv-volleyball-thumb-btn', 'jvVolleyballModal');
 		})();
 	</script>
 
@@ -477,6 +538,13 @@
 						<div class="sports-hover-preview">
 							<img src="{{ url_for('static', filename='images/volleyball_coaching.jpeg') }}" alt="High School Volleyball Coaching - Full View" loading="lazy">
 							<span class="sports-hover-caption">High School Volleyball Coaching</span>
+						</div>
+					</div>
+					<div class="sports-thumb-wrapper" id="jv-volleyball-thumb-btn" role="button" tabindex="0" aria-label="View JV boys volleyball coaching photo" title="Click or tap to view full photo">
+						<img src="{{ url_for('static', filename='images/jv_volleyball.jpeg') }}" alt="High School JV Boys Volleyball Coaching" loading="lazy" class="sports-thumb-img">
+						<div class="sports-hover-preview">
+							<img src="{{ url_for('static', filename='images/jv_volleyball.jpeg') }}" alt="High School JV Boys Volleyball Coaching - Full View" loading="lazy">
+							<span class="sports-hover-caption">High School JV Boys Volleyball</span>
 						</div>
 					</div>
 				</div>
@@ -504,7 +572,7 @@
 					<tr>
 						<td>2026</td>
 						<td>Volleyball</td>
-						<td>High School JV Boys</td>
+						<td><a href="#" id="table-jv-volleyball-link" class="link-preview">High School JV Boys<span class="thumbnail-preview"><img src="{{ url_for('static', filename='images/jv_volleyball.jpeg') }}" alt="JV Boys Volleyball Coaching"></span></a></td>
 						<td>Head Coach</td>
 					</tr>
 					<tr>
