@@ -164,12 +164,18 @@ def log_visit(response):
         referrer = resolve_referrer(raw_referrer=referrer, args=request.args, target_url=url)
 
         def save_log_task(app_context, ip, url, ua, endpoint, view_args, referrer):
-            from utils import get_ip_location
+            from utils import get_ip_details
             
-            # 1. DO GEOLOCATION FIRST (Slow network I/O)
-            location = get_ip_location(ip)
+            # 1. DO GEOLOCATION & DATACENTER CHECK (Slow network I/O)
+            ip_info = get_ip_details(ip)
             
-            # 2. OPEN DB CONTEXT ONLY FOR THE WRITE (Fast)
+            # 2. DO NOT LOG DATACENTER / CLOUD VPS / PROXY BOTS
+            if ip_info.get('is_datacenter'):
+                return
+            
+            location = ip_info.get('location')
+            
+            # 3. OPEN DB CONTEXT ONLY FOR THE WRITE (Fast)
             with app_context:
                 try:
                     # Save general visit

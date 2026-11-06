@@ -370,7 +370,7 @@ def tracking_stats():
         else:
             return f"{s // 3600}h {(s % 3600) // 60}m"
     
-    from utils import is_bot, parse_user_agent, parse_referrer_query
+    from utils import is_bot, parse_user_agent, parse_referrer_query, is_datacenter_location
     
     journeys = []
     
@@ -383,7 +383,8 @@ def tracking_stats():
         
         dead_cnt = ip_dead_routes.get(ip, 0)
         is_scanner_bot = dead_cnt >= 2
-        is_auto_bot = is_bot(ua) or is_scanner_bot
+        is_dc_bot = is_datacenter_location(loc)
+        is_auto_bot = is_bot(ua) or is_scanner_bot or is_dc_bot
         bot_status = 'auto' if is_auto_bot else None
 
         if hide_bots and bot_status:
@@ -399,6 +400,7 @@ def tracking_stats():
         lifetime['dead_routes'] = dead_cnt
         lifetime['valid_views'] = max(0, views - dead_cnt)
         lifetime['is_scanner_bot'] = is_scanner_bot
+        lifetime['is_dc_bot'] = is_dc_bot
         
         journeys.append((ip, loc, first, last, views, referrers, clean_ua, search_term, bot_status, lifetime))
     
@@ -997,9 +999,11 @@ def view_journey(ip):
         
     total_active_seconds = sum(s['duration_seconds'] for s in sessions)
     
-    # Auto-flag as bot if multiple dead 404 paths were scanned
+    # Auto-flag as bot if multiple dead 404 paths were scanned or datacenter ISP
     has_scanner_behavior = any(s['analysis'].get('dead_probes_count', 0) >= 2 for s in sessions)
-    if has_scanner_behavior:
+    from utils import is_datacenter_location
+    is_dc_bot = any(is_datacenter_location(v.visitor_location) for v in visits)
+    if has_scanner_behavior or is_dc_bot:
         is_auto_bot_journey = True
         bot_status = 'auto'
 

@@ -260,7 +260,7 @@
                         {% if is_bot == 'auto' %}
                         <span
                             style="background: #e74c3c; color: white; padding: 2px 8px; border-radius: 4px; font-size: 0.7rem; font-weight: bold; vertical-align: middle; margin-left: 8px;"
-                            title="Auto-detected Bot{% if lifetime.is_scanner_bot %} (404 Scanner: probed non-existent paths){% endif %}">BOT{% if lifetime.is_scanner_bot %} (Scanner){% endif %}</span>
+                            title="Auto-detected Bot{% if lifetime.is_dc_bot %} (Datacenter / Cloud Server Probe){% elif lifetime.is_scanner_bot %} (404 Scanner: probed non-existent paths){% endif %}">BOT{% if lifetime.is_dc_bot %} (Datacenter){% elif lifetime.is_scanner_bot %} (Scanner){% endif %}</span>
                         {% elif is_bot == 'manual' %}
                         <span
                             style="background: #c0392b; color: white; padding: 2px 8px; border-radius: 4px; font-size: 0.7rem; font-weight: bold; vertical-align: middle; margin-left: 8px; border: 1px dotted #ffcccb;"

@@ -93,25 +93,71 @@ def get_client_ip():
 
     return request.remote_addr or ''
 
-def get_ip_location(ip_address):
-    """Fetches geolocation for a given IP address using ip-api.com."""
+DATACENTER_ISP_KEYWORDS = (
+    'tencent', 'alibaba', 'contabo', 'netcup', 'datacamp', 'oracle',
+    'google llc', 'google cloud', 'amazon', 'aws', 'digitalocean', 'linode',
+    'hetzner', 'ovh', 'choopa', 'vultr', 'm247', 'hostinger', 'leaseweb',
+    'cogent', 'fastly', 'akamai', 'server', 'hosting', 'datacenter', 'data center',
+    'cloud', 'vps', 'dedicated', 'colocation', 'vpn', 'proxy', 'tor exit',
+    'anxholding', 'unified layer', 'ophl', 'tzulo', 'scaleway', 'rackspace'
+)
+
+_ip_classification_cache = {}
+
+def get_ip_details(ip_address):
+    """
+    Fetches geolocation and datacenter/hosting classification using ip-api.com.
+    Returns dict: {'location': str, 'is_datacenter': bool, 'isp': str}
+    """
     if not ip_address or ip_address in ['127.0.0.1', '::1']:
-        return "Localhost"
-    
-    # In case a list was passed
+        return {'location': 'Localhost', 'is_datacenter': False, 'isp': 'Local'}
+
     ip_address = ip_address.split(',')[0].strip()
-    
+
+    if ip_address in _ip_classification_cache:
+        return _ip_classification_cache[ip_address]
+
+    result = {'location': 'Location unavailable', 'is_datacenter': False, 'isp': ''}
     try:
-        # Using http because some environments block https for this API or it's free tier
-        response = requests.get(f"http://ip-api.com/json/{ip_address}", timeout=1.5)
+        url = f"http://ip-api.com/json/{ip_address}?fields=status,message,country,regionName,city,isp,org,as,hosting"
+        response = requests.get(url, timeout=1.5)
         if response.status_code == 200:
             data = response.json()
             if data.get('status') == 'success':
-                return f"{data.get('city')}, {data.get('regionName')}, {data.get('country')} (ISP: {data.get('isp')})"
-            return f"Unknown Location ({data.get('message', 'API Error')})"
+                isp = (data.get('isp') or '').strip()
+                org = (data.get('org') or '').strip()
+                as_name = (data.get('as') or '').strip()
+                is_hosting = data.get('hosting', False)
+
+                # Check if datacenter / cloud provider
+                isp_full = f"{isp} {org} {as_name}".lower()
+                is_datacenter = is_hosting or any(kw in isp_full for kw in DATACENTER_ISP_KEYWORDS)
+
+                location_str = f"{data.get('city')}, {data.get('regionName')}, {data.get('country')} (ISP: {isp})"
+                result = {
+                    'location': location_str,
+                    'is_datacenter': is_datacenter,
+                    'isp': isp
+                }
     except Exception as e:
-        print(f"Geolocation error for IP {ip_address}: {e}")
-    return "Location unavailable"
+        print(f"Geolocation/Datacenter check error for IP {ip_address}: {e}")
+
+    # Keep cache bound
+    if len(_ip_classification_cache) > 2000:
+        _ip_classification_cache.clear()
+    _ip_classification_cache[ip_address] = result
+    return result
+
+def get_ip_location(ip_address):
+    """Fetches geolocation for a given IP address using ip-api.com."""
+    return get_ip_details(ip_address).get('location', 'Location unavailable')
+
+def is_datacenter_location(location_str):
+    """Checks if an existing location string contains known datacenter ISP signatures."""
+    if not location_str:
+        return False
+    loc_lower = location_str.lower()
+    return any(kw in loc_lower for kw in DATACENTER_ISP_KEYWORDS)
 
 def slugify(text):
     text = text.lower()
