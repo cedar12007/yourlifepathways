@@ -2,17 +2,27 @@
 
 {% block extra_head_elements %}
 <style>
-#impact-story {
+#impact-story,
+#impact-story-club-raros {
 	scroll-margin-top: 130px !important;
 }
 .executive-spotlight-card {
-	background: linear-gradient(135deg, #f8fafc 0%, #ffffff 100%);
-	border: 1px solid #e2e8f0;
-	border-left: 5px solid #1d3a5e;
+	background: #ffffff;
+	border: 1px solid #cbd5e1;
+	border-top: 4px solid #1d3a5e;
+	border-left: 4px solid #1d3a5e;
 	border-radius: 12px;
-	box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+	box-shadow: 0 4px 18px rgba(15, 23, 42, 0.06);
 	padding: 2.2em 2em;
 	margin: 2.5em 0;
+	transition: transform 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease;
+}
+.executive-spotlight-card:hover {
+	transform: translateY(-4px);
+	border-color: #93c5fd;
+	border-top-color: #0284c7;
+	border-left-color: #0284c7;
+	box-shadow: 0 12px 30px rgba(29, 58, 94, 0.14);
 }
 .executive-spotlight-card blockquote {
 	font-size: 0.98em !important;
@@ -33,15 +43,45 @@
 .executive-spotlight-card blockquote p:last-child {
 	margin-bottom: 0 !important;
 }
+.spotlight-cta-btn .button.small,
+.spotlight-cta-btn a {
+	width: auto !important;
+	display: inline-flex !important;
+	align-items: center !important;
+	gap: 6px !important;
+	padding: 0.45em 1.15em !important;
+	font-size: 0.8em !important;
+	font-weight: 600 !important;
+	border-radius: 6px !important;
+	background: #f8fafc !important;
+	border: 1px solid #cbd5e1 !important;
+	color: #1d3a5e !important;
+	box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04) !important;
+	transition: all 0.2s ease !important;
+	line-height: 1.5 !important;
+	height: auto !important;
+	text-decoration: none !important;
+}
+.spotlight-cta-btn .button.small:hover,
+.spotlight-cta-btn a:hover,
+.executive-spotlight-card:hover .spotlight-cta-btn .button.small,
+.executive-spotlight-card:hover .spotlight-cta-btn a {
+	background: #eef6ff !important;
+	border-color: #93c5fd !important;
+	color: #1d4ed8 !important;
+	box-shadow: 0 2px 8px rgba(37, 99, 235, 0.12) !important;
+}
 @media screen and (max-width: 768px) {
-	#impact-story {
+	#impact-story,
+	#impact-story-club-raros {
 		scroll-margin-top: 85px !important;
 	}
 	.executive-spotlight-card {
-		padding: 1.25em 1.1em !important;
+		padding: 1.35em 1.2em !important;
 		margin: 1.75em 0 !important;
+		border-top-width: 4px !important;
 		border-left-width: 4px !important;
-		border-radius: 8px !important;
+		border-radius: 10px !important;
 	}
 	.executive-spotlight-card blockquote,
 	.executive-spotlight-card blockquote p {
@@ -66,8 +106,8 @@
 		text-align: center !important;
 	}
 	.spotlight-avatar {
-		width: 64px !important;
-		height: 64px !important;
+		width: 58px !important;
+		height: 58px !important;
 	}
 }
 </style>
@@ -132,10 +172,10 @@ non-profit and Mission-Driven organizations and leaders in the Washington DC Met
 			broader community.
 		</p>
 
-		<!-- Leadership Impact Story -->
+		<!-- Leadership Impact Story: H.O.P.E. -->
 		<div id="impact-story" class="executive-spotlight-card">
 			<div style="display: flex; justify-content: space-between; align-items: baseline; flex-wrap: wrap; margin-bottom: 1em; gap: 10px;">
-				<h3 style="margin: 0; color: #1d3a5e;">Leadership Spotlight: Organizational Strategy &amp; Sustainable Growth</h3>
+				<h3 style="margin: 0; color: #1d3a5e;">Leadership Spotlight: Housing Options &amp; Planning Enterprises (H.O.P.E.)</h3>
 				<span style="font-size: 0.8em; color: #1d3a5e; text-transform: uppercase; letter-spacing: 1px; font-weight: 700; background: #e0e7ff; padding: 4px 10px; border-radius: 4px;">Executive Case Example</span>
 			</div>
 
@@ -163,16 +203,63 @@ non-profit and Mission-Driven organizations and leaders in the Washington DC Met
 			</blockquote>
 
 			<div class="spotlight-author-wrap" style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px; padding-top: 1.2em; border-top: 1px solid #e2e8f0;">
-				<div style="display: flex; align-items: center; gap: 16px;">
+				<div style="display: flex; align-items: flex-start; gap: 16px;">
 					<img src="{{ url_for('static', filename='images/donna_hurley.png') }}" alt="Donna B. Hurley, CEO of H.O.P.E." class="spotlight-avatar" style="width: 74px; height: 74px; border-radius: 50%; object-fit: cover; border: 2.5px solid #cbd5e1; box-shadow: 0 2px 8px rgba(0,0,0,0.1); flex-shrink: 0;">
 					<div>
-						<strong style="color: #1d3a5e; font-size: 1.05em; display: block; line-height: 1.25;">Donna B. Hurley</strong>
-						<span style="color: #475569; font-size: 0.88em; display: block; margin-top: 2px; line-height: 1.35;">President &amp; CEO, Housing Options &amp; Planning Enterprises, Inc. (H.O.P.E.)</span>
-						<span style="color: #94a3b8; font-size: 0.8em; display: block; margin-top: 2px; line-height: 1.3;">HUD-Approved Housing Counseling Agency &bull; Washington DC Metro Area</span>
+						<strong style="color: #1d3a5e; font-size: 1.05em; display: block; line-height: 1.25; margin-bottom: 3px;">Donna B. Hurley</strong>
+						<span style="color: #475569; font-size: 0.88em; display: block; line-height: 1.35; margin-bottom: 2px;">President &amp; CEO, Housing Options &amp; Planning Enterprises, Inc. (H.O.P.E.)</span>
+						<span style="color: #94a3b8; font-size: 0.8em; display: block; line-height: 1.3;">HUD-Approved Housing Counseling Agency &bull; Washington DC Metro Area</span>
 					</div>
 				</div>
 				<div class="spotlight-cta-btn">
 					<a href="https://www.hopefinancial.org" target="_blank" rel="noopener noreferrer" class="button small">Visit hopefinancial.org</a>
+				</div>
+			</div>
+		</div>
+
+		<!-- Leadership Impact Story: El Club de los Raros -->
+		<div id="impact-story-club-raros" class="executive-spotlight-card">
+			<div style="display: flex; justify-content: space-between; align-items: baseline; flex-wrap: wrap; margin-bottom: 1em; gap: 10px;">
+				<h3 style="margin: 0; color: #1d3a5e;">Leadership Spotlight: El Club de los Raros</h3>
+				<span style="font-size: 0.8em; color: #1d3a5e; text-transform: uppercase; letter-spacing: 1px; font-weight: 700; background: #e0e7ff; padding: 4px 10px; border-radius: 4px;">Executive Case Example</span>
+			</div>
+
+			<!-- Organization Context Inset -->
+			<div style="background: #f1f5f9; border-radius: 8px; border-left: 3px solid #94a3b8; padding: 1.1em 1.35em; margin-bottom: 1.75em;">
+				<div style="font-size: 0.72em; text-transform: uppercase; letter-spacing: 1.5px; font-weight: 700; color: #64748b; margin-bottom: 0.4em;">
+					About the Organization
+				</div>
+				<p style="color: #475569; font-size: 0.9em; line-height: 1.65; margin: 0;">
+					Based in Seville, Spain, <strong>El Club de los Raros</strong> promotes reading and its everyday benefits so that they become part of more lives, creating better conditions for reading to happen through secondhand books, community spaces, and social and environmental projects.
+				</p>
+			</div>
+
+			<!-- Testimonial Quote -->
+			<blockquote>
+				<p>
+					“When I started the coaching process, I was navigating a challenging period, balancing the demands of running a social enterprise with the need for greater personal clarity and direction.”
+				</p>
+				<p>
+					“Our work together has helped me approach the next steps in our social enterprise with greater confidence, while also overcoming some of my own self-imposed limitations.”
+				</p>
+				<p>
+					“What I particularly appreciated was the combination of professionalism, genuine humanity, and flexibility to adapt the process to my needs. It created a space of trust where I could reflect openly, challenge my assumptions, and grow both as a social entrepreneur and as a person.”
+				</p>
+			</blockquote>
+
+			<div class="spotlight-author-wrap" style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px; padding-top: 1.2em; border-top: 1px solid #e2e8f0;">
+				<div style="display: flex; align-items: flex-start; gap: 16px;">
+					<div class="spotlight-avatar" style="width: 74px; height: 74px; border-radius: 12px; background: #ffffff; border: 2.5px solid #cbd5e1; box-shadow: 0 2px 8px rgba(0,0,0,0.1); display: flex; align-items: center; justify-content: center; padding: 6px; flex-shrink: 0; box-sizing: border-box;">
+						<img src="{{ url_for('static', filename='images/club_de_los_raros_logo.png') }}" alt="El Club de los Raros Logo" style="max-width: 100%; max-height: 100%; object-fit: contain; display: block;">
+					</div>
+					<div>
+						<strong style="color: #1d3a5e; font-size: 1.05em; display: block; line-height: 1.25; margin-bottom: 3px;">Ginés Haro Pastor</strong>
+						<span style="color: #475569; font-size: 0.88em; display: block; line-height: 1.35; margin-bottom: 2px;">Founder &amp; Director, El Club de los Raros</span>
+						<span style="color: #94a3b8; font-size: 0.8em; display: block; line-height: 1.3;">Social Enterprise &bull; Making Reading Accessible To Everyone &bull; Seville, Spain</span>
+					</div>
+				</div>
+				<div class="spotlight-cta-btn">
+					<a href="https://www.elclubdelosraros.com" target="_blank" rel="noopener noreferrer" class="button small">Visit elclubdelosraros.com</a>
 				</div>
 			</div>
 		</div>
