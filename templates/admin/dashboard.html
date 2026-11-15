@@ -76,13 +76,25 @@
                             data-format="date">{{ post.date_created.strftime('%Y-%m-%d') if post.date_created else ''
                             }}</span></td>
                     <td>
-                        <span
-                            class="post-status {% if post.is_deleted %}status-deleted{% else %}status-active{% endif %}">
-                            {{ 'Deleted' if post.is_deleted else 'Active' }}
-                        </span>
+                        {% if post.is_deleted %}
+                        <span class="post-status status-deleted">Archived</span>
+                        {% elif post.is_draft %}
+                        <span class="post-status" style="background: #fef3c7; color: #92400e; font-weight: 700; border: 1px solid #fde68a;">Draft</span>
+                        {% else %}
+                        <span class="post-status status-active">Published</span>
+                        {% endif %}
                     </td>
                     <td class="admin-actions">
                         <a href="{{ url_for('admin.edit_post', post_id=post.id) }}" class="btn-admin btn-edit">Edit</a>
+                        {% if not post.is_deleted %}
+                        <form action="{{ url_for('admin.toggle_publish', post_id=post.id) }}" method="POST">
+                            {% if post.is_draft %}
+                            <button type="submit" class="btn-admin" style="background: #10b981 !important; color: #fff !important;" title="Publish this draft live immediately">Publish</button>
+                            {% else %}
+                            <button type="submit" class="btn-admin" style="background: #d97706 !important; color: #fff !important;" title="Unpublish this post and make it a draft">Draft</button>
+                            {% endif %}
+                        </form>
+                        {% endif %}
                         <form action="{{ url_for('admin.toggle_delete', post_id=post.id) }}" method="POST"
                             onsubmit="handleAjaxAction(event, this);">
                             {% if post.is_deleted %}

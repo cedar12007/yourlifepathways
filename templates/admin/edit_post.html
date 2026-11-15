@@ -9,8 +9,14 @@
     <a href="{{ url_for('admin.dashboard') }}" class="admin-back-link">
         <i class="fa-solid fa-arrow-left"></i> Back to Admin
     </a>
-    <header class="major">
-        <h2>{{ 'Edit Post' if post else 'Create New Post' }}</h2>
+    <header class="major" style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;">
+        <h2 style="margin: 0;">{{ 'Edit Post' if post else 'Create New Post' }}</h2>
+        {% if post %}
+        <span class="status-badge" style="{% if post.is_draft %}background: #fef3c7; color: #92400e; border: 1px solid #fde68a;{% else %}background: #e3fcef; color: #064; border: 1px solid #bbf7d0;{% endif %} font-size: 0.85rem; padding: 5px 12px; border-radius: 6px; font-weight: 700; display: inline-flex; align-items: center; gap: 6px;">
+            <i class="fa-solid {% if post.is_draft %}fa-file-pen{% else %}fa-circle-check{% endif %}"></i>
+            {{ 'Draft (Not Public)' if post.is_draft else 'Published Live' }}
+        </span>
+        {% endif %}
     </header>
 
     <div class="admin-form-container">
@@ -27,19 +33,6 @@
                 <small style="color: #666;">This defines the URL. Example: my-new-post</small>
             </div>
 
-            <script>
-                function generateSlug(text) {
-                    {% if not post %}
-                    const slugInput = document.getElementById('slug');
-                    slugInput.value = text.toLowerCase()
-                        .trim()
-                        .replace(/[^\w\s-]/g, '')
-                        .replace(/[\s_-]+/g, '-')
-                        .replace(/^-+|-+$/g, '');
-                    {% endif %}
-                }
-            </script>
-
             <div class="form-group">
                 <label for="category">Category</label>
                 <input type="text" id="category" name="category" value="{{ post.category if post else '' }}">
@@ -52,16 +45,29 @@
             </div>
 
             <div class="form-group">
-                <label for="canonical_url">Canonical URL (Optional - for syndicated content)</label>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5em;">
+                    <label for="canonical_url" style="margin-bottom: 0;">Canonical URL (Optional - for syndicated content)</label>
+                    <button type="button" id="btn-prefill-substack" 
+                        style="background: none; border: 1px solid #cbd5e1; border-radius: 4px; padding: 2px 10px; font-size: 0.75rem; color: #475569; cursor: pointer; display: inline-flex; align-items: center; gap: 5px;">
+                        <i class="fa-solid fa-link"></i> Use Substack URL
+                    </button>
+                </div>
                 <input type="url" id="canonical_url" name="canonical_url" 
                     value="{{ post.canonical_url if post and post.canonical_url else '' }}"
-                    placeholder="https://example.com/original-article">
-                <small style="color: #666;">Leave empty to use this site's URL. Set this if the post was originally published elsewhere (e.g., Substack, Medium)</small>
+                    placeholder="https://notaicoach.substack.com/p/your-post-slug">
+                <small style="color: #666;">Leave empty to use this site's URL. Example: <code>https://notaicoach.substack.com/p/your-post-slug</code></small>
             </div>
 
             <div class="form-group">
-                <label for="summary">Summary (Search Engine Snippet)</label>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5em;">
+                    <label for="summary" style="margin-bottom: 0;">Summary (Search Engine Snippet)</label>
+                    <button type="button" id="btn-sync-summary" 
+                        style="background: none; border: 1px solid #cbd5e1; border-radius: 4px; padding: 2px 10px; font-size: 0.75rem; color: #475569; cursor: pointer; display: inline-flex; align-items: center; gap: 5px;">
+                        <i class="fa-solid fa-wand-magic-sparkles"></i> Auto-fill from Content
+                    </button>
+                </div>
                 <textarea id="summary" name="summary" required>{{ post.summary if post else '' }}</textarea>
+                <small id="summary-counter" style="color: #666; display: block; margin-top: 4px;">0 / 155 characters (Recommended SEO length: 140–160)</small>
             </div>
 
             <div class="form-group">
@@ -70,11 +76,267 @@
                     class="content-editor">{{ post.content if post else '' }}</textarea>
             </div>
 
-            <div class="form-actions">
-                <button type="submit" class="button primary">Save Post</button>
+            <div class="form-actions" style="display: flex; gap: 10px; flex-wrap: wrap; align-items: center;">
+                <button type="submit" name="status_action" value="publish" class="button primary" style="display: inline-flex; align-items: center; gap: 8px;">
+                    <i class="fa-solid fa-paper-plane"></i> {{ 'Publish Post' if not post or post.is_draft else 'Update Published Post' }}
+                </button>
+                <button type="submit" name="status_action" value="draft" class="button" style="background: #d97706 !important; color: #fff !important; display: inline-flex; align-items: center; gap: 8px;">
+                    <i class="fa-solid fa-file-pen"></i> {{ 'Save as Draft' if not post or post.is_draft else 'Unpublish & Save as Draft' }}
+                </button>
+                <button type="submit" formaction="{{ url_for('admin.preview_post') }}" formtarget="_blank" class="button" style="background: #2563eb !important; color: #fff !important; display: inline-flex; align-items: center; gap: 8px;">
+                    <i class="fa-solid fa-arrow-up-right-from-square"></i> Preview in New Tab
+                </button>
+                <button type="button" id="btn-quick-preview" class="button" style="background: #475569 !important; color: #fff !important; display: inline-flex; align-items: center; gap: 8px;">
+                    <i class="fa-solid fa-eye"></i> Quick Preview
+                </button>
                 <a href="{{ url_for('admin.dashboard', admin='true') }}" class="button btn-cancel">Cancel</a>
             </div>
         </form>
     </div>
+
+    <!-- Quick Preview Modal -->
+    <div id="quick-preview-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.75); backdrop-filter: blur(4px); z-index: 99999; overflow-y: auto; padding: 25px 15px; box-sizing: border-box;">
+        <div style="max-width: 860px; margin: 20px auto; background: #ffffff; border-radius: 12px; box-shadow: 0 20px 50px rgba(0,0,0,0.3); overflow: hidden; position: relative;">
+            <!-- Modal Header -->
+            <div style="background: #0f2d59; color: #ffffff; padding: 14px 24px; display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #38bdf8;">
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <span style="background: #38bdf8; color: #0f2d59; font-weight: 800; font-size: 0.7rem; padding: 3px 8px; border-radius: 4px; text-transform: uppercase; letter-spacing: 0.5px;">Preview</span>
+                    <span style="font-size: 0.95rem; font-weight: 600;">Draft Post Preview</span>
+                </div>
+                <div style="display: flex; gap: 10px; align-items: center;">
+                    <button type="button" id="btn-modal-open-tab" style="background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.3); color: #fff; padding: 5px 12px; border-radius: 4px; font-size: 0.8rem; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;">
+                        <i class="fa-solid fa-arrow-up-right-from-square"></i> Full Page in New Tab
+                    </button>
+                    <button type="button" id="btn-close-modal" style="background: none; border: none; color: #fff; font-size: 1.5rem; line-height: 1; cursor: pointer; padding: 0 6px;">&times;</button>
+                </div>
+            </div>
+
+            <!-- Modal Article Body -->
+            <div style="padding: 35px 40px; color: #1e293b; max-height: 75vh; overflow-y: auto;">
+                <div id="preview-modal-category" style="display: inline-block; background: #e0f2fe; color: #0369a1; font-weight: 700; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px; padding: 4px 10px; border-radius: 4px; margin-bottom: 12px;"></div>
+                
+                <h1 id="preview-modal-title" style="margin-top: 0; color: #0f2d59; font-size: 2.1rem; line-height: 1.25; margin-bottom: 15px;"></h1>
+                
+                <div id="preview-modal-meta" style="color: #64748b; font-size: 0.85rem; margin-bottom: 25px; padding-bottom: 15px; border-bottom: 1px solid #e2e8f0;"></div>
+
+                <div id="preview-modal-image-wrap" style="margin-bottom: 30px; text-align: center;">
+                    <img id="preview-modal-image" src="" alt="Post hero image" style="max-width: 100%; border-radius: 8px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); max-height: 420px; object-fit: cover; width: 100%;">
+                </div>
+
+                <div id="preview-modal-summary" style="background-color: #f8fafc; padding: 20px 24px; border-left: 5px solid #0f2d59; margin-bottom: 30px; font-style: italic; color: #334155; line-height: 1.6; border-radius: 0 6px 6px 0; font-size: 1rem;"></div>
+
+                <div id="preview-modal-content" style="font-size: 1.05rem; line-height: 1.8; color: #1e293b; word-break: break-word;"></div>
+
+                <div id="preview-modal-canonical" style="margin-top: 35px; padding: 12px 18px; background: #f1f5f9; border-radius: 6px; font-size: 0.85rem; color: #475569; display: flex; align-items: center; gap: 8px;">
+                    <i class="fa-solid fa-link"></i> <span id="preview-modal-canonical-text"></span>
+                </div>
+            </div>
+
+            <!-- Modal Footer -->
+            <div style="background: #f8fafc; padding: 15px 30px; border-top: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center;">
+                <span style="font-size: 0.8rem; color: #64748b;">This preview renders exactly as visitors will see it.</span>
+                <button type="button" id="btn-close-modal-bottom" class="button btn-cancel" style="height: 36px; line-height: 36px; padding: 0 20px; margin: 0 !important; font-size: 0.85rem;">Close Preview</button>
+            </div>
+        </div>
+    </div>
 </section>
+
+<script>
+    const isNewPost = {{ 'true' if not post else 'false' }};
+    const titleInput = document.getElementById('title');
+    const slugInput = document.getElementById('slug');
+    const summaryInput = document.getElementById('summary');
+    const contentInput = document.getElementById('content');
+    const canonicalInput = document.getElementById('canonical_url');
+    const summaryCounter = document.getElementById('summary-counter');
+    const btnSyncSummary = document.getElementById('btn-sync-summary');
+    const btnPrefillSubstack = document.getElementById('btn-prefill-substack');
+
+    let summaryManuallyEdited = !isNewPost && summaryInput.value.trim().length > 0;
+
+    function generateSlug(text) {
+        if (isNewPost && slugInput) {
+            slugInput.value = text.toLowerCase()
+                .trim()
+                .replace(/[^\w\s-]/g, '')
+                .replace(/[\s_-]+/g, '-')
+                .replace(/^-+|-+$/g, '');
+        }
+    }
+
+    function extractSnippet(htmlOrText, maxLength = 155) {
+        if (!htmlOrText || !htmlOrText.trim()) return '';
+        const temp = document.createElement('div');
+        temp.innerHTML = htmlOrText;
+        let text = temp.textContent || temp.innerText || '';
+        text = text.replace(/\s+/g, ' ').trim();
+        if (text.length <= maxLength) return text;
+        let truncated = text.substring(0, maxLength);
+        const lastSpace = truncated.lastIndexOf(' ');
+        if (lastSpace > 50) {
+            truncated = truncated.substring(0, lastSpace);
+        }
+        return truncated.replace(/[,.;:!\s]+$/, '') + '...';
+    }
+
+    function updateSummaryCounter() {
+        if (!summaryCounter || !summaryInput) return;
+        const len = summaryInput.value.length;
+        summaryCounter.textContent = `${len} / 155 characters (Recommended SEO length: 140–160)`;
+        if (len > 165) {
+            summaryCounter.style.color = '#e74c3c';
+        } else if (len >= 130 && len <= 165) {
+            summaryCounter.style.color = '#27ae60';
+        } else {
+            summaryCounter.style.color = '#666';
+        }
+    }
+
+    if (contentInput && summaryInput) {
+        contentInput.addEventListener('input', function() {
+            if (isNewPost && !summaryManuallyEdited) {
+                const snippet = extractSnippet(contentInput.value);
+                summaryInput.value = snippet;
+                updateSummaryCounter();
+            }
+        });
+
+        summaryInput.addEventListener('input', function() {
+            summaryManuallyEdited = summaryInput.value.trim().length > 0;
+            updateSummaryCounter();
+        });
+
+        if (btnSyncSummary) {
+            btnSyncSummary.addEventListener('click', function() {
+                const snippet = extractSnippet(contentInput.value);
+                summaryInput.value = snippet;
+                summaryManuallyEdited = false;
+                updateSummaryCounter();
+            });
+        }
+
+        updateSummaryCounter();
+    }
+
+    if (btnPrefillSubstack && canonicalInput) {
+        btnPrefillSubstack.addEventListener('click', function() {
+            const currentSlug = (slugInput && slugInput.value.trim()) || 'your-post-slug';
+            const substackUrl = `https://notaicoach.substack.com/p/${currentSlug}`;
+            if (canonicalInput.value.trim() === substackUrl) {
+                canonicalInput.value = '';
+            } else {
+                canonicalInput.value = substackUrl;
+            }
+        });
+    }
+
+    // Quick Preview Modal
+    const quickPreviewModal = document.getElementById('quick-preview-modal');
+    const btnQuickPreview = document.getElementById('btn-quick-preview');
+    const btnCloseModal = document.getElementById('btn-close-modal');
+    const btnCloseModalBottom = document.getElementById('btn-close-modal-bottom');
+    const btnModalOpenTab = document.getElementById('btn-modal-open-tab');
+    const categoryInput = document.getElementById('category');
+    const imageInput = document.getElementById('image_file');
+
+    function openQuickPreview() {
+        if (!quickPreviewModal) return;
+
+        // Title
+        document.getElementById('preview-modal-title').textContent = (titleInput && titleInput.value.trim()) || 'Untitled Post';
+
+        // Category
+        const cat = (categoryInput && categoryInput.value.trim()) || 'General';
+        const catEl = document.getElementById('preview-modal-category');
+        catEl.textContent = cat;
+
+        // Meta info
+        const slug = (slugInput && slugInput.value.trim()) || 'post-slug';
+        document.getElementById('preview-modal-meta').textContent = `Category: ${cat}  •  URL: /blog/${slug}  •  Author: Erez Asif`;
+
+        // Image
+        const imgEl = document.getElementById('preview-modal-image');
+        const imgFile = (imageInput && imageInput.value.trim()) || 'default.jpg';
+        imgEl.src = `/static/images/blog/${imgFile}`;
+        imgEl.onerror = function() {
+            imgEl.src = '/static/images/blog/default.jpg';
+        };
+
+        // Summary
+        const summaryEl = document.getElementById('preview-modal-summary');
+        const summaryText = (summaryInput && summaryInput.value.trim()) || (contentInput ? extractSnippet(contentInput.value) : '');
+        if (summaryText) {
+            summaryEl.style.display = 'block';
+            summaryEl.textContent = summaryText;
+        } else {
+            summaryEl.style.display = 'none';
+        }
+
+        // Content
+        const contentEl = document.getElementById('preview-modal-content');
+        contentEl.innerHTML = (contentInput && contentInput.value.trim()) || '<p style="color: #94a3b8; font-style: italic;">No content yet. Type in the content editor to see it live here.</p>';
+
+        // Canonical URL
+        const canonEl = document.getElementById('preview-modal-canonical');
+        const canonTextEl = document.getElementById('preview-modal-canonical-text');
+        const canonVal = (canonicalInput && canonicalInput.value.trim());
+        if (canonVal) {
+            canonEl.style.display = 'flex';
+            canonTextEl.innerHTML = `Canonical source: <a href="${canonVal}" target="_blank" style="color: #0284c7; text-decoration: underline;">${canonVal}</a>`;
+        } else {
+            canonEl.style.display = 'flex';
+            canonTextEl.innerHTML = `Canonical URL: <strong>https://www.yourlifepathways.com/blog/${slug}</strong> (Native site article)`;
+        }
+
+        quickPreviewModal.style.display = 'block';
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closeQuickPreview() {
+        if (!quickPreviewModal) return;
+        quickPreviewModal.style.display = 'none';
+        document.body.style.overflow = '';
+    }
+
+    if (btnQuickPreview) {
+        btnQuickPreview.addEventListener('click', openQuickPreview);
+    }
+
+    if (btnCloseModal) {
+        btnCloseModal.addEventListener('click', closeQuickPreview);
+    }
+
+    if (btnCloseModalBottom) {
+        btnCloseModalBottom.addEventListener('click', closeQuickPreview);
+    }
+
+    if (quickPreviewModal) {
+        quickPreviewModal.addEventListener('click', function(e) {
+            if (e.target === quickPreviewModal) {
+                closeQuickPreview();
+            }
+        });
+    }
+
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape' && quickPreviewModal && quickPreviewModal.style.display === 'block') {
+            closeQuickPreview();
+        }
+    });
+
+    if (btnModalOpenTab) {
+        btnModalOpenTab.addEventListener('click', function() {
+            const form = document.querySelector('.admin-form-container form');
+            if (form) {
+                const prevAction = form.action;
+                const prevTarget = form.target;
+                form.action = "{{ url_for('admin.preview_post') }}";
+                form.target = "_blank";
+                form.submit();
+                form.action = prevAction;
+                form.target = prevTarget;
+            }
+        });
+    }
+</script>
 {% endblock %}

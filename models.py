@@ -40,6 +40,7 @@ class Post(db.Model):
     # NEW COLUMNS
     is_featured = db.Column(db.Boolean, default=False)
     is_deleted = db.Column(db.Boolean, default=False, index=True)  # Index makes filtering fast
+    is_draft = db.Column(db.Boolean, default=False, index=True)  # True = unpublished draft, False = publicly live
 
     # TIMESTAMPS
     # server_default=func.now() lets Postgres handle the initial time

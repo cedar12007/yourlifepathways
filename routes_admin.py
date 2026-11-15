@@ -1501,11 +1501,24 @@ def new_post():
     if request.method == 'POST':
         title = request.form.get('title')
         slug = request.form.get('slug')
-        summary = request.form.get('summary')
-        content = request.form.get('content')
+        summary = (request.form.get('summary') or '').strip()
+        content = request.form.get('content', '')
         image_file = request.form.get('image_file', 'default.jpg')
         category = request.form.get('category')
         canonical_url = request.form.get('canonical_url', '').strip() or None
+        
+        status_action = request.form.get('status_action', 'publish')
+        is_draft = (status_action == 'draft')
+        
+        # Auto-generate summary from content if empty
+        if not summary and content:
+            import re
+            clean_text = re.sub(r'<[^>]+>', ' ', content)
+            clean_text = ' '.join(clean_text.split())
+            if len(clean_text) > 155:
+                summary = clean_text[:152].rsplit(' ', 1)[0] + '...'
+            else:
+                summary = clean_text or title
         
         # Ensure we have a valid slug
         final_slug = slugify(slug if slug else title)
@@ -1517,14 +1530,79 @@ def new_post():
             content=content,
             image_file=image_file,
             category=category,
-            canonical_url=canonical_url
+            canonical_url=canonical_url,
+            is_draft=is_draft
         )
         db.session.add(post)
         db.session.commit()
-        flash('Post created successfully!', 'success')
+        if is_draft:
+            flash('Draft saved successfully! It is not publicly visible.', 'info')
+        else:
+            flash('Post published successfully!', 'success')
         return redirect(url_for('admin.dashboard'))
     
     return render_template('admin/edit_post.html', post=None, noindex=True)
+
+@admin_bp.route('/post/preview', methods=['POST'])
+@admin_required
+def preview_post():
+    from types import SimpleNamespace
+    from datetime import datetime
+    import re
+
+    title = request.form.get('title', 'Untitled Post')
+    slug = request.form.get('slug')
+    summary = (request.form.get('summary') or '').strip()
+    content = request.form.get('content', '')
+    image_file = (request.form.get('image_file') or '').strip() or 'default.jpg'
+    category = request.form.get('category', '')
+    canonical_url = (request.form.get('canonical_url') or '').strip() or None
+
+    final_slug = slugify(slug if slug else title) or 'preview-post'
+
+    if not summary and content:
+        clean_text = re.sub(r'<[^>]+>', ' ', content)
+        clean_text = ' '.join(clean_text.split())
+        if len(clean_text) > 155:
+            summary = clean_text[:152].rsplit(' ', 1)[0] + '...'
+        else:
+            summary = clean_text or title
+
+    mock_post = SimpleNamespace(
+        id=0,
+        title=title,
+        slug=final_slug,
+        summary=summary,
+        content=content,
+        image_file=image_file,
+        category=category,
+        canonical_url=canonical_url,
+        date_created=datetime.now(),
+        is_deleted=False,
+        num_views=0
+    )
+
+    canonical = canonical_url or f"https://www.yourlifepathways.com/blog/{final_slug}"
+    meta_title = f"{title} | YourLifePathways Blog (Preview)"
+    meta_description = summary[:155] if summary else f"Read {title} on the YourLifePathways blog."
+
+    return render_template(
+        'blog_detail.html',
+        post=mock_post,
+        comments=[],
+        total_comments=0,
+        likes_count=0,
+        shares_count=0,
+        views_count=0,
+        prev_post=None,
+        next_post=None,
+        canonical_url=canonical,
+        meta_title=meta_title,
+        meta_description=meta_description,
+        is_admin=True,
+        is_preview=True,
+        noindex=True
+    )
 
 @admin_bp.route('/post/<int:post_id>/views-analytics')
 @admin_required
@@ -1648,11 +1726,31 @@ def edit_post(post_id):
         post.canonical_url = request.form.get('canonical_url', '').strip() or None
         post.slug = slugify(slug if slug else post.title)
         
+        status_action = request.form.get('status_action')
+        if status_action == 'draft':
+            post.is_draft = True
+            flash_msg = 'Draft saved successfully! It is not publicly visible.'
+        elif status_action == 'publish':
+            post.is_draft = False
+            flash_msg = 'Post published live successfully!'
+        else:
+            flash_msg = 'Post updated successfully!'
+        
         db.session.commit()
-        flash('Post updated successfully!', 'success')
+        flash(flash_msg, 'success')
         return redirect(url_for('admin.dashboard'))
     
     return render_template('admin/edit_post.html', post=post, noindex=True)
+
+@admin_bp.route('/post/<int:post_id>/toggle-publish', methods=['POST'])
+@admin_required
+def toggle_publish(post_id):
+    post = Post.query.get_or_404(post_id)
+    post.is_draft = not post.is_draft
+    db.session.commit()
+    status_msg = "moved to drafts (hidden from public)." if post.is_draft else "published live to the blog!"
+    flash(f"Post '{post.title}' was {status_msg}", "success")
+    return redirect(url_for('admin.dashboard'))
 
 @admin_bp.route('/post/<int:post_id>/toggle-delete', methods=['POST'])
 @admin_required

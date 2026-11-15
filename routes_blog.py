@@ -53,7 +53,7 @@ def get_active_posts():
         .outerjoin(shares_sub, Post.id == shares_sub.c.post_id)\
         .outerjoin(comments_sub, Post.id == comments_sub.c.post_id)\
         .outerjoin(views_sub, Post.id == views_sub.c.post_id)\
-        .filter(Post.is_deleted == False)\
+        .filter(Post.is_deleted == False, Post.is_draft == False)\
         .order_by(Post.date_created.desc())\
         .all()
     
@@ -69,7 +69,7 @@ def get_active_posts():
 
 
 def get_latest_posts(limit=3):
-    return Post.query.filter_by(is_deleted=False).order_by(Post.date_created.desc()).limit(limit).all()
+    return Post.query.filter_by(is_deleted=False, is_draft=False).order_by(Post.date_created.desc()).limit(limit).all()
 
 
 def get_threaded_comments(post_id, include_unapproved=False):
@@ -136,7 +136,8 @@ def view_post(slug):
     # Find the post by slug in the list
     post = Post.query.filter_by(slug=slug, is_deleted=False).first_or_404()
 
-    if not post:
+    # Drafts are private and only viewable by authenticated admin
+    if post.is_draft and not is_admin():
         abort(404)
 
     # Get all active posts ordered by date
@@ -169,7 +170,7 @@ def view_post(slug):
     # Use post's canonical_url if set (for syndicated content), otherwise use our site's URL
     canonical_url = post.canonical_url or f"https://www.yourlifepathways.com/blog/{post.slug}"
 
-    return render_template('blog_detail.html', post=post, comments=comments, approved_count=approved_count, likes_count=likes_count, shares_count=shares_count, views_count=views_count, is_admin=is_admin(), prev_post=prev_post, next_post=next_post, meta_title=meta_title, meta_description=meta_description, canonical_url=canonical_url)
+    return render_template('blog_detail.html', post=post, comments=comments, approved_count=approved_count, likes_count=likes_count, shares_count=shares_count, views_count=views_count, is_admin=is_admin(), prev_post=prev_post, next_post=next_post, meta_title=meta_title, meta_description=meta_description, canonical_url=canonical_url, noindex=post.is_draft)
 
 
 @blog.route('/like/<int:post_id>', methods=['POST'])
