@@ -1513,8 +1513,11 @@ def new_post():
         # Auto-generate summary from content if empty
         if not summary and content:
             import re
-            clean_text = re.sub(r'<[^>]+>', ' ', content)
+            spaced_content = re.sub(r'</(h[1-6]|p|div|article|section|li)>', ' ', content, flags=re.IGNORECASE)
+            clean_text = re.sub(r'<[^>]+>', ' ', spaced_content)
             clean_text = ' '.join(clean_text.split())
+            if title and clean_text.lower().startswith(title.lower()):
+                clean_text = clean_text[len(title):].strip()
             if len(clean_text) > 155:
                 summary = clean_text[:152].rsplit(' ', 1)[0] + '...'
             else:
@@ -1561,8 +1564,11 @@ def preview_post():
     final_slug = slugify(slug if slug else title) or 'preview-post'
 
     if not summary and content:
-        clean_text = re.sub(r'<[^>]+>', ' ', content)
+        spaced_content = re.sub(r'</(h[1-6]|p|div|article|section|li)>', ' ', content, flags=re.IGNORECASE)
+        clean_text = re.sub(r'<[^>]+>', ' ', spaced_content)
         clean_text = ' '.join(clean_text.split())
+        if title and clean_text.lower().startswith(title.lower()):
+            clean_text = clean_text[len(title):].strip()
         if len(clean_text) > 155:
             summary = clean_text[:152].rsplit(' ', 1)[0] + '...'
         else:
@@ -1719,12 +1725,25 @@ def edit_post(post_id):
     if request.method == 'POST':
         post.title = request.form.get('title')
         slug = request.form.get('slug')
-        post.summary = request.form.get('summary')
+        post.summary = (request.form.get('summary') or '').strip()
         post.content = request.form.get('content')
         post.image_file = request.form.get('image_file')
         post.category = request.form.get('category')
         post.canonical_url = request.form.get('canonical_url', '').strip() or None
         post.slug = slugify(slug if slug else post.title)
+
+        # Auto-generate summary from content if empty
+        if not post.summary and post.content:
+            import re
+            spaced_content = re.sub(r'</(h[1-6]|p|div|article|section|li)>', ' ', post.content, flags=re.IGNORECASE)
+            clean_text = re.sub(r'<[^>]+>', ' ', spaced_content)
+            clean_text = ' '.join(clean_text.split())
+            if post.title and clean_text.lower().startswith(post.title.lower()):
+                clean_text = clean_text[len(post.title):].strip()
+            if len(clean_text) > 155:
+                post.summary = clean_text[:152].rsplit(' ', 1)[0] + '...'
+            else:
+                post.summary = clean_text or post.title
         
         status_action = request.form.get('status_action')
         if status_action == 'draft':

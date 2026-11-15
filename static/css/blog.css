@@ -733,6 +733,30 @@ sup a:hover {
     font-weight: 400;
 }
 
+/* Substack-style quote callout */
+#main .post-detail blockquote,
+.post-detail blockquote,
+#preview-modal-content blockquote {
+    border-left: 3.5px solid #ff6719 !important;
+    background: transparent;
+    padding: 4px 0 4px 20px;
+    margin: 1.8em 0;
+    font-size: 14pt !important;
+    line-height: 1.6;
+    font-style: italic;
+    color: inherit;
+}
+
+#main .post-detail blockquote p,
+.post-detail blockquote p,
+#preview-modal-content blockquote p {
+    margin: 0;
+    font-size: 14pt !important;
+    line-height: 1.6;
+    font-style: inherit;
+    color: inherit;
+}
+
 .external-link-symbol {
     font-size: 0.7em;
     vertical-align: middle;

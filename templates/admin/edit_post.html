@@ -1,7 +1,8 @@
 {% extends "base.html" %}
 
 {% block extra_head_elements %}
-<link rel="stylesheet" href="{{ url_for('static', filename='css/admin.min.css') }}?v=1.2">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/admin.min.css') }}?v=1.3">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/blog.min.css') }}?v=1.6">
 {% endblock %}
 
 {% block content %}
@@ -60,18 +61,72 @@
 
             <div class="form-group">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5em;">
-                    <label for="summary" style="margin-bottom: 0;">Summary (Search Engine Snippet)</label>
+                    <label for="summary" style="margin-bottom: 0;">Summary / Highlight Snippet</label>
                     <button type="button" id="btn-sync-summary" 
                         style="background: none; border: 1px solid #cbd5e1; border-radius: 4px; padding: 2px 10px; font-size: 0.75rem; color: #475569; cursor: pointer; display: inline-flex; align-items: center; gap: 5px;">
                         <i class="fa-solid fa-wand-magic-sparkles"></i> Auto-fill from Content
                     </button>
                 </div>
-                <textarea id="summary" name="summary" required>{{ post.summary if post else '' }}</textarea>
-                <small id="summary-counter" style="color: #666; display: block; margin-top: 4px;">0 / 155 characters (Recommended SEO length: 140–160)</small>
+                <textarea id="summary" name="summary" rows="3" required placeholder="e.g. I stress-tested 10 popular superpowers at work. Most would actually ruin your job.">{{ post.summary if post else '' }}</textarea>
+                <small id="summary-counter" style="color: #666; display: block; margin-top: 4px;">0 / 155 characters (Displayed in the italic highlight box on the article &amp; used for Google search snippets)</small>
             </div>
 
             <div class="form-group">
-                <label for="content">Content (HTML allowed)</label>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5em; flex-wrap: wrap; gap: 8px;">
+                    <label for="content" style="margin-bottom: 0;">Content (HTML allowed)</label>
+                    <div style="display: flex; gap: 6px; flex-wrap: wrap; align-items: center;">
+                        <button type="button" id="btn-insert-substack" 
+                            style="background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 4px; padding: 3px 10px; font-size: 0.75rem; color: #1d4ed8; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 5px;">
+                            <i class="fa-solid fa-plus"></i> Substack Subscription Box
+                        </button>
+                        <button type="button" id="btn-insert-h2" 
+                            style="background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 4px; padding: 3px 8px; font-size: 0.75rem; color: #475569; cursor: pointer;">
+                            + Heading (H2)
+                        </button>
+                        <button type="button" id="btn-insert-quote" 
+                            style="background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 4px; padding: 3px 8px; font-size: 0.75rem; color: #475569; cursor: pointer;">
+                            + Quote Callout
+                        </button>
+                        <button type="button" id="btn-toggle-cheatsheet" 
+                            style="background: #f1f5f9; border: 1px solid #cbd5e1; border-radius: 4px; padding: 3px 10px; font-size: 0.75rem; color: #334155; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 5px;">
+                            <i class="fa-solid fa-code"></i> HTML Tags Guide
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Collapsible HTML Tags Guide -->
+                <div id="html-guide-card" style="display: none; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 16px 20px; margin-bottom: 14px; font-size: 0.85rem; color: #334155; line-height: 1.6;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; border-bottom: 1px solid #e2e8f0; padding-bottom: 8px;">
+                        <strong style="color: #0f2d59; font-size: 0.95rem;"><i class="fa-solid fa-book-open"></i> HTML Elements Reference (from <em>I’m Not Your AI Coach</em>)</strong>
+                        <button type="button" id="btn-close-cheatsheet" style="background: none; border: none; font-size: 1.2rem; cursor: pointer; color: #64748b;">&times;</button>
+                    </div>
+                    
+                    <div style="display: grid; grid-template-columns: 1fr; gap: 12px;">
+                        <div>
+                            <strong style="color: #2563eb;">1. Substack Subscription Box (at end of article):</strong>
+                            <pre style="background: #ffffff; border: 1px solid #cbd5e1; border-radius: 4px; padding: 8px 12px; margin: 4px 0; font-size: 0.78rem; overflow-x: auto; color: #1e293b;"><code>&lt;div style="margin: 40px 0; padding: 20px; background: #f8fafc; border-left: 4px solid #2563eb; border-radius: 8px;"&gt;
+  &lt;h4 style="margin-top: 0; color: #2563eb;"&gt;Substack subscription&lt;/h4&gt;
+  &lt;p style="margin-bottom: 0;"&gt;This article was first shared with my Substack newsletter subscribers. &lt;a href="https://notaicoach.substack.com" target="_blank" rel="noopener"&gt;&lt;strong&gt;Subscribe here&lt;/strong&gt;&lt;/a&gt; to receive weekly insights on human-first coaching directly in your inbox.&lt;/p&gt;
+&lt;/div&gt;</code></pre>
+                        </div>
+
+                        <div>
+                            <strong style="color: #0f2d59;">2. Section Headings:</strong>
+                            <pre style="background: #ffffff; border: 1px solid #cbd5e1; border-radius: 4px; padding: 6px 12px; margin: 4px 0; font-size: 0.78rem; overflow-x: auto; color: #1e293b;"><code>&lt;h2&gt;Your Section Title&lt;/h2&gt;</code></pre>
+                        </div>
+
+                        <div>
+                            <strong style="color: #ea580c;">3. Quote / Callout (Substack vertical orange line):</strong>
+                            <pre style="background: #ffffff; border: 1px solid #cbd5e1; border-radius: 4px; padding: 6px 12px; margin: 4px 0; font-size: 0.78rem; overflow-x: auto; color: #1e293b;"><code>&lt;blockquote&gt;Your standout quote or reflective question here.&lt;/blockquote&gt;</code></pre>
+                        </div>
+
+                        <div>
+                            <strong style="color: #047857;">4. Punchline / Closing Emphasized Statement:</strong>
+                            <pre style="background: #ffffff; border: 1px solid #cbd5e1; border-radius: 4px; padding: 6px 12px; margin: 4px 0; font-size: 0.78rem; overflow-x: auto; color: #1e293b;"><code>&lt;p&gt;&lt;em&gt;&lt;strong&gt;Your key closing takeaway or punchline statement here.&lt;/strong&gt;&lt;/em&gt;&lt;/p&gt;</code></pre>
+                        </div>
+                    </div>
+                </div>
+
                 <textarea id="content" name="content"
                     class="content-editor">{{ post.content if post else '' }}</textarea>
             </div>
@@ -112,25 +167,29 @@
             </div>
 
             <!-- Modal Article Body -->
-            <div style="padding: 35px 40px; color: #1e293b; max-height: 75vh; overflow-y: auto;">
+            <article class="post-detail" style="padding: 35px 40px; color: #1e293b; max-height: 75vh; overflow-y: auto; background: #ffffff;">
                 <div id="preview-modal-category" style="display: inline-block; background: #e0f2fe; color: #0369a1; font-weight: 700; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px; padding: 4px 10px; border-radius: 4px; margin-bottom: 12px;"></div>
                 
-                <h1 id="preview-modal-title" style="margin-top: 0; color: #0f2d59; font-size: 2.1rem; line-height: 1.25; margin-bottom: 15px;"></h1>
-                
-                <div id="preview-modal-meta" style="color: #64748b; font-size: 0.85rem; margin-bottom: 25px; padding-bottom: 15px; border-bottom: 1px solid #e2e8f0;"></div>
+                <header>
+                    <h1 id="preview-modal-title" style="margin-top: 0; color: #0f2d59; font-family: 'Roboto Slab', serif; font-size: 2.5rem; font-weight: 700; line-height: 1.2; margin-bottom: 12px; text-align: center;"></h1>
+                </header>
 
-                <div id="preview-modal-image-wrap" style="margin-bottom: 30px; text-align: center;">
-                    <img id="preview-modal-image" src="" alt="Post hero image" style="max-width: 100%; border-radius: 8px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); max-height: 420px; object-fit: cover; width: 100%;">
+                <div id="preview-modal-meta" style="color: #94a3b8; font-size: 0.85rem; margin-bottom: 25px; padding-bottom: 15px; border-bottom: 1px solid #e2e8f0; text-align: center;"></div>
+
+                <div id="preview-modal-image-wrap" class="image main" style="margin-bottom: 30px; text-align: center;">
+                    <img id="preview-modal-image" src="" alt="Post hero image" style="max-width: 50%; border-radius: 8px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); max-height: 420px; object-fit: cover; margin: auto; display: block;">
                 </div>
 
-                <div id="preview-modal-summary" style="background-color: #f8fafc; padding: 20px 24px; border-left: 5px solid #0f2d59; margin-bottom: 30px; font-style: italic; color: #334155; line-height: 1.6; border-radius: 0 6px 6px 0; font-size: 1rem;"></div>
+                <div class="content">
+                    <div id="preview-modal-summary" class="blog-summary" style="background-color: #f9f9f9; padding: 20px 24px; border-left: 5px solid #333; margin-bottom: 30px; font-style: italic; font-family: 'Georgia', serif; color: #333; line-height: 1.6; font-size: 1rem; display: none;"></div>
 
-                <div id="preview-modal-content" style="font-size: 1.05rem; line-height: 1.8; color: #1e293b; word-break: break-word;"></div>
+                    <div id="preview-modal-content" class="post-body content" style="font-family: 'Georgia', serif; font-size: 1rem; line-height: 1.6; color: #333; word-break: break-word;"></div>
+                </div>
 
                 <div id="preview-modal-canonical" style="margin-top: 35px; padding: 12px 18px; background: #f1f5f9; border-radius: 6px; font-size: 0.85rem; color: #475569; display: flex; align-items: center; gap: 8px;">
                     <i class="fa-solid fa-link"></i> <span id="preview-modal-canonical-text"></span>
                 </div>
-            </div>
+            </article>
 
             <!-- Modal Footer -->
             <div style="background: #f8fafc; padding: 15px 30px; border-top: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center;">
@@ -167,9 +226,20 @@
     function extractSnippet(htmlOrText, maxLength = 155) {
         if (!htmlOrText || !htmlOrText.trim()) return '';
         const temp = document.createElement('div');
-        temp.innerHTML = htmlOrText;
+        // Add spaces for block boundaries so words don't jam together
+        const prepared = htmlOrText.replace(/<\/(h[1-6]|p|div|article|section|li)>/gi, ' ');
+        temp.innerHTML = prepared;
+
+        // If content repeats the post title in an h1/h2 at the start, skip it so summary begins with subtitle/body
+        const currentTitle = (titleInput && titleInput.value.trim().toLowerCase()) || '';
+        const firstHeading = temp.querySelector('h1, h2');
+        if (firstHeading && currentTitle && (firstHeading.textContent.trim().toLowerCase().includes(currentTitle) || currentTitle.includes(firstHeading.textContent.trim().toLowerCase()))) {
+            firstHeading.remove();
+        }
+
         let text = temp.textContent || temp.innerText || '';
         text = text.replace(/\s+/g, ' ').trim();
+        if (!text) return '';
         if (text.length <= maxLength) return text;
         let truncated = text.substring(0, maxLength);
         const lastSpace = truncated.lastIndexOf(' ');
@@ -230,6 +300,59 @@
         });
     }
 
+    // Helper to insert code at cursor in Content textarea
+    function insertAtCursor(textarea, textToInsert) {
+        if (!textarea) return;
+        const start = textarea.selectionStart || textarea.value.length;
+        const end = textarea.selectionEnd || textarea.value.length;
+        const text = textarea.value;
+        const before = text.substring(0, start);
+        const after = text.substring(end, text.length);
+        const prefix = (before.length > 0 && !before.endsWith('\n\n')) ? (before.endsWith('\n') ? '\n' : '\n\n') : '';
+        const suffix = (after.length > 0 && !after.startsWith('\n\n')) ? (after.startsWith('\n') ? '\n' : '\n\n') : '';
+        textarea.value = before + prefix + textToInsert + suffix + after;
+        const newPos = start + prefix.length + textToInsert.length;
+        textarea.selectionStart = textarea.selectionEnd = newPos;
+        textarea.focus();
+    }
+
+    const btnInsertSubstack = document.getElementById('btn-insert-substack');
+    if (btnInsertSubstack && contentInput) {
+        btnInsertSubstack.addEventListener('click', function() {
+            const snippet = `<div style="margin: 40px 0; padding: 20px; background: #f8fafc; border-left: 4px solid #2563eb; border-radius: 8px;">\n  <h4 style="margin-top: 0; color: #2563eb;">Substack subscription</h4>\n  <p style="margin-bottom: 0;">This article was first shared with my Substack newsletter subscribers. <a href="https://notaicoach.substack.com" target="_blank" rel="noopener"><strong>Subscribe here</strong></a> to receive weekly insights on human-first coaching directly in your inbox.</p>\n</div>`;
+            insertAtCursor(contentInput, snippet);
+        });
+    }
+
+    const btnInsertH2 = document.getElementById('btn-insert-h2');
+    if (btnInsertH2 && contentInput) {
+        btnInsertH2.addEventListener('click', function() {
+            insertAtCursor(contentInput, '<h2>Section Title</h2>\n<p>Your paragraph text here...</p>');
+        });
+    }
+
+    const btnInsertQuote = document.getElementById('btn-insert-quote');
+    if (btnInsertQuote && contentInput) {
+        btnInsertQuote.addEventListener('click', function() {
+            insertAtCursor(contentInput, '<blockquote>\n  Standout quote or reflective question here.\n</blockquote>');
+        });
+    }
+
+    const btnToggleCheatsheet = document.getElementById('btn-toggle-cheatsheet');
+    const btnCloseCheatsheet = document.getElementById('btn-close-cheatsheet');
+    const htmlGuideCard = document.getElementById('html-guide-card');
+    if (btnToggleCheatsheet && htmlGuideCard) {
+        btnToggleCheatsheet.addEventListener('click', function() {
+            const isHidden = (htmlGuideCard.style.display === 'none' || !htmlGuideCard.style.display);
+            htmlGuideCard.style.display = isHidden ? 'block' : 'none';
+        });
+    }
+    if (btnCloseCheatsheet && htmlGuideCard) {
+        btnCloseCheatsheet.addEventListener('click', function() {
+            htmlGuideCard.style.display = 'none';
+        });
+    }
+
     // Quick Preview Modal
     const quickPreviewModal = document.getElementById('quick-preview-modal');
     const btnQuickPreview = document.getElementById('btn-quick-preview');
@@ -244,6 +367,18 @@
 
         // Title
         document.getElementById('preview-modal-title').textContent = (titleInput && titleInput.value.trim()) || 'Untitled Post';
+
+        // Subtitle / Summary
+        const summaryEl = document.getElementById('preview-modal-summary');
+        const summaryText = (summaryInput && summaryInput.value.trim()) || (contentInput ? extractSnippet(contentInput.value) : '');
+        if (summaryEl) {
+            if (summaryText) {
+                summaryEl.style.display = 'block';
+                summaryEl.textContent = summaryText;
+            } else {
+                summaryEl.style.display = 'none';
+            }
+        }
 
         // Category
         const cat = (categoryInput && categoryInput.value.trim()) || 'General';
@@ -261,16 +396,6 @@
         imgEl.onerror = function() {
             imgEl.src = '/static/images/blog/default.jpg';
         };
-
-        // Summary
-        const summaryEl = document.getElementById('preview-modal-summary');
-        const summaryText = (summaryInput && summaryInput.value.trim()) || (contentInput ? extractSnippet(contentInput.value) : '');
-        if (summaryText) {
-            summaryEl.style.display = 'block';
-            summaryEl.textContent = summaryText;
-        } else {
-            summaryEl.style.display = 'none';
-        }
 
         // Content
         const contentEl = document.getElementById('preview-modal-content');
