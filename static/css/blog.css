@@ -741,8 +741,8 @@ sup a:hover {
     background: transparent;
     padding: 4px 0 4px 20px;
     margin: 1.8em 0;
-    font-size: 14pt !important;
-    line-height: 1.6;
+    font-size: 15pt !important;
+    line-height: 1.65;
     font-style: italic;
     color: inherit;
 }
@@ -751,8 +751,8 @@ sup a:hover {
 .post-detail blockquote p,
 #preview-modal-content blockquote p {
     margin: 0;
-    font-size: 14pt !important;
-    line-height: 1.6;
+    font-size: 15pt !important;
+    line-height: 1.65;
     font-style: inherit;
     color: inherit;
 }
