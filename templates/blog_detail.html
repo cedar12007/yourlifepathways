@@ -11,7 +11,144 @@
 {% block twitter_image %}{{ url_for('static', filename='images/blog/' + post.image_file, _external=True) }}{% endblock %}
 
 {% block extra_head_elements %}
-<link rel="stylesheet" href="{{ url_for('static', filename='css/blog.min.css') }}?v=2.1" />
+<link rel="stylesheet" href="{{ url_for('static', filename='css/blog.min.css') }}?v=2.3" />
+
+<style media="print">
+    @page {
+        margin: 0.8cm 0.6cm;
+        size: auto;
+    }
+
+    /* Hide everything outside the post content */
+    #header,
+    #nav,
+    #footer,
+    #copyright,
+    .preview-banner,
+    .draft-notice-banner,
+    .breadcrumb,
+    .centered-nav,
+    .interaction-group,
+    .detail-interactions,
+    .blog-footer,
+    #comments,
+    .blog_comment,
+    .comment-actions,
+    .reply-form,
+    #commentForm,
+    .mobile-back-btn,
+    .sticky-contact-widget,
+    .sticky-contact-card,
+    #flash-container,
+    #statusModal,
+    #resourceModal {
+        display: none !important;
+        visibility: hidden !important;
+    }
+
+    /* Reset containers for clean, edge-to-edge printable area */
+    html, body, #wrapper, #main, #nav + #main {
+        background: #ffffff !important;
+        background-color: #ffffff !important;
+        color: #111111 !important;
+        box-shadow: none !important;
+        border: none !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        width: 100% !important;
+        max-width: 100% !important;
+    }
+
+    #main {
+        padding-top: 0 !important;
+        margin-top: 0 !important;
+    }
+
+    /* The blog post article */
+    article.post-detail {
+        display: block !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+
+    article.post-detail header h1 {
+        font-family: 'Roboto Slab', serif, Georgia !important;
+        font-size: 28pt !important;
+        line-height: 1.25 !important;
+        color: #111111 !important;
+        margin-top: 0 !important;
+        margin-bottom: 0.6em !important;
+        page-break-after: avoid;
+    }
+
+    /* Main article image & inline screenshots */
+    #main .post-detail .image.main,
+    .post-detail .image.main {
+        box-shadow: none !important;
+        border: 1px solid #e2e8f0 !important;
+        max-width: 95% !important;
+        margin: 1.2em auto !important;
+        background: transparent !important;
+        page-break-inside: avoid;
+    }
+
+    #main .post-detail .image.main img,
+    .post-detail .image.main img {
+        max-height: 480px !important;
+        object-fit: contain !important;
+        margin: 0 auto !important;
+    }
+
+    /* Summary callout box - sized for mobile PDF readability */
+    .blog-summary {
+        background-color: #f8fafc !important;
+        border-left: 5px solid #333333 !important;
+        color: #333333 !important;
+        padding: 16px 22px !important;
+        margin-bottom: 1.5em !important;
+        font-style: italic !important;
+        font-size: 19pt !important;
+        line-height: 1.6 !important;
+        page-break-inside: avoid;
+    }
+
+    /* Post paragraphs - scaled up so 8.5" PDF is readable on phones without zooming */
+    article.post-detail .content,
+    article.post-detail .content p,
+    article.post-detail p {
+        font-size: 19pt !important;
+        line-height: 1.65 !important;
+        color: #111111 !important;
+        orphans: 3;
+        widows: 3;
+    }
+
+    /* Substack blockquotes */
+    #main .post-detail blockquote,
+    .post-detail blockquote {
+        border-left: 4px solid #ff6719 !important;
+        background: transparent !important;
+        padding: 6px 0 6px 20px !important;
+        margin: 1.4em 0 !important;
+        font-size: 19pt !important;
+        line-height: 1.6 !important;
+        font-style: italic !important;
+        page-break-inside: avoid;
+    }
+
+    h1, h2, h3, h4, h5, h6 {
+        page-break-after: avoid;
+    }
+
+    article.post-detail h2,
+    article.post-detail h3 {
+        font-size: 22pt !important;
+        margin-top: 1.5em !important;
+        margin-bottom: 0.6em !important;
+    }
+</style>
 
 
 <!-- JSON-LD Structured Data -->
@@ -86,7 +223,10 @@
         <span style="font-size: 0.95rem; font-weight: 500;">Draft Preview &mdash; This post is <strong>not</strong> saved or published yet.</span>
     </div>
     <div style="display: flex; gap: 10px; align-items: center;">
-        <button type="button" onclick="window.close()" style="background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.3); color: #fff; padding: 6px 14px; border-radius: 4px; cursor: pointer; font-size: 0.85rem; font-weight: 600;">
+        <button type="button" onclick="window.print()" style="background: #38bdf8; border: 1px solid #38bdf8; color: #0f2d59; padding: 6px 14px; border-radius: 4px; cursor: pointer; font-size: 0.85rem; font-weight: 700; display: inline-flex; align-items: center; gap: 6px; box-shadow: 0 2px 4px rgba(0,0,0,0.15);">
+            <i class="fa-solid fa-print"></i> Print
+        </button>
+        <button type="button" onclick="window.close()" style="background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.3); color: #fff; padding: 6px 14px; border-radius: 4px; cursor: pointer; font-size: 0.85rem; font-weight: 600; display: inline-flex; align-items: center; gap: 6px;">
             <i class="fa-solid fa-xmark"></i> Close Preview
         </button>
     </div>
@@ -98,7 +238,10 @@
         <span style="font-size: 0.95rem; font-weight: 500;">You are viewing a private draft. It is hidden from the public and search engines.</span>
     </div>
     <div style="display: flex; gap: 10px; align-items: center;">
-        <a href="{{ url_for('admin.edit_post', post_id=post.id) }}" style="background: #ffffff; color: #78350f; padding: 6px 14px; border-radius: 4px; text-decoration: none; font-size: 0.85rem; font-weight: 700;">
+        <button type="button" onclick="window.print()" style="background: #fbbf24; border: 1px solid #fbbf24; color: #78350f; padding: 6px 14px; border-radius: 4px; cursor: pointer; font-size: 0.85rem; font-weight: 700; display: inline-flex; align-items: center; gap: 6px; box-shadow: 0 2px 4px rgba(0,0,0,0.15);">
+            <i class="fa-solid fa-print"></i> Print
+        </button>
+        <a href="{{ url_for('admin.edit_post', post_id=post.id) }}" style="background: #ffffff; color: #78350f; padding: 6px 14px; border-radius: 4px; text-decoration: none; font-size: 0.85rem; font-weight: 700; display: inline-flex; align-items: center; gap: 6px;">
             <i class="fa-solid fa-pen-to-square"></i> Edit / Publish
         </a>
     </div>
