@@ -132,27 +132,32 @@
             </div>
 
             <style>
-                .form-actions {
-                    margin-top: 2.5em;
-                    display: flex;
-                    gap: 12px;
-                    align-items: center;
-                    flex-wrap: wrap;
+                #main .form-actions {
+                    margin-top: 2.5em !important;
+                    display: flex !important;
+                    gap: 12px !important;
+                    align-items: center !important;
+                    flex-wrap: wrap !important;
                 }
-                .form-actions .button,
-                .form-actions button,
-                .form-actions a.button {
+                #main .form-actions .button,
+                #main .form-actions button,
+                #main .form-actions button[type="submit"],
+                #main .form-actions input[type="submit"],
+                #main .form-actions a.button {
                     height: 2.9rem !important;
                     line-height: 2.9rem !important;
                     display: inline-flex !important;
                     align-items: center !important;
                     justify-content: center !important;
-                    gap: 8px;
+                    align-self: center !important;
+                    gap: 8px !important;
                     padding: 0 1.5rem !important;
                     font-size: 0.85rem !important;
                     font-weight: 600 !important;
                     border-radius: 8px !important;
                     margin: 0 !important;
+                    margin-top: 0 !important;
+                    margin-bottom: 0 !important;
                     box-sizing: border-box !important;
                     vertical-align: middle !important;
                     text-decoration: none !important;
@@ -160,40 +165,46 @@
                     cursor: pointer !important;
                     transition: all 0.2s ease;
                 }
-                .form-actions .button i,
-                .form-actions button i,
-                .form-actions a.button i {
-                    font-size: 0.9rem;
-                    line-height: 1;
-                    display: inline-block;
-                    margin: 0;
+                #main .form-actions .button i,
+                #main .form-actions button i,
+                #main .form-actions a.button i {
+                    font-size: 0.9rem !important;
+                    line-height: 1 !important;
+                    display: inline-block !important;
+                    margin: 0 !important;
                 }
-                .form-actions button.button.primary {
+                #main .form-actions button.button.primary,
+                #main .form-actions .button.primary {
                     background-color: #8cc9f0 !important;
                     color: #1d3a5e !important;
                     border: none !important;
                     box-shadow: none !important;
                 }
-                .form-actions button.button.primary:hover {
+                #main .form-actions button.button.primary:hover,
+                #main .form-actions .button.primary:hover {
                     background-color: #79bee8 !important;
                 }
-                .form-actions button.btn-secondary {
+                #main .form-actions button.btn-secondary,
+                #main .form-actions .button.btn-secondary {
                     background-color: #ffffff !important;
                     color: #1d3a5e !important;
                     border: 1px solid #cbd5e1 !important;
                     box-shadow: none !important;
                 }
-                .form-actions button.btn-secondary:hover {
+                #main .form-actions button.btn-secondary:hover,
+                #main .form-actions .button.btn-secondary:hover {
                     background-color: #f8fafc !important;
                     border-color: #94a3b8 !important;
                 }
-                .form-actions a.button.btn-cancel {
+                #main .form-actions a.button.btn-cancel,
+                #main .form-actions .btn-cancel {
                     background-color: #f1f5f9 !important;
                     color: #475569 !important;
                     border: 1px solid #cbd5e1 !important;
                     box-shadow: none !important;
                 }
-                .form-actions a.button.btn-cancel:hover {
+                #main .form-actions a.button.btn-cancel:hover,
+                #main .form-actions .btn-cancel:hover {
                     background-color: #e2e8f0 !important;
                 }
             </style>
