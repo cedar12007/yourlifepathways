@@ -376,3 +376,32 @@ document.addEventListener('click', function (event) {
     }
 })();
 
+// 5. Expandable In-Post Images (Click-to-Expand Lightbox)
+document.addEventListener('DOMContentLoaded', function () {
+    const contentImages = document.querySelectorAll('.post-detail .content .image.main');
+    if (!contentImages.length) return;
+
+    contentImages.forEach(function (imgBox) {
+        imgBox.addEventListener('click', function (e) {
+            e.stopPropagation();
+            const wasExpanded = this.classList.contains('is-expanded');
+            contentImages.forEach(function (el) { el.classList.remove('is-expanded'); });
+            if (!wasExpanded) {
+                this.classList.add('is-expanded');
+            }
+        });
+    });
+
+    // Clicking anywhere outside or on the backdrop collapses expanded images
+    document.addEventListener('click', function () {
+        contentImages.forEach(function (el) { el.classList.remove('is-expanded'); });
+    });
+
+    // Pressing Escape key collapses expanded images
+    document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape') {
+            contentImages.forEach(function (el) { el.classList.remove('is-expanded'); });
+        }
+    });
+});
+

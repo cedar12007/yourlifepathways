@@ -461,6 +461,93 @@ button.like-btn.already-liked {
     margin: 0 !important;
 }
 
+/* In-Post Content Images / Chat Screenshots & Phone Cards */
+#main .post-detail .content .image.main,
+.post-detail .content .image.main {
+    width: 90% !important;
+    max-width: 440px !important;
+    margin: 1.6rem auto 2rem auto !important;
+    border-radius: 12px !important;
+    border: 1px solid rgba(0, 0, 0, 0.08) !important;
+    box-shadow: 0 4px 16px -2px rgba(15, 23, 42, 0.08), 
+                0 2px 6px -1px rgba(15, 23, 42, 0.04) !important;
+    background-color: #ffffff !important;
+    overflow: hidden !important;
+    position: relative !important;
+    cursor: zoom-in !important;
+    transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1), 
+                box-shadow 0.28s cubic-bezier(0.16, 1, 0.3, 1),
+                border-color 0.2s ease !important;
+    transform-origin: center center !important;
+}
+
+/* Subtle magnifying glass badge indicating click-to-expand */
+#main .post-detail .content .image.main::after,
+.post-detail .content .image.main::after {
+    content: "\f00e";
+    font-family: "Font Awesome 6 Free";
+    font-weight: 900;
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: rgba(15, 23, 42, 0.65);
+    color: #ffffff;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.72rem;
+    pointer-events: none;
+    opacity: 0.85;
+    transition: opacity 0.2s ease, transform 0.2s ease;
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    z-index: 5;
+}
+
+/* Gentle hover feedback (NO scale / NO expansion on hover) */
+#main .post-detail .content .image.main:hover,
+.post-detail .content .image.main:hover {
+    border-color: rgba(0, 0, 0, 0.18) !important;
+    box-shadow: 0 8px 24px -4px rgba(15, 23, 42, 0.12), 
+                0 2px 6px -1px rgba(15, 23, 42, 0.06) !important;
+    transform: translateY(-2px);
+}
+
+#main .post-detail .content .image.main:hover::after,
+.post-detail .content .image.main:hover::after {
+    opacity: 1;
+    background: rgba(15, 23, 42, 0.85);
+}
+
+/* In-Place Smooth Expand Transition upon Click */
+#main .post-detail .content .image.main.is-expanded,
+.post-detail .content .image.main.is-expanded {
+    transform: scale(1.48) !important;
+    z-index: 100 !important;
+    box-shadow: 0 25px 50px -12px rgba(15, 23, 42, 0.35), 
+                0 0 0 1px rgba(0, 0, 0, 0.08) !important;
+    cursor: zoom-out !important;
+}
+
+#main .post-detail .content .image.main.is-expanded::after,
+.post-detail .content .image.main.is-expanded::after {
+    opacity: 0 !important;
+    transform: scale(0.7) !important;
+}
+
+#main .post-detail .content .image.main img,
+.post-detail .content .image.main img {
+    width: 100% !important;
+    height: auto !important;
+    max-height: none !important;
+    display: block !important;
+    margin: 0 auto !important;
+    pointer-events: none;
+}
+
 
 /* This overrides the global strong tag only within the blog post */
 .post-detail strong {
@@ -666,6 +753,24 @@ sup a:hover {
         width: 100%;
         margin: 1rem auto 1.5rem auto !important;
         border-radius: 8px;
+    }
+
+    #main .post-detail .content .image.main,
+    .post-detail .content .image.main {
+        width: 100% !important;
+        max-width: 440px !important;
+        margin: 1.25rem auto 1.5rem auto !important;
+    }
+
+    #main .post-detail .content .image.main:hover,
+    .post-detail .content .image.main:hover {
+        transform: none !important;
+    }
+
+    #main .post-detail .content .image.main.is-expanded,
+    .post-detail .content .image.main.is-expanded {
+        transform: scale(1.18) !important;
+        z-index: 100 !important;
     }
 
     #main .post-detail .image.main img,
