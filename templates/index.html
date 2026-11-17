@@ -160,6 +160,221 @@
 		padding-top: 1.5em !important;
 	}
 }
+
+/* Blog Carousel Styles */
+#latest-blog-posts {
+	overflow: visible !important;
+}
+
+.blog-carousel-wrapper {
+	position: relative;
+	width: 100%;
+	margin: 1.5em auto 0 auto;
+}
+
+#latest-blog-posts .blog-slider-container {
+	display: flex !important;
+	gap: 20px !important;
+	overflow-x: auto !important;
+	scroll-snap-type: x mandatory !important;
+	scroll-behavior: smooth !important;
+	-webkit-overflow-scrolling: touch !important;
+	padding: 10px 4px 22px 4px !important;
+	scrollbar-width: thin !important;
+	scrollbar-color: #cbd5e1 transparent !important;
+	cursor: grab;
+	user-select: none;
+}
+
+#latest-blog-posts .blog-slider-container.is-dragging {
+	cursor: grabbing;
+	scroll-behavior: auto !important;
+}
+
+#latest-blog-posts .blog-slider-container::-webkit-scrollbar {
+	height: 6px !important;
+	display: block !important;
+}
+
+#latest-blog-posts .blog-slider-container::-webkit-scrollbar-track {
+	background: #f1f5f9;
+	border-radius: 10px;
+}
+
+#latest-blog-posts .blog-slider-container::-webkit-scrollbar-thumb {
+	background: #cbd5e1;
+	border-radius: 10px;
+}
+
+#latest-blog-posts .blog-slider-container::-webkit-scrollbar-thumb:hover {
+	background: #94a3b8;
+}
+
+#latest-blog-posts .blog-slider-card {
+	flex: 0 0 280px !important;
+	width: 280px !important;
+	max-width: 280px !important;
+	min-height: 340px !important;
+	scroll-snap-align: start !important;
+	background: #ffffff !important;
+	border-radius: 14px !important;
+	border: 1px solid #e2e8f0 !important;
+	box-shadow: 0 4px 14px rgba(15, 23, 42, 0.06) !important;
+	overflow: hidden !important;
+	display: flex !important;
+	flex-direction: column !important;
+	text-decoration: none !important;
+	color: inherit !important;
+	transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease !important;
+	position: relative !important;
+}
+
+#latest-blog-posts .blog-slider-card:hover {
+	transform: translateY(-6px) !important;
+	border-color: #8cc9f0 !important;
+	box-shadow: 0 12px 28px rgba(29, 58, 94, 0.14) !important;
+}
+
+.blog-slider-img-wrap {
+	width: 100%;
+	height: 145px;
+	overflow: hidden;
+	background: #f1f5f9;
+	flex-shrink: 0;
+	position: relative;
+}
+
+.blog-slider-img-wrap img {
+	width: 100% !important;
+	height: 100% !important;
+	object-fit: cover !important;
+	object-position: center !important;
+	transition: transform 0.35s ease !important;
+	display: block !important;
+}
+
+#latest-blog-posts .blog-slider-card:hover .blog-slider-img-wrap img {
+	transform: scale(1.05);
+}
+
+.blog-slider-body {
+	padding: 1.1em 1.1em 1em 1.1em;
+	display: flex;
+	flex-direction: column;
+	flex-grow: 1;
+	justify-content: space-between;
+}
+
+#latest-blog-posts .blog-slider-card h3 {
+	font-family: 'Roboto Slab', serif, inherit !important;
+	font-size: 1.05rem !important;
+	font-weight: 700 !important;
+	line-height: 1.35 !important;
+	color: #1d3a5e !important;
+	margin: 0 0 0.5rem 0 !important;
+	display: -webkit-box !important;
+	-webkit-line-clamp: 2 !important;
+	-webkit-box-orient: vertical !important;
+	overflow: hidden !important;
+}
+
+#latest-blog-posts .blog-slider-card p {
+	font-size: 0.82rem !important;
+	line-height: 1.45 !important;
+	color: #64748b !important;
+	margin: 0 0 1rem 0 !important;
+	display: -webkit-box !important;
+	-webkit-line-clamp: 3 !important;
+	-webkit-box-orient: vertical !important;
+	overflow: hidden !important;
+}
+
+.blog-slider-footer {
+	margin-top: auto;
+	padding-top: 0.5em;
+	border-top: 1px solid #f1f5f9;
+}
+
+.blog-slider-footer .read-more-text {
+	font-size: 0.82rem !important;
+	font-weight: 700 !important;
+	color: #0284c7 !important;
+	display: inline-flex !important;
+	align-items: center !important;
+	gap: 6px !important;
+	background: transparent !important;
+	padding: 0 !important;
+	transition: gap 0.2s ease, color 0.2s ease !important;
+}
+
+#latest-blog-posts .blog-slider-card:hover .read-more-text {
+	color: #0369a1 !important;
+	gap: 9px !important;
+}
+
+/* Carousel Prev/Next Buttons */
+.blog-carousel-btn {
+	background: #ffffff !important;
+	border: 1px solid #cbd5e1 !important;
+	border-radius: 50% !important;
+	width: 44px !important;
+	height: 44px !important;
+	min-width: 44px !important;
+	max-width: 44px !important;
+	min-height: 44px !important;
+	max-height: 44px !important;
+	box-shadow: 0 4px 14px rgba(15, 23, 42, 0.14) !important;
+	color: #1d3a5e !important;
+	display: inline-flex !important;
+	align-items: center !important;
+	justify-content: center !important;
+	padding: 0 !important;
+	margin: 0 !important;
+	cursor: pointer !important;
+	position: absolute !important;
+	top: 50% !important;
+	transform: translateY(-50%) !important;
+	z-index: 10 !important;
+	transition: all 0.2s ease !important;
+}
+
+.blog-carousel-btn:hover {
+	background: #1d3a5e !important;
+	color: #ffffff !important;
+	border-color: #1d3a5e !important;
+	box-shadow: 0 6px 18px rgba(29, 58, 94, 0.25) !important;
+	transform: translateY(-50%) scale(1.08) !important;
+}
+
+.blog-carousel-btn.prev {
+	left: -22px;
+}
+
+.blog-carousel-btn.next {
+	right: -22px;
+}
+
+.blog-carousel-btn.is-hidden {
+	opacity: 0 !important;
+	pointer-events: none !important;
+}
+
+@media screen and (max-width: 768px) {
+	.blog-carousel-btn {
+		display: none !important;
+	}
+	#latest-blog-posts .blog-slider-card {
+		flex: 0 0 250px !important;
+		width: 250px !important;
+		max-width: 250px !important;
+		min-height: 310px !important;
+	}
+	#latest-blog-posts .blog-slider-container {
+		padding-left: 10px !important;
+		padding-right: 10px !important;
+		gap: 14px !important;
+	}
+}
 </style>
 {% endblock %}
 
@@ -944,51 +1159,127 @@ I especially appreciated the personalized coaching and expert guidance. Thanks t
 	<header class="major">
 		<h2>Latest Blog Posts</h2>
 	</header>
-	<div class="blog-slider">
-		<div class="blog-slider-container">
+	<div class="blog-carousel-wrapper">
+		<button type="button" class="blog-carousel-btn prev is-hidden" id="blogCarouselPrev" aria-label="Previous blog posts" title="Previous posts">
+			<i class="fa-solid fa-chevron-left"></i>
+		</button>
+
+		<div class="blog-slider-container" id="blogSliderTrack">
 			{% for post in latest_posts %}
 			<a href="{{ url_for('blog.view_post', slug=post.slug) }}" class="blog-slider-card">
-				{% if post.image_file %}
-				<img src="{{ url_for('static', filename='images/blog/' + post.image_file) }}" alt="{{ post.title }}"
-					loading="lazy" decoding="async">
-				{% endif %}
-				<h3>{{ post.title }}</h3>
-				<p>{{ post.summary[:100] }}...</p>
-				<span>Read More...</span>
+				<div class="blog-slider-img-wrap">
+					{% if post.image_file %}
+					<img src="{{ url_for('static', filename='images/blog/' + post.image_file) }}" alt="{{ post.title }}"
+						loading="lazy" decoding="async">
+					{% else %}
+					<div class="blog-slider-img-placeholder" style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; background: #f1f5f9; color: #94a3b8; font-size: 2rem;">
+						<i class="fa-solid fa-newspaper"></i>
+					</div>
+					{% endif %}
+				</div>
+				<div class="blog-slider-body">
+					<h3>{{ post.title }}</h3>
+					<p>{{ (post.summary or '')[:110] }}{% if (post.summary or '')|length > 110 %}...{% endif %}</p>
+					<div class="blog-slider-footer">
+						<span class="read-more-text">Read Article <i class="fa-solid fa-arrow-right"></i></span>
+					</div>
+				</div>
 			</a>
 			{% endfor %}
 		</div>
-		<div class="explore-more">
-			<a href="{{ url_for('blog.list_posts') }}">Explore More Blog Posts</a>
-		</div>
+
+		<button type="button" class="blog-carousel-btn next" id="blogCarouselNext" aria-label="Next blog posts" title="Next posts">
+			<i class="fa-solid fa-chevron-right"></i>
+		</button>
 	</div>
+
+	<div class="explore-more" style="text-align: center; margin-top: 1.8em;">
+		<a href="{{ url_for('blog.list_posts') }}" class="button primary small" style="display: inline-flex; align-items: center; gap: 8px;">
+			<span>Explore All Blog Posts</span>
+			<i class="fa-solid fa-arrow-right"></i>
+		</a>
+	</div>
+
 	<script>
 		(function () {
-			var container = document.querySelector('#latest-blog-posts .blog-slider-container');
-			if (!container) return;
-			var cards = Array.prototype.slice.call(container.querySelectorAll('.blog-slider-card'));
-			if (cards.length <= 3) return;
+			var track = document.getElementById('blogSliderTrack');
+			var prevBtn = document.getElementById('blogCarouselPrev');
+			var nextBtn = document.getElementById('blogCarouselNext');
+			if (!track || !prevBtn || !nextBtn) return;
 
-			function updateVisibleCards() {
-				// On mobile/touch carousel, allow swiping through all cards
-				if (window.innerWidth <= 768) {
-					cards.forEach(function (card) { card.style.display = ''; });
-					return;
-				}
-				var style = window.getComputedStyle(container);
-				var padLeft = parseFloat(style.paddingLeft) || 0;
-				var padRight = parseFloat(style.paddingRight) || 0;
-				var gap = parseFloat(style.gap || style.columnGap) || 18;
-				var availableWidth = container.clientWidth - padLeft - padRight;
-				var cardWidth = 200;
-				var maxFit = Math.max(3, Math.floor((availableWidth + gap) / (cardWidth + gap)));
-				cards.forEach(function (card, idx) {
-					card.style.display = idx < maxFit ? '' : 'none';
-				});
+			function getScrollStep() {
+				var card = track.querySelector('.blog-slider-card');
+				if (!card) return 300;
+				var cardWidth = card.offsetWidth + 20; // card width + gap
+				var visibleCards = Math.floor(track.clientWidth / cardWidth);
+				return cardWidth * Math.max(1, visibleCards);
 			}
 
-			updateVisibleCards();
-			window.addEventListener('resize', updateVisibleCards);
+			function updateButtonStates() {
+				var sl = track.scrollLeft;
+				var maxScroll = track.scrollWidth - track.clientWidth - 4;
+				if (sl <= 4) {
+					prevBtn.classList.add('is-hidden');
+				} else {
+					prevBtn.classList.remove('is-hidden');
+				}
+				if (sl >= maxScroll) {
+					nextBtn.classList.add('is-hidden');
+				} else {
+					nextBtn.classList.remove('is-hidden');
+				}
+			}
+
+			prevBtn.addEventListener('click', function () {
+				track.scrollBy({ left: -getScrollStep(), behavior: 'smooth' });
+			});
+
+			nextBtn.addEventListener('click', function () {
+				track.scrollBy({ left: getScrollStep(), behavior: 'smooth' });
+			});
+
+			track.addEventListener('scroll', updateButtonStates, { passive: true });
+			window.addEventListener('resize', updateButtonStates, { passive: true });
+
+			// Smooth mouse drag-to-scroll support for desktop
+			var isDown = false;
+			var startX = 0;
+			var scrollStart = 0;
+			var hasDragged = false;
+
+			track.addEventListener('mousedown', function (e) {
+				isDown = true;
+				hasDragged = false;
+				track.classList.add('is-dragging');
+				startX = e.pageX - track.offsetLeft;
+				scrollStart = track.scrollLeft;
+			});
+
+			window.addEventListener('mouseup', function () {
+				if (!isDown) return;
+				isDown = false;
+				track.classList.remove('is-dragging');
+			});
+
+			track.addEventListener('mousemove', function (e) {
+				if (!isDown) return;
+				var x = e.pageX - track.offsetLeft;
+				var diff = x - startX;
+				if (Math.abs(diff) > 5) {
+					hasDragged = true;
+				}
+				track.scrollLeft = scrollStart - diff;
+			});
+
+			track.addEventListener('click', function (e) {
+				if (hasDragged) {
+					e.preventDefault();
+					e.stopPropagation();
+				}
+			}, true);
+
+			// Check button visibility initially
+			setTimeout(updateButtonStates, 150);
 		})();
 	</script>
 </section>
