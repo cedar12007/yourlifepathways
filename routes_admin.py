@@ -1,5 +1,5 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash, abort, jsonify, make_response, session
-from datetime import timedelta
+from datetime import timedelta, datetime, timezone
 from models import Post, Comment, User, LoginHistory, db, SiteVisit, PostView, EmailOpen
 from utils import slugify, parse_user_agent, send_comment_approval_email
 from routes_blog import is_admin
@@ -1494,6 +1494,21 @@ def dashboard():
         last_login_time=last_login_time,
         noindex=True
     )
+
+@admin_bp.route('/reset-new-views', methods=['POST'])
+@admin_required
+def reset_new_views():
+    now_utc = datetime.now(timezone.utc)
+    session['last_login_time'] = now_utc.isoformat()
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest' or request.is_json:
+        return jsonify({
+            'success': True,
+            'message': 'New views counter has been reset to zero.',
+            'last_login_time': now_utc.isoformat(),
+            'formatted_time': now_utc.strftime('%Y-%m-%d %H:%M')
+        })
+    flash('New views counter has been reset to zero.', 'success')
+    return redirect(url_for('admin.dashboard'))
 
 @admin_bp.route('/post/new', methods=['GET', 'POST'])
 @admin_required

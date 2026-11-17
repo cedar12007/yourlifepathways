@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 
 {% block extra_head_elements %}
-<link rel="stylesheet" href="{{ url_for('static', filename='css/admin.min.css') }}?v=1.5">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/admin.min.css') }}?v=1.6">
 {% endblock %}
 
 {% block content %}
@@ -27,9 +27,24 @@
     <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 2em;">
         <a href="{{ url_for('admin.new_post') }}" class="btn-new" style="margin-bottom: 0 !important;"><i class="fa-solid fa-plus"></i> Add New Post</a>
         {% if last_login_time %}
-        <div style="font-size: 0.85rem; color: #666; display: inline-flex; align-items: center; gap: 6px; white-space: nowrap;">
+        <div style="font-size: 0.85rem; color: #666; display: inline-flex; align-items: center; gap: 8px; flex-wrap: wrap;">
             <i class="fa-solid fa-clock-rotate-left" style="color: #2b6cb0; font-size: 0.85rem;"></i>
             <span style="font-size: 0.85rem; line-height: 1;">New views since last login: <span class="local-time" data-utc="{{ last_login_time.isoformat() }}" style="font-size: 0.85rem; font-weight: 700; color: #1d3a5e;">{{ last_login_time.strftime('%Y-%m-%d %H:%M') }}</span></span>
+            <form action="{{ url_for('admin.reset_new_views') }}" method="POST" style="display: inline-flex; align-items: center; margin: 0; padding: 0;" onsubmit="return confirm('Zero out the new views counter? This will set your baseline to now.');">
+                <button type="submit" class="btn-zero-views" title="Reset new views baseline to now (zeros out new views counter)">
+                    <i class="fa-solid fa-arrows-rotate"></i> Zero Out
+                </button>
+            </form>
+        </div>
+        {% else %}
+        <div style="font-size: 0.85rem; color: #666; display: inline-flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+            <i class="fa-solid fa-clock-rotate-left" style="color: #2b6cb0; font-size: 0.85rem;"></i>
+            <span style="font-size: 0.85rem; line-height: 1;">New views since last login: <span style="font-size: 0.85rem; font-weight: 700; color: #1d3a5e;">Initial login</span></span>
+            <form action="{{ url_for('admin.reset_new_views') }}" method="POST" style="display: inline-flex; align-items: center; margin: 0; padding: 0;" onsubmit="return confirm('Start tracking new views from now?');">
+                <button type="submit" class="btn-zero-views" title="Set baseline to now">
+                    <i class="fa-solid fa-arrows-rotate"></i> Zero Out
+                </button>
+            </form>
         </div>
         {% endif %}
     </div>
