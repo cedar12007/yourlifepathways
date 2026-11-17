@@ -124,7 +124,7 @@
     <!-- Context Navigation -->
     <div class="journey-nav">
         {% if prev_ip %}
-        <a id="prev-journey-link" href="{{ url_for('admin.view_journey', ip=prev_ip, period=period, custom_date=custom_date, start_date=start_date, end_date=end_date, has_referrer=('true' if has_referrer else 'false'), referrer_filter=referrer_filter, show_all=('true' if show_all else 'false'), sort_by=sort_by) }}"
+        <a id="prev-journey-link" href="{{ url_for('admin.view_journey', ip=prev_ip, period=period, custom_date=custom_date, start_date=start_date, end_date=end_date, has_referrer=('true' if has_referrer else 'false'), referrer_filter=referrer_filter, show_all=('true' if show_all else 'false'), sort_by=sort_by, all_history=('true' if all_history else 'false')) }}"
             class="button" title="Shortcut: Left Arrow (←)">
             <i class="fa-solid fa-chevron-left"></i> Previous <kbd style="font-size: 0.7rem; opacity: 0.7; border: 1px solid currentColor; border-radius: 3px; padding: 0 4px; margin-left: 2px;">&larr;</kbd>
         </a>
@@ -133,7 +133,10 @@
         {% endif %}
 
         <div style="text-align: center; color: #636363; font-size: 0.85rem;">
-            Journey Context: <strong>{{ period|capitalize }}</strong>
+            Journey Context: <strong>{{ 'All History (Full Lifetime)' if all_history else period|capitalize }}</strong>
+            {% if all_history %}
+                <br><span style="display: inline-block; margin-top: 3px; background: #ebf8ff; color: #2b6cb0; border: 1px solid #bee3f8; padding: 2px 8px; border-radius: 12px; font-size: 0.72rem; font-weight: 700;"><i class="fa-solid fa-infinity"></i> Showing All {{ lifetime.days }} Days</span>
+            {% endif %}
             {% if referrer_filter %}
                 <br><span style="font-size: 0.8em; color: #2b6cb0; font-weight: 600;"><i class="fa-solid fa-filter"></i> {{ referrer_filter|truncate(40) }}</span>
             {% endif %}
@@ -141,7 +144,7 @@
         </div>
 
         {% if next_ip %}
-        <a id="next-journey-link" href="{{ url_for('admin.view_journey', ip=next_ip, period=period, custom_date=custom_date, start_date=start_date, end_date=end_date, has_referrer=('true' if has_referrer else 'false'), referrer_filter=referrer_filter, show_all=('true' if show_all else 'false'), sort_by=sort_by) }}"
+        <a id="next-journey-link" href="{{ url_for('admin.view_journey', ip=next_ip, period=period, custom_date=custom_date, start_date=start_date, end_date=end_date, has_referrer=('true' if has_referrer else 'false'), referrer_filter=referrer_filter, show_all=('true' if show_all else 'false'), sort_by=sort_by, all_history=('true' if all_history else 'false')) }}"
             class="button" title="Shortcut: Right Arrow (→)">
             Next <kbd style="font-size: 0.7rem; opacity: 0.7; border: 1px solid currentColor; border-radius: 3px; padding: 0 4px; margin-right: 2px;">&rarr;</kbd> <i class="fa-solid fa-chevron-right"></i>
         </a>
@@ -192,6 +195,25 @@
             <br><span style="font-size: 0.85em; color: #888;">Search: "<b>{{ search_term }}</b>"</span>
             {% endif %}
         </p>
+        {% elif lifetime_referrers and lifetime_referrers|length > 0 %}
+        <p style="margin-top: 0.5rem; word-break: break-word;">
+            <strong>Known Source{% if lifetime_referrers|length > 1 %}s{% endif %}:</strong>
+            <span style="font-size: 0.78rem; color: #718096; margin-right: 4px;">(Direct on current view • Referred on earlier visit)</span>
+            {% for ref in lifetime_referrers %}
+            {% if ref.startswith('http://') or ref.startswith('https://') %}
+            <a href="{{ ref }}" target="_blank" style="color: #e67e22;">{{ ref|truncate(50) }}</a>
+            {% else %}
+            <span style="color: #d97706; font-weight: 600;">{{ ref|truncate(50) }}</span>
+            {% endif %}{% if not loop.last %}, {% endif %}
+            {% endfor %}
+            {% if search_term %}
+            <br><span style="font-size: 0.85em; color: #888;">Search: "<b>{{ search_term }}</b>"</span>
+            {% endif %}
+        </p>
+        {% else %}
+        <p style="margin-top: 0.5rem; word-break: break-word;">
+            <strong>Source:</strong> <span style="color: #718096;">Direct / None detected</span>
+        </p>
         {% endif %}
 
         <p style="margin-top: 0.5rem;">
@@ -210,20 +232,35 @@
             </span>
         </p>
 
-        {% if lifetime.days > 1 and total_active_seconds > 0 %}
-        <div style="margin-top: 1.5rem; padding-top: 1rem; border-top: 1px dashed #cbd5e0;">
-            <p><span
-                    style="background: #f6ad55; color: white; padding: 2px 8px; border-radius: 4px; font-size: 0.7rem; font-weight: bold; vertical-align: middle; margin-right: 8px;">LIFETIME
-                    SUMMARY</span> <strong>Return Visitor</strong></p>
-            <p style="margin-top: 0.5rem; font-size: 0.9rem;">First seen on: <strong>{{
-                    lifetime.first.strftime('%Y-%m-%d') }}</strong></p>
-            <p style="font-size: 0.9rem;">Days visited: <strong>{{ lifetime.days }}</strong> • Total views: <strong>{{
-                    lifetime.views }}</strong></p>
-            <p style="font-size: 0.9rem;">Relationship span:
-                <span style="color: #e67e22; font-weight: bold;">
-                    {% set total_days = (lifetime.duration.total_seconds() / 86400)|int %}
-                    {% if total_days < 1 %} Under 24h {% else %} {{ total_days }} days {% endif %} </span>
-            </p>
+        {% if lifetime.days > 1 %}
+        <div style="margin-top: 1.5rem; padding-top: 1rem; border-top: 1px dashed #cbd5e0; display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 12px;">
+            <div>
+                <p><span
+                        style="background: #f6ad55; color: white; padding: 2px 8px; border-radius: 4px; font-size: 0.7rem; font-weight: bold; vertical-align: middle; margin-right: 8px;">LIFETIME
+                        SUMMARY</span> <strong>Return Visitor</strong></p>
+                <p style="margin-top: 0.5rem; font-size: 0.9rem;">First seen on: <strong>{{
+                        lifetime.first.strftime('%Y-%m-%d') }}</strong></p>
+                <p style="font-size: 0.9rem;">Days visited: <strong>{{ lifetime.days }}</strong> • Total views: <strong>{{
+                        lifetime.views }}</strong></p>
+                <p style="font-size: 0.9rem;">Relationship span:
+                    <span style="color: #e67e22; font-weight: bold;">
+                        {% set total_days = (lifetime.duration.total_seconds() / 86400)|int %}
+                        {% if total_days < 1 %} Under 24h {% else %} {{ total_days }} days {% endif %} </span>
+                </p>
+            </div>
+            <div style="display: flex; align-items: center; gap: 8px; margin-top: 0.5rem;">
+                {% if not all_history %}
+                <a href="{{ url_for('admin.view_journey', ip=ip, all_history='true', period=period, custom_date=custom_date, start_date=start_date, end_date=end_date, has_referrer=('true' if has_referrer else 'false'), referrer_filter=referrer_filter, show_all=('true' if show_all else 'false'), sort_by=sort_by) }}" 
+                   style="font-size: 0.8rem; padding: 6px 14px; background: #3182ce; color: #ffffff !important; text-decoration: none; border-radius: 6px; font-weight: 600; display: inline-flex; align-items: center; gap: 6px; box-shadow: 0 1px 3px rgba(49,130,206,0.3); transition: all 0.15s ease;">
+                    <i class="fa-solid fa-timeline"></i> View Full Journey (All {{ lifetime.days }} Days)
+                </a>
+                {% else %}
+                <a href="{{ url_for('admin.view_journey', ip=ip, all_history='false', period=period, custom_date=custom_date, start_date=start_date, end_date=end_date, has_referrer=('true' if has_referrer else 'false'), referrer_filter=referrer_filter, show_all=('true' if show_all else 'false'), sort_by=sort_by) }}" 
+                   style="font-size: 0.8rem; padding: 6px 14px; background: #edf2f7; color: #4a5568 !important; text-decoration: none; border-radius: 6px; font-weight: 600; display: inline-flex; align-items: center; gap: 6px; border: 1px solid #cbd5e0; transition: all 0.15s ease;">
+                    <i class="fa-solid fa-filter"></i> Switch to {{ period|capitalize }} Only
+                </a>
+                {% endif %}
+            </div>
         </div>
         {% endif %}
         {% endif %}
@@ -233,10 +270,15 @@
         {% for session in sessions %}
         <div style="margin-bottom: 2rem; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 10px; overflow: hidden; box-shadow: 0 2px 5px rgba(0,0,0,0.04);">
             <div style="background: #f8fafc; padding: 0.85rem 1.25rem; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e2e8f0; flex-wrap: wrap; gap: 8px;">
-                <div style="font-weight: 700; color: #0f2d59; font-size: 0.95rem; display: flex; align-items: center; gap: 8px;">
+                <div style="font-weight: 700; color: #0f2d59; font-size: 0.95rem; display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
                     <i class="fa-solid fa-clock-rotate-left" style="color: #3182ce;"></i>
                     Session {{ session.num }}
                     <span style="color: #718096; font-weight: normal; font-size: 0.85rem;">• {{ session.start.strftime('%Y-%m-%d') }}</span>
+                    {% if session.entry_referrer %}
+                        <span style="background: #fffaf0; color: #c05621; border: 1px solid #fbd38d; padding: 2px 8px; border-radius: 12px; font-size: 0.72rem; font-weight: 600; display: inline-flex; align-items: center; gap: 4px;" title="Entry referrer for this session: {{ session.entry_referrer }}">
+                            <i class="fa-solid fa-arrow-turn-down"></i> Arrived via: {{ session.entry_referrer|truncate(45) }}
+                        </span>
+                    {% endif %}
                 </div>
                 <div style="font-size: 0.85rem; color: #4a5568; display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
                     <span style="font-weight: 600; color: #2e7d32;">
@@ -377,6 +419,12 @@
                                     </span>
                                 {% endif %}
                             {% endif %}
+
+                            {% if step.referrer %}
+                                <span style="background: #fffaf0; color: #c05621; border: 1px solid #feebc8; padding: 2px 7px; border-radius: 12px; font-size: 0.7rem; font-weight: 600; white-space: nowrap;" title="Referred by: {{ step.referrer }}">
+                                    <i class="fa-solid fa-arrow-turn-down" style="color: #dd6b20; margin-right: 3px;"></i> Via: {{ step.referrer|truncate(35) }}
+                                </span>
+                            {% endif %}
                         </div>
 
                         {% if step.section_views %}
@@ -424,6 +472,9 @@
                         {% if r.section_views %}
                             <span style="color: #d69e2e; margin-left: 6px;">[sections: {{ r.section_views }}]</span>
                         {% endif %}
+                        {% if r.referrer %}
+                            <span style="color: #d97706; margin-left: 6px;">[ref: {{ r.referrer }}]</span>
+                        {% endif %}
                     </div>
                 </div>
                 {% endfor %}
@@ -435,7 +486,7 @@
     <!-- Bottom Navigation -->
     <div class="journey-nav" style="margin-top: 3rem;">
         {% if prev_ip %}
-        <a id="prev-journey-link-bottom" href="{{ url_for('admin.view_journey', ip=prev_ip, period=period, custom_date=custom_date, start_date=start_date, end_date=end_date, has_referrer=('true' if has_referrer else 'false'), referrer_filter=referrer_filter, show_all=('true' if show_all else 'false'), sort_by=sort_by) }}"
+        <a id="prev-journey-link-bottom" href="{{ url_for('admin.view_journey', ip=prev_ip, period=period, custom_date=custom_date, start_date=start_date, end_date=end_date, has_referrer=('true' if has_referrer else 'false'), referrer_filter=referrer_filter, show_all=('true' if show_all else 'false'), sort_by=sort_by, all_history=('true' if all_history else 'false')) }}"
             class="button">
             <i class="fa-solid fa-chevron-left"></i> Previous <kbd style="font-size: 0.7rem; opacity: 0.7; border: 1px solid currentColor; border-radius: 3px; padding: 0 4px; margin-left: 2px;">&larr;</kbd>
         </a>
@@ -444,7 +495,7 @@
         {% endif %}
 
         {% if next_ip %}
-        <a id="next-journey-link-bottom" href="{{ url_for('admin.view_journey', ip=next_ip, period=period, custom_date=custom_date, start_date=start_date, end_date=end_date, has_referrer=('true' if has_referrer else 'false'), referrer_filter=referrer_filter, show_all=('true' if show_all else 'false'), sort_by=sort_by) }}"
+        <a id="next-journey-link-bottom" href="{{ url_for('admin.view_journey', ip=next_ip, period=period, custom_date=custom_date, start_date=start_date, end_date=end_date, has_referrer=('true' if has_referrer else 'false'), referrer_filter=referrer_filter, show_all=('true' if show_all else 'false'), sort_by=sort_by, all_history=('true' if all_history else 'false')) }}"
             class="button">
             Next <kbd style="font-size: 0.7rem; opacity: 0.7; border: 1px solid currentColor; border-radius: 3px; padding: 0 4px; margin-right: 2px;">&rarr;</kbd> <i class="fa-solid fa-chevron-right"></i>
         </a>

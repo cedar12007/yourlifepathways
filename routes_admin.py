@@ -477,6 +477,7 @@ def view_journey(ip):
     has_referrer = request.args.get('has_referrer') == 'true'
     referrer_filter = request.args.get('referrer_filter', '')
     sort_by = request.args.get('sort_by', 'recent')
+    all_history = request.args.get('all_history') == 'true'
     
     # 2. Get the current list of IPs to find next/prev
     query = db.session.query(
@@ -631,10 +632,10 @@ def view_journey(ip):
         'duration': lifetime_stats.last_ever - lifetime_stats.first_ever
     }
         
-    # Detailed sequence of pages for a specific IP, limited to the filtered period
+    # Detailed sequence of pages for a specific IP, limited to the filtered period unless all_history is requested
     visits_query = SiteVisit.query.filter_by(visitor_ip=ip)
     
-    if date_filter is not None:
+    if not all_history and date_filter is not None:
         visits_query = visits_query.filter(date_filter)
             
     visits = visits_query.order_by(SiteVisit.timestamp.asc()).all()
@@ -648,7 +649,27 @@ def view_journey(ip):
             seen.add(r)
             referrers.append(r)
             
-    first_ref = referrers[0] if referrers else None
+    # Always query lifetime external referrers for this IP across all history
+    lifetime_refs_query = db.session.query(
+        SiteVisit.referrer,
+        SiteVisit.timestamp
+    ).filter(
+        SiteVisit.visitor_ip == ip,
+        SiteVisit.referrer.isnot(None),
+        ~SiteVisit.referrer.contains('://yourlifepathways.com'),
+        ~SiteVisit.referrer.contains('://www.yourlifepathways.com'),
+        ~SiteVisit.referrer.contains('://localhost'),
+        ~SiteVisit.referrer.contains('://127.0.0.1')
+    ).order_by(SiteVisit.timestamp.asc()).all()
+    
+    lifetime_referrers = []
+    seen_lt = set()
+    for r_val, _ in lifetime_refs_query:
+        if r_val not in seen_lt:
+            seen_lt.add(r_val)
+            lifetime_referrers.append(r_val)
+            
+    first_ref = referrers[0] if referrers else (lifetime_referrers[0] if lifetime_referrers else None)
     search_term = parse_referrer_query(first_ref)
     
     # Identify if bot (check all visits in this journey)
@@ -724,6 +745,14 @@ def view_journey(ip):
         s_end = v_list[-1].timestamp
         s_dur = int((s_end - s_start).total_seconds())
 
+        # Determine entry referrer for this session
+        session_entry_referrer = None
+        for v in v_list:
+            r = v.referrer
+            if r and not ('://yourlifepathways.com' in r or '://www.yourlifepathways.com' in r or '://localhost' in r or '://127.0.0.1' in r):
+                session_entry_referrer = r
+                break
+
         steps = []
         raw_steps = []
         distinct_pages = set()
@@ -737,9 +766,14 @@ def view_journey(ip):
             url = v.url or ''
             depth = getattr(v, 'scroll_depth', 0) or 0
             s_views = getattr(v, 'section_views', None) or ''
+            v_ref = v.referrer or ''
+            step_ref = None
+            if v_ref and not ('://yourlifepathways.com' in v_ref or '://www.yourlifepathways.com' in v_ref or '://localhost' in v_ref or '://127.0.0.1' in v_ref):
+                step_ref = v_ref
 
             raw_steps.append({
                 'url': url,
+                'referrer': v.referrer,
                 'timestamp': ts,
                 'scroll_depth': depth,
                 'section_views': s_views
@@ -889,6 +923,7 @@ def view_journey(ip):
                     'step_type': step_type,
                     'is_404': not is_page_valid,
                     'url': url,
+                    'referrer': step_ref,
                     'timestamp': ts,
                     'end_time': ts,
                     'depth': depth,
@@ -1011,6 +1046,7 @@ def view_journey(ip):
             'start': s_start,
             'end': s_end,
             'duration_seconds': max(s_dur, total_dwell_seconds),
+            'entry_referrer': session_entry_referrer,
             'visits': v_list,
             'steps': steps,
             'raw_steps': raw_steps,
@@ -1065,7 +1101,9 @@ def view_journey(ip):
                           show_all=show_all,
                           hide_bots=hide_bots,
                           sort_by=sort_by,
+                          all_history=all_history,
                           referrers=referrers,
+                          lifetime_referrers=lifetime_referrers,
                           search_term=search_term,
                           noindex=True)
 
