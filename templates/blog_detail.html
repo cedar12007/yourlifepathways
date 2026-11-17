@@ -11,7 +11,7 @@
 {% block twitter_image %}{{ url_for('static', filename='images/blog/' + post.image_file, _external=True) }}{% endblock %}
 
 {% block extra_head_elements %}
-<link rel="stylesheet" href="{{ url_for('static', filename='css/blog.min.css') }}?v=2.7" />
+<link rel="stylesheet" href="{{ url_for('static', filename='css/blog.min.css') }}?v=3.1" />
 
 <style media="print">
     @page {
@@ -289,10 +289,10 @@
 </div>
 {% endmacro %}
 
-<nav class="breadcrumb" aria-label="Breadcrumb" style="display: flex; align-items: center; justify-content: space-between;">
-    <ol style="flex: 1;" class="desktop-only">
+<nav class="breadcrumb" aria-label="Breadcrumb" style="display: flex; align-items: center; justify-content: space-between; gap: 15px;">
+    <ol style="flex: 1; min-width: 0;" class="desktop-only">
         <li><a href="{{ url_for('blog.list_posts') }}">Blog</a></li>
-        <li class="active" aria-current="page"><span>{{ post.title }}</span></li>
+        <li class="active" aria-current="page"><span title="{{ post.title }}">{{ post.title }}</span></li>
     </ol>
     <a href="{{ url_for('blog.list_posts') }}" class="mobile-back-btn mobile-only">
         <i class="fa-solid fa-chevron-left"></i> Blog
@@ -378,41 +378,43 @@
 
 </article>
 
-<h3 id="comments">Comments</h3>
-{% if comments %}
-{% for comment in comments %}
-{{ render_comment(comment) }}
-{% endfor %}
-{% else %}
-<p>No comments yet. Be the first to comment!</p>
-{% endif %}
+<div class="blog-comments-container">
+    <h3 id="comments">Comments</h3>
+    {% if comments %}
+    {% for comment in comments %}
+    {{ render_comment(comment) }}
+    {% endfor %}
+    {% else %}
+    <p>No comments yet. Be the first to comment!</p>
+    {% endif %}
 
-{% if not is_preview %}
-<form action="{{ url_for('blog.add_comment', slug=post.slug) }}" method="POST" id="commentForm">
-    <h4>Leave a Comment</h4>
-    <div class="form-group">
-        <input type="text" name="name" placeholder="Name (Required)" required class="form-control">
+    {% if not is_preview %}
+    <form action="{{ url_for('blog.add_comment', slug=post.slug) }}" method="POST" id="commentForm">
+        <h4>Leave a Comment</h4>
+        <div class="form-group">
+            <input type="text" name="name" placeholder="Name (Required)" required class="form-control">
+        </div>
+        <div class="form-group">
+            <input type="email" name="email" placeholder="Email (Optional - will not be published)" class="form-control">
+        </div>
+        <textarea name="content" placeholder="Share your thoughts..." required class="form-control"></textarea>
+
+        <div style="display:none;">
+            <input type="text" name="honeypot" tabindex="-1">
+        </div>
+
+        <input type="hidden" name="g-recaptcha-response" id="g-recaptcha-response">
+
+        <button type="submit" class="btn-submit">Submit Comment</button>
+    </form>
+    {% else %}
+    <div style="background: #f8fafc; border: 1px dashed #cbd5e1; border-radius: 8px; padding: 25px; text-align: center; color: #64748b; margin-top: 25px;">
+        <i class="fa-regular fa-comments" style="font-size: 1.8rem; margin-bottom: 10px; display: block; color: #94a3b8;"></i>
+        <strong>Comments Section Preview</strong>
+        <p style="margin: 6px 0 0; font-size: 0.9rem;">Visitor commenting will become active once this post is saved and published.</p>
     </div>
-    <div class="form-group">
-        <input type="email" name="email" placeholder="Email (Optional - will not be published)" class="form-control">
-    </div>
-    <textarea name="content" placeholder="Share your thoughts..." required class="form-control"></textarea>
-
-    <div style="display:none;">
-        <input type="text" name="honeypot" tabindex="-1">
-    </div>
-
-    <input type="hidden" name="g-recaptcha-response" id="g-recaptcha-response">
-
-    <button type="submit" class="btn-submit">Submit Comment</button>
-</form>
-{% else %}
-<div style="background: #f8fafc; border: 1px dashed #cbd5e1; border-radius: 8px; padding: 25px; text-align: center; color: #64748b; margin-top: 25px;">
-    <i class="fa-regular fa-comments" style="font-size: 1.8rem; margin-bottom: 10px; display: block; color: #94a3b8;"></i>
-    <strong>Comments Section Preview</strong>
-    <p style="margin: 6px 0 0; font-size: 0.9rem;">Visitor commenting will become active once this post is saved and published.</p>
+    {% endif %}
 </div>
-{% endif %}
 
 
 

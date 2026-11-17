@@ -347,21 +347,28 @@ button.like-btn.already-liked {
     margin-bottom: 0.5rem;
     font-size: 0.9rem;
     overflow: hidden;
+    min-width: 0;
 }
-
-
 
 .breadcrumb ol {
     list-style: none;
     padding: 0;
     margin: 0;
     display: flex;
-    flex-wrap: wrap;
+    align-items: center;
+    flex-wrap: nowrap !important;
+    min-width: 0 !important;
+    overflow: hidden;
 }
 
 .breadcrumb li {
     display: flex;
     align-items: center;
+    min-width: 0;
+}
+
+.breadcrumb li:not(.active) {
+    flex-shrink: 0;
 }
 
 /* Add a separator (chevron) between items */
@@ -372,6 +379,7 @@ button.like-btn.already-liked {
     font-weight: 900;
     margin: 0 10px;
     color: #ccc;
+    flex-shrink: 0;
 }
 
 .breadcrumb li a {
@@ -380,6 +388,8 @@ button.like-btn.already-liked {
     /* Removes the default Stellar underline if desired */
     color: #888;
     transition: color 0.2s;
+    white-space: nowrap;
+    flex-shrink: 0;
 }
 
 .breadcrumb li a:hover {
@@ -390,9 +400,24 @@ button.like-btn.already-liked {
 .breadcrumb li.active {
     color: #333;
     font-weight: 600;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    min-width: 0 !important;
+    flex: 1 1 auto;
+    display: block !important;
+}
+
+.breadcrumb li.active span {
+    display: block !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    min-width: 0 !important;
+}
+
+.breadcrumb .interaction-group {
+    flex-shrink: 0 !important;
 }
 
 .mobile-back-btn {
@@ -438,11 +463,29 @@ button.like-btn.already-liked {
     }
 }
 
-/* Article Main Image - Modern Editorial Hero */
-#main .post-detail .image.main,
-.post-detail .image.main {
-    width: 80%;
-    max-width: 750px;
+/* ==========================================================================
+   Medium-Style Editorial Reading Column (680px)
+   ========================================================================== */
+.post-detail,
+#main .post-detail,
+.breadcrumb,
+.centered-nav,
+.blog-comments-container,
+#comments,
+.comment-card,
+#commentForm {
+    max-width: 680px;
+    margin-left: auto;
+    margin-right: auto;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+/* Article Hero Image - Flush with the 680px Editorial Column */
+#main .post-detail > .image.main,
+.post-detail > .image.main {
+    width: 100% !important;
+    max-width: 100% !important;
     margin: 1.5rem auto 2.25rem auto !important;
     border-radius: 12px;
     overflow: hidden;
@@ -452,8 +495,8 @@ button.like-btn.already-liked {
     border: 1px solid rgba(0, 0, 0, 0.06);
 }
 
-#main .post-detail .image.main img,
-.post-detail .image.main img {
+#main .post-detail > .image.main img,
+.post-detail > .image.main img {
     width: 100% !important;
     height: auto !important;
     max-height: none !important;
@@ -461,12 +504,12 @@ button.like-btn.already-liked {
     margin: 0 !important;
 }
 
-/* In-Post Content Images / Chat Screenshots & Phone Cards */
+/* In-Post Content Images / Chat Screenshots (Full Column Width 680px) */
 #main .post-detail .content .image.main,
 .post-detail .content .image.main {
-    width: 90% !important;
-    max-width: 440px !important;
-    margin: 1.6rem auto 2rem auto !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 1.8rem auto 2.2rem auto !important;
     border-radius: 12px !important;
     border: 1px solid rgba(0, 0, 0, 0.08) !important;
     box-shadow: 0 4px 16px -2px rgba(15, 23, 42, 0.08), 
@@ -475,8 +518,8 @@ button.like-btn.already-liked {
     overflow: hidden !important;
     position: relative !important;
     cursor: zoom-in !important;
-    transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1), 
-                box-shadow 0.28s cubic-bezier(0.16, 1, 0.3, 1),
+    transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), 
+                box-shadow 0.3s cubic-bezier(0.16, 1, 0.3, 1),
                 border-color 0.2s ease !important;
     transform-origin: center center !important;
 }
@@ -522,12 +565,12 @@ button.like-btn.already-liked {
     background: rgba(15, 23, 42, 0.85);
 }
 
-/* In-Place Smooth Expand Transition upon Click */
+/* Medium-Style Outset Bleed Expand Transition upon Click (~830px) */
 #main .post-detail .content .image.main.is-expanded,
 .post-detail .content .image.main.is-expanded {
-    transform: scale(1.48) !important;
+    transform: scale(1.22) !important;
     z-index: 100 !important;
-    box-shadow: 0 25px 50px -12px rgba(15, 23, 42, 0.35), 
+    box-shadow: 0 30px 60px -15px rgba(15, 23, 42, 0.35), 
                 0 0 0 1px rgba(0, 0, 0, 0.08) !important;
     cursor: zoom-out !important;
 }
@@ -758,7 +801,7 @@ sup a:hover {
     #main .post-detail .content .image.main,
     .post-detail .content .image.main {
         width: 100% !important;
-        max-width: 440px !important;
+        max-width: 100% !important;
         margin: 1.25rem auto 1.5rem auto !important;
     }
 
