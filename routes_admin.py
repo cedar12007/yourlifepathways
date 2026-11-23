@@ -1,6 +1,6 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash, abort, jsonify, make_response, session
 from datetime import timedelta, datetime, timezone
-from models import Post, Comment, User, LoginHistory, db, SiteVisit, PostView, EmailOpen
+from models import Post, Comment, User, LoginHistory, db, SiteVisit, PostView, EmailOpen, ContactMessage
 from utils import slugify, parse_user_agent, send_comment_approval_email
 from routes_blog import is_admin
 from extensions import executor
@@ -18,6 +18,14 @@ def admin_required(f):
             return redirect(url_for('main.index'))
         return f(*args, **kwargs)
     return decorated_function
+
+@admin_bp.context_processor
+def inject_admin_badges():
+    try:
+        unread_inquiries = ContactMessage.query.filter_by(is_read=False).count()
+    except Exception:
+        unread_inquiries = 0
+    return dict(unread_inquiries_count=unread_inquiries)
 
 # --- Hidden Authentication Routes ---
 
@@ -1896,6 +1904,35 @@ def update_post_offset(post_id):
         db.session.rollback()
         return jsonify({'success': False, 'error': str(e)}), 500
 
+@admin_bp.route('/inquiries')
+@admin_required
+def manage_inquiries():
+    inquiries = ContactMessage.query.order_by(ContactMessage.date_created.desc()).all()
+    return render_template('admin/inquiries.html', inquiries=inquiries, noindex=True)
+
+@admin_bp.route('/inquiry/<int:msg_id>/toggle-read', methods=['POST'])
+@admin_required
+def toggle_read_inquiry(msg_id):
+    msg = ContactMessage.query.get_or_404(msg_id)
+    msg.is_read = not msg.is_read
+    db.session.commit()
+    status = 'read' if msg.is_read else 'unread'
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest' or request.is_json:
+        return jsonify({'success': True, 'is_read': msg.is_read, 'message': f'Message marked as {status}.'})
+    flash(f'Message marked as {status}.', 'success')
+    return redirect(url_for('admin.manage_inquiries'))
+
+@admin_bp.route('/inquiry/<int:msg_id>/delete', methods=['POST'])
+@admin_required
+def delete_inquiry(msg_id):
+    msg = ContactMessage.query.get_or_404(msg_id)
+    db.session.delete(msg)
+    db.session.commit()
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest' or request.is_json:
+        return jsonify({'success': True, 'message': 'Inquiry deleted successfully.'})
+    flash('Inquiry deleted successfully.', 'success')
+    return redirect(url_for('admin.manage_inquiries'))
+
 @admin_bp.route('/comments')
 @admin_required
 def manage_comments():
@@ -1915,7 +1952,10 @@ def toggle_approve_comment(comment_id):
     if comment.is_approved and not was_approved and comment.email:
         post = Post.query.get(comment.post_id)
         if post:
-            executor.submit(send_comment_approval_email, comment.name, comment.email, post.title, post.slug)
+            try:
+                send_comment_approval_email(comment.name, comment.email, post.title, post.slug)
+            except Exception as e:
+                print(f"Error sending comment approval email: {e}")
 
     if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
         return jsonify({"success": True, "message": message})

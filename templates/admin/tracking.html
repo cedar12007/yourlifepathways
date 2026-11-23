@@ -57,6 +57,12 @@
 
     <div class="admin-tabs">
         <a href="{{ url_for('admin.dashboard') }}" class="admin-tab">Blog Posts</a>
+        <a href="{{ url_for('admin.manage_inquiries') }}" class="admin-tab">
+            Inquiries
+            {% if unread_inquiries_count and unread_inquiries_count > 0 %}
+            <span style="background: #e11d48; color: #fff; border-radius: 10px; padding: 1px 7px; font-size: 0.72rem; margin-left: 4px; font-weight: 700;">{{ unread_inquiries_count }}</span>
+            {% endif %}
+        </a>
         <a href="{{ url_for('admin.manage_comments') }}" class="admin-tab">Comments</a>
         <a href="{{ url_for('admin.manage_likes') }}" class="admin-tab">Likes</a>
         <a href="{{ url_for('admin.tracking_stats') }}" class="admin-tab active">Traffic</a>

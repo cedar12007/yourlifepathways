@@ -150,3 +150,15 @@ class EmailOpen(db.Model):
     user_agent = db.Column(db.Text)
     timestamp = db.Column(db.DateTime(timezone=True), server_default=func.now())
 
+
+class ContactMessage(db.Model):
+    __tablename__ = 'ylp_contact_messages'
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(150), nullable=False)
+    email = db.Column(db.String(150), nullable=False)
+    message = db.Column(db.Text, nullable=False)
+    visitor_ip = db.Column(db.String(45), nullable=True)
+    visitor_location = db.Column(db.String(255), nullable=True)
+    is_read = db.Column(db.Boolean, default=False, nullable=False, index=True)
+    date_created = db.Column(db.DateTime(timezone=True), server_default=func.now())
+

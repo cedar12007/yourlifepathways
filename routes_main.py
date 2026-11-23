@@ -5,8 +5,7 @@ from flask import Blueprint, render_template, request, jsonify, make_response, u
 
 # Import from your local files
 from extensions import db, executor
-from models import Post, EmailOpen
-# from models import ContactMessage
+from models import Post, EmailOpen, ContactMessage
 from utils import check_rate_limit, verify_recaptcha, send_email_notification, REDIS_ENABLED, get_client_ip, get_ip_location, vercel_edge_cache
 
 # Ensure this is a string, not a list
@@ -144,16 +143,27 @@ def validate_captcha():
     if not recaptcha_result.get("success") or score < 0.5:
         return jsonify({"success": False, "message": "Security verification failed. Please try again."}), 400
 
-    # 3. Process Success: Save to DB and Send Email
+    # 3. Process Success: First save to DB as safety net, then send Email
     try:
-        # Save to SQLite via SQLAlchemy
-        # new_msg = ContactMessage(name=name, email=email, message=message)
-        # db.session.add(new_msg)
-        # db.session.commit()
+        location = get_ip_location(ip_address) if ip_address and ip_address != "Not available" else None
+        new_msg = ContactMessage(
+            name=name,
+            email=email,
+            message=message,
+            visitor_ip=ip_address,
+            visitor_location=location
+        )
+        db.session.add(new_msg)
+        db.session.commit()
+        print(f"Contact message #{new_msg.id} saved to database from {email}")
 
-        # Send SMTP Email
-        send_email_notification(name, email, message, recaptcha_result, ip_address=ip_address)
-        print("sent email")
+        # Send SMTP Email (safely wrapped so email glitches never lose the lead)
+        try:
+            send_email_notification(name, email, message, recaptcha_result, ip_address=ip_address)
+            print("sent email")
+        except Exception as email_err:
+            print(f"Warning: Contact email sending error (message is safe in DB): {email_err}")
+
         return jsonify({"success": True, "message": "Thank you! Your message has been received."})
 
     except Exception as e:

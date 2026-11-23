@@ -50,6 +50,7 @@ with app.app_context():
         with db.engine.connect() as conn:
             conn.execute(text("ALTER TABLE ylp_posts ADD COLUMN IF NOT EXISTS highlight_summary TEXT;"))
             conn.execute(text("ALTER TABLE ylp_posts ADD COLUMN IF NOT EXISTS view_offset INTEGER DEFAULT 0 NOT NULL;"))
+            conn.execute(text("CREATE TABLE IF NOT EXISTS ylp_contact_messages (id SERIAL PRIMARY KEY, name VARCHAR(150) NOT NULL, email VARCHAR(150) NOT NULL, message TEXT NOT NULL, visitor_ip VARCHAR(45), visitor_location VARCHAR(255), is_read BOOLEAN DEFAULT FALSE NOT NULL, date_created TIMESTAMPTZ DEFAULT NOW());"))
             conn.commit()
     except Exception:
         pass
