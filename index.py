@@ -24,6 +24,10 @@ def load_user(user_id):
     return User.query.get(int(user_id))
 app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL', 'sqlite:///site.db') 
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
+    'pool_pre_ping': True,
+    'pool_recycle': 300,
+}
 
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'dev-key')
 app.config['RECAPTCHA_SITE_KEY'] = os.getenv('RECAPTCHA_SITE_KEY', '')
@@ -41,6 +45,13 @@ from routes_admin import admin_bp
 
 with app.app_context():
     db.create_all()
+    try:
+        from sqlalchemy import text
+        with db.engine.connect() as conn:
+            conn.execute(text("ALTER TABLE ylp_posts ADD COLUMN IF NOT EXISTS highlight_summary TEXT;"))
+            conn.commit()
+    except Exception:
+        pass
 
 app.register_blueprint(blog)
 app.register_blueprint(main_bp)

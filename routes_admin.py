@@ -1555,6 +1555,7 @@ def new_post():
         title = request.form.get('title')
         slug = request.form.get('slug')
         summary = (request.form.get('summary') or '').strip()
+        highlight_summary = (request.form.get('highlight_summary') or '').strip() or None
         content = request.form.get('content', '')
         image_file = request.form.get('image_file', 'default.jpg')
         category = request.form.get('category')
@@ -1563,18 +1564,22 @@ def new_post():
         status_action = request.form.get('status_action', 'publish')
         is_draft = (status_action == 'draft')
         
-        # Auto-generate summary from content if empty
-        if not summary and content:
-            import re
-            spaced_content = re.sub(r'</(h[1-6]|p|div|article|section|li)>', ' ', content, flags=re.IGNORECASE)
-            clean_text = re.sub(r'<[^>]+>', ' ', spaced_content)
-            clean_text = ' '.join(clean_text.split())
-            if title and clean_text.lower().startswith(title.lower()):
-                clean_text = clean_text[len(title):].strip()
-            if len(clean_text) > 155:
-                summary = clean_text[:152].rsplit(' ', 1)[0] + '...'
+        # Auto-generate summary from highlight_summary or content if empty
+        if not summary:
+            source_text = highlight_summary or content
+            if source_text:
+                import re
+                spaced_content = re.sub(r'</(h[1-6]|p|div|article|section|li)>', ' ', source_text, flags=re.IGNORECASE)
+                clean_text = re.sub(r'<[^>]+>', ' ', spaced_content)
+                clean_text = ' '.join(clean_text.split())
+                if title and clean_text.lower().startswith(title.lower()):
+                    clean_text = clean_text[len(title):].strip()
+                if len(clean_text) > 155:
+                    summary = clean_text[:152].rsplit(' ', 1)[0] + '...'
+                else:
+                    summary = clean_text or title
             else:
-                summary = clean_text or title
+                summary = title or 'Untitled'
         
         # Ensure we have a valid slug
         final_slug = slugify(slug if slug else title)
@@ -1583,6 +1588,7 @@ def new_post():
             title=title,
             slug=final_slug,
             summary=summary,
+            highlight_summary=highlight_summary,
             content=content,
             image_file=image_file,
             category=category,
@@ -1609,6 +1615,7 @@ def preview_post():
     title = request.form.get('title', 'Untitled Post')
     slug = request.form.get('slug')
     summary = (request.form.get('summary') or '').strip()
+    highlight_summary = (request.form.get('highlight_summary') or '').strip() or None
     content = request.form.get('content', '')
     image_file = (request.form.get('image_file') or '').strip() or 'default.jpg'
     category = request.form.get('category', '')
@@ -1616,22 +1623,27 @@ def preview_post():
 
     final_slug = slugify(slug if slug else title) or 'preview-post'
 
-    if not summary and content:
-        spaced_content = re.sub(r'</(h[1-6]|p|div|article|section|li)>', ' ', content, flags=re.IGNORECASE)
-        clean_text = re.sub(r'<[^>]+>', ' ', spaced_content)
-        clean_text = ' '.join(clean_text.split())
-        if title and clean_text.lower().startswith(title.lower()):
-            clean_text = clean_text[len(title):].strip()
-        if len(clean_text) > 155:
-            summary = clean_text[:152].rsplit(' ', 1)[0] + '...'
+    if not summary:
+        source_text = highlight_summary or content
+        if source_text:
+            spaced_content = re.sub(r'</(h[1-6]|p|div|article|section|li)>', ' ', source_text, flags=re.IGNORECASE)
+            clean_text = re.sub(r'<[^>]+>', ' ', spaced_content)
+            clean_text = ' '.join(clean_text.split())
+            if title and clean_text.lower().startswith(title.lower()):
+                clean_text = clean_text[len(title):].strip()
+            if len(clean_text) > 155:
+                summary = clean_text[:152].rsplit(' ', 1)[0] + '...'
+            else:
+                summary = clean_text or title
         else:
-            summary = clean_text or title
+            summary = title
 
     mock_post = SimpleNamespace(
         id=0,
         title=title,
         slug=final_slug,
         summary=summary,
+        highlight_summary=highlight_summary,
         content=content,
         image_file=image_file,
         category=category,
@@ -1779,24 +1791,29 @@ def edit_post(post_id):
         post.title = request.form.get('title')
         slug = request.form.get('slug')
         post.summary = (request.form.get('summary') or '').strip()
+        post.highlight_summary = (request.form.get('highlight_summary') or '').strip() or None
         post.content = request.form.get('content')
         post.image_file = request.form.get('image_file')
         post.category = request.form.get('category')
         post.canonical_url = request.form.get('canonical_url', '').strip() or None
         post.slug = slugify(slug if slug else post.title)
 
-        # Auto-generate summary from content if empty
-        if not post.summary and post.content:
-            import re
-            spaced_content = re.sub(r'</(h[1-6]|p|div|article|section|li)>', ' ', post.content, flags=re.IGNORECASE)
-            clean_text = re.sub(r'<[^>]+>', ' ', spaced_content)
-            clean_text = ' '.join(clean_text.split())
-            if post.title and clean_text.lower().startswith(post.title.lower()):
-                clean_text = clean_text[len(post.title):].strip()
-            if len(clean_text) > 155:
-                post.summary = clean_text[:152].rsplit(' ', 1)[0] + '...'
+        # Auto-generate summary from highlight_summary or content if empty
+        if not post.summary:
+            source_text = post.highlight_summary or post.content
+            if source_text:
+                import re
+                spaced_content = re.sub(r'</(h[1-6]|p|div|article|section|li)>', ' ', source_text, flags=re.IGNORECASE)
+                clean_text = re.sub(r'<[^>]+>', ' ', spaced_content)
+                clean_text = ' '.join(clean_text.split())
+                if post.title and clean_text.lower().startswith(post.title.lower()):
+                    clean_text = clean_text[len(post.title):].strip()
+                if len(clean_text) > 155:
+                    post.summary = clean_text[:152].rsplit(' ', 1)[0] + '...'
+                else:
+                    post.summary = clean_text or post.title
             else:
-                post.summary = clean_text or post.title
+                post.summary = post.title or 'Untitled'
         
         status_action = request.form.get('status_action')
         if status_action == 'draft':

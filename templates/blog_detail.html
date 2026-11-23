@@ -13,6 +13,48 @@
 {% block extra_head_elements %}
 <link rel="stylesheet" href="{{ url_for('static', filename='css/blog.min.css') }}?v=3.1" />
 
+<style>
+    .blog-summary,
+    .blog-summary p {
+        font-size: 1.25rem !important;
+        line-height: 1.65 !important;
+        font-style: italic !important;
+        color: #2d3748 !important;
+    }
+    .blog-summary p {
+        margin-bottom: 1em !important;
+    }
+    .blog-summary p:last-child {
+        margin-bottom: 0 !important;
+    }
+    .blog-summary strong,
+    .blog-summary b {
+        font-size: inherit !important;
+        line-height: inherit !important;
+        font-family: inherit !important;
+        font-weight: 700 !important;
+        font-style: inherit !important;
+        display: inline !important;
+        text-transform: none !important;
+        color: #1a202c !important;
+    }
+    .blog-summary em,
+    .blog-summary i {
+        font-size: inherit !important;
+        line-height: inherit !important;
+        font-family: inherit !important;
+        font-style: italic !important;
+        display: inline !important;
+        font-weight: inherit !important;
+    }
+    .blog-summary a {
+        font-size: inherit !important;
+        line-height: inherit !important;
+        color: #1d4ed8 !important;
+        text-decoration: underline !important;
+    }
+</style>
+
 <style media="print">
     @page {
         margin: 0.8cm 0.6cm;
@@ -157,7 +199,7 @@
   "@context": "https://schema.org",
   "@type": "Article",
   "headline": "{{ post.title }}",
-  "description": "{{ post.summary }}",
+  "description": "{{ (post.summary or '') | striptags | replace('\"', '\\\"') }}",
   "image": "{{ url_for('static', filename='images/blog/' + post.image_file, _external=True) }}",
   "datePublished": "{{ post.date_created.strftime('%Y-%m-%dT%H:%M:%S') }}",
   "dateModified": "{{ post.date_created.strftime('%Y-%m-%dT%H:%M:%S') }}",
@@ -344,10 +386,13 @@
     </div>
 
     <div class="content">
+        {% set callout = post.highlight_summary if (post.highlight_summary and post.highlight_summary.strip()) else post.summary %}
+        {% if callout %}
         <div class="blog-summary"
             style="background-color: #f9f9f9; padding: 20px; border-left: 5px solid #333; margin-bottom: 30px; font-style: italic;">
-            {{ post.summary }}
+            {{ callout | safe }}
         </div>
+        {% endif %}
 
         <p class="content">{{ post.content | safe }}</p>
     </div>

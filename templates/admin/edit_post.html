@@ -59,16 +59,44 @@
                 <small style="color: #666;">Leave empty to use this site's URL. Example: <code>https://notaicoach.substack.com/p/your-post-slug</code></small>
             </div>
 
+            <!-- Field 1: SEO Summary / Search Snippet -->
             <div class="form-group">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5em;">
-                    <label for="summary" style="margin-bottom: 0;">Summary / Highlight Snippet</label>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5em; flex-wrap: wrap; gap: 8px;">
+                    <label for="summary" style="margin-bottom: 0;">Summary / Highlight Snippet (Recommended SEO)</label>
                     <button type="button" id="btn-sync-summary" 
                         style="background: none; border: 1px solid #cbd5e1; border-radius: 4px; padding: 2px 10px; font-size: 0.75rem; color: #475569; cursor: pointer; display: inline-flex; align-items: center; gap: 5px;">
                         <i class="fa-solid fa-wand-magic-sparkles"></i> Auto-fill from Content
                     </button>
                 </div>
-                <textarea id="summary" name="summary" rows="3" required placeholder="e.g. I stress-tested 10 popular superpowers at work. Most would actually ruin your job.">{{ post.summary if post else '' }}</textarea>
-                <small id="summary-counter" style="color: #666; display: block; margin-top: 4px;">0 / 155 characters (Displayed in the italic highlight box on the article &amp; used for Google search snippets)</small>
+                <textarea id="summary" name="summary" rows="2" required placeholder="e.g. I stress-tested 10 popular superpowers at work. Most would actually ruin your job.">{{ post.summary if post else '' }}</textarea>
+                <small id="summary-counter" style="color: #666; display: block; margin-top: 4px;">0 / 155 characters (Recommended SEO length: 140–160. Used for Google search snippets, meta descriptions, and post preview cards. Plain text only.)</small>
+            </div>
+
+            <!-- Field 2: Highlight Summary (Article Callout) -->
+            <div class="form-group">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5em; flex-wrap: wrap; gap: 8px;">
+                    <label for="highlight_summary" style="margin-bottom: 0;">Highlight Summary (Article Callout — HTML allowed)</label>
+                    <div style="display: flex; gap: 6px; flex-wrap: wrap; align-items: center;">
+                        <button type="button" id="btn-copy-seo-to-highlight" 
+                            style="background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 4px; padding: 2px 8px; font-size: 0.75rem; color: #475569; cursor: pointer; display: inline-flex; align-items: center; gap: 4px;">
+                            <i class="fa-regular fa-copy"></i> Copy from SEO Snippet
+                        </button>
+                        <button type="button" id="btn-highlight-bold" 
+                            style="background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 4px; padding: 2px 8px; font-size: 0.75rem; color: #475569; cursor: pointer;" title="Wrap selected text in <strong>">
+                            <strong>B</strong>
+                        </button>
+                        <button type="button" id="btn-highlight-italic" 
+                            style="background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 4px; padding: 2px 8px; font-size: 0.75rem; color: #475569; cursor: pointer;" title="Wrap selected text in <em>">
+                            <em>I</em>
+                        </button>
+                        <button type="button" id="btn-highlight-link" 
+                            style="background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 4px; padding: 2px 8px; font-size: 0.75rem; color: #475569; cursor: pointer;" title="Insert link">
+                            <i class="fa-solid fa-link"></i> Link
+                        </button>
+                    </div>
+                </div>
+                <textarea id="highlight_summary" name="highlight_summary" rows="4" placeholder="Enter key highlights, takeaways, or quotes to display in the callout box at the top of the article. HTML tags allowed (e.g. <strong>, <em>, <a>, <p>, <ul>).">{{ post.highlight_summary if post and post.highlight_summary is not none else '' }}</textarea>
+                <small style="color: #666; display: block; margin-top: 4px;">Displayed in the styled highlight box at the top of the article. Supports full HTML tags with <strong>no character limits</strong>. Leave empty to fall back to the SEO summary above.</small>
             </div>
 
             <div class="form-group">
@@ -232,11 +260,16 @@
     const titleInput = document.getElementById('title');
     const slugInput = document.getElementById('slug');
     const summaryInput = document.getElementById('summary');
+    const highlightSummaryInput = document.getElementById('highlight_summary');
     const contentInput = document.getElementById('content');
     const canonicalInput = document.getElementById('canonical_url');
     const summaryCounter = document.getElementById('summary-counter');
     const btnSyncSummary = document.getElementById('btn-sync-summary');
     const btnPrefillSubstack = document.getElementById('btn-prefill-substack');
+    const btnCopySeoToHighlight = document.getElementById('btn-copy-seo-to-highlight');
+    const btnHighlightBold = document.getElementById('btn-highlight-bold');
+    const btnHighlightItalic = document.getElementById('btn-highlight-italic');
+    const btnHighlightLink = document.getElementById('btn-highlight-link');
 
     let summaryManuallyEdited = !isNewPost && summaryInput.value.trim().length > 0;
 
@@ -279,7 +312,7 @@
     function updateSummaryCounter() {
         if (!summaryCounter || !summaryInput) return;
         const len = summaryInput.value.length;
-        summaryCounter.textContent = `${len} / 155 characters (Recommended SEO length: 140–160)`;
+        summaryCounter.textContent = `${len} / 155 characters (Recommended SEO length: 140–160. Plain text only.)`;
         if (len > 165) {
             summaryCounter.style.color = '#e74c3c';
         } else if (len >= 130 && len <= 165) {
@@ -289,10 +322,56 @@
         }
     }
 
+    // Helper to wrap selected text in a textarea
+    function wrapTextareaSelection(textarea, beforeTag, afterTag, defaultText = '') {
+        if (!textarea) return;
+        const start = textarea.selectionStart;
+        const end = textarea.selectionEnd;
+        const text = textarea.value;
+        const selected = text.substring(start, end) || defaultText;
+        const replacement = beforeTag + selected + afterTag;
+        textarea.value = text.substring(0, start) + replacement + text.substring(end);
+        textarea.selectionStart = start + beforeTag.length;
+        textarea.selectionEnd = start + beforeTag.length + selected.length;
+        textarea.focus();
+    }
+
+    if (btnCopySeoToHighlight && highlightSummaryInput && summaryInput) {
+        btnCopySeoToHighlight.addEventListener('click', function() {
+            const val = summaryInput.value.trim();
+            if (val) {
+                highlightSummaryInput.value = val;
+                highlightSummaryInput.focus();
+            }
+        });
+    }
+
+    if (btnHighlightBold && highlightSummaryInput) {
+        btnHighlightBold.addEventListener('click', function() {
+            wrapTextareaSelection(highlightSummaryInput, '<strong>', '</strong>', 'bold text');
+        });
+    }
+
+    if (btnHighlightItalic && highlightSummaryInput) {
+        btnHighlightItalic.addEventListener('click', function() {
+            wrapTextareaSelection(highlightSummaryInput, '<em>', '</em>', 'italic text');
+        });
+    }
+
+    if (btnHighlightLink && highlightSummaryInput) {
+        btnHighlightLink.addEventListener('click', function() {
+            const url = prompt('Enter link URL:', 'https://');
+            if (url) {
+                wrapTextareaSelection(highlightSummaryInput, `<a href="${url}" target="_blank" rel="noopener">`, '</a>', 'link text');
+            }
+        });
+    }
+
     if (contentInput && summaryInput) {
         contentInput.addEventListener('input', function() {
             if (isNewPost && !summaryManuallyEdited) {
-                const snippet = extractSnippet(contentInput.value);
+                const source = (highlightSummaryInput && highlightSummaryInput.value.trim()) || contentInput.value;
+                const snippet = extractSnippet(source);
                 summaryInput.value = snippet;
                 updateSummaryCounter();
             }
@@ -305,7 +384,8 @@
 
         if (btnSyncSummary) {
             btnSyncSummary.addEventListener('click', function() {
-                const snippet = extractSnippet(contentInput.value);
+                const source = (highlightSummaryInput && highlightSummaryInput.value.trim()) || contentInput.value;
+                const snippet = extractSnippet(source);
                 summaryInput.value = snippet;
                 summaryManuallyEdited = false;
                 updateSummaryCounter();

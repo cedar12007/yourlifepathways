@@ -32,6 +32,7 @@ class Post(db.Model):
     title = db.Column(db.String(255), nullable=False)
     slug = db.Column(db.String(255), unique=True, nullable=False, index=True)
     summary = db.Column(db.Text, nullable=False)
+    highlight_summary = db.Column(db.Text, nullable=True)
     content = db.Column(db.Text, nullable=True)
     image_file = db.Column(db.String(100), nullable=False, default='default.jpg')
     category = db.Column(db.String(100))
