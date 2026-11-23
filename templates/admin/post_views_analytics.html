@@ -119,6 +119,11 @@
         <div class="stats-card">
             <h4>Total Lifetime Views</h4>
             <div class="number">{{ total_views_count }}</div>
+            {% if post.view_offset and post.view_offset > 0 %}
+            <div style="font-size: 0.78rem; color: #718096; margin-top: 4px;" title="Offset added for public display: +{{ post.view_offset }}">
+                {{ total_views_count + post.view_offset }} public (+{{ post.view_offset }} offset)
+            </div>
+            {% endif %}
         </div>
         <div class="stats-card">
             <h4>Unique Locations</h4>

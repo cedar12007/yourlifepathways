@@ -76,6 +76,11 @@
                                 <i class="fa-solid fa-eye" style="color: #7f8c8d; font-size: 0.85em;"></i>{{ post.view_count }}
                             </span>
                         </a>
+                        {% if post.view_offset and post.view_offset > 0 %}
+                        <span style="display: block; font-size: 0.72rem; color: #64748b; font-weight: 500;" title="Real verified reads: {{ post.view_count }} | Public display: {{ post.public_views }} (Base offset: +{{ post.view_offset }})">
+                            ({{ post.public_views }} public)
+                        </span>
+                        {% endif %}
                     </td>
                     <td style="text-align: center;" data-sort="{{ post.new_views }}">
                         {% if post.new_views and post.new_views > 0 %}

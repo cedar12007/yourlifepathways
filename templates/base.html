@@ -202,7 +202,7 @@
                 {% for message in messages %}
                 <div class="flash-modal">
                     <div class="modal-content">{{ message }}</div>
-                    <button class="close-btn" onclick="closeFlash(this.parentElement)">&times;</button>
+                    <button type="button" class="close-btn" onclick="closeFlash(this.closest('.flash-modal'))" aria-label="Close">&times;</button>
                 </div>
                 {% endfor %}
                 {% endif %}
@@ -293,7 +293,7 @@
         <script src="{{ url_for('static', filename='js/browser.min.js') }}" defer></script>
         <script src="{{ url_for('static', filename='js/breakpoints.min.js') }}" defer></script>
         <script src="{{ url_for('static', filename='js/util.min.js') }}" defer></script>
-        <script src="{{ url_for('static', filename='js/modal.min.js') }}" defer></script>
+        <script src="{{ url_for('static', filename='js/modal.min.js') }}?v=1.2" defer></script>
         <script src="{{ url_for('static', filename='js/admin.min.js') }}" defer></script>
         <script src="{{ url_for('static', filename='js/main.min.js') }}?v=2.3" defer></script>
         <script src="{{ url_for('static', filename='js/telemetry.min.js') }}?v=1.1" defer></script>

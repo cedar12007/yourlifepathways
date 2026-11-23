@@ -49,6 +49,7 @@ with app.app_context():
         from sqlalchemy import text
         with db.engine.connect() as conn:
             conn.execute(text("ALTER TABLE ylp_posts ADD COLUMN IF NOT EXISTS highlight_summary TEXT;"))
+            conn.execute(text("ALTER TABLE ylp_posts ADD COLUMN IF NOT EXISTS view_offset INTEGER DEFAULT 0 NOT NULL;"))
             conn.commit()
     except Exception:
         pass
@@ -265,7 +266,7 @@ def log_event():
                 from models import Post, PostView
                 post = Post.query.filter_by(slug=slug).first()
                 if post:
-                    current_views_count = PostView.query.filter_by(post_id=post.id).count()
+                    current_views_count = PostView.query.filter_by(post_id=post.id).count() + (post.view_offset or 0)
                     return jsonify({'status': 'ok', 'views': current_views_count})
         return '', 204
     
@@ -324,7 +325,7 @@ def log_event():
                 from models import Post, PostView
                 post = Post.query.filter_by(slug=slug).first()
                 if post:
-                    current_views_count = PostView.query.filter_by(post_id=post.id).count()
+                    current_views_count = PostView.query.filter_by(post_id=post.id).count() + (post.view_offset or 0)
                     return jsonify({'status': 'ok', 'views': current_views_count})
         return '', 204
     app._recent_events[event_key] = now
@@ -377,7 +378,7 @@ def log_event():
                         db.session.flush()
                     
                     db.session.commit()
-                    current_views_count = PostView.query.filter_by(post_id=post.id).count()
+                    current_views_count = PostView.query.filter_by(post_id=post.id).count() + (post.view_offset or 0)
                     return jsonify({'status': 'ok', 'views': current_views_count})
 
         db.session.commit()

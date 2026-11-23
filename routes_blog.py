@@ -63,7 +63,7 @@ def get_active_posts():
         post.num_likes = nl
         post.num_shares = ns
         post.num_comments = nc
-        post.num_views = nv
+        post.num_views = nv + (post.view_offset or 0)
         result.append(post)
     return result
 
@@ -157,7 +157,8 @@ def view_post(slug):
     approved_count = Comment.query.filter_by(post_id=post.id, is_approved=True, is_deleted=False).count()
     likes_count = PostLike.query.filter_by(post_id=post.id, is_deleted=False).count()
     shares_count = PostShare.query.filter_by(post_id=post.id).count()
-    views_count = PostView.query.filter_by(post_id=post.id).count()
+    real_views = PostView.query.filter_by(post_id=post.id).count()
+    views_count = real_views + (post.view_offset or 0)
     post.num_views = views_count
 
     print(f"Post interaction stats: Likes:{likes_count}, Shares:{shares_count}, Comments:{approved_count}, Views:{views_count}")

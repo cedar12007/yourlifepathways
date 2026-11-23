@@ -334,7 +334,7 @@ document.addEventListener('click', function (event) {
     }
 });
 
-// Engaged Reader Tracking: Fires when a real visitor stays 6 seconds OR scrolls into the article
+// Reader Tracking: Fires promptly on page load (1-second dwell) or immediately upon user scroll
 (function () {
     let pinged = false;
     function sendReadPing() {
@@ -358,12 +358,12 @@ document.addEventListener('click', function (event) {
             .catch(function () {});
     }
 
-    // 1. Dwell timer: 6 seconds of reading time
-    const timer = setTimeout(sendReadPing, 6000);
+    // 1. Dwell timer: fires 1 second after page load to count all visitors
+    const timer = setTimeout(sendReadPing, 1000);
 
-    // 2. Scroll trigger: scrolled 250px down into content
+    // 2. Scroll trigger: fires immediately when visitor interacts / scrolls
     function onScroll() {
-        if (window.scrollY > 250) {
+        if (window.scrollY > 20) {
             sendReadPing();
         }
     }

@@ -74,21 +74,22 @@ async function handleAjaxAction(event, form) {
 function initModal() {
     // Get modal elements
     const modal = document.getElementById("statusModal");
-    const span = document.querySelector(".close-btn");
+    if (!modal) return;
 
-    if (!modal || !span) return;
-
-    // Close modal when X is clicked
-    span.onclick = function () {
-        closeModal();
+    // Only target close-btn inside statusModal, never global close-btn
+    const span = modal.querySelector(".close-btn");
+    if (span) {
+        span.onclick = function () {
+            closeModal();
+        };
     }
 
     // Close modal when clicking outside
-    window.onclick = function (event) {
-        if (event.target == modal) {
+    window.addEventListener('click', function (event) {
+        if (event.target === modal) {
             closeModal();
         }
-    }
+    });
 }
 
 // Initialize on load
@@ -96,9 +97,29 @@ document.addEventListener('DOMContentLoaded', initModal);
 
 // --- Flash Message Handling (Legacy/Server-side support) ---
 function closeFlash(element) {
+    if (!element) return;
+    element.style.transition = 'opacity 0.25s ease, transform 0.25s ease';
     element.style.opacity = '0';
-    setTimeout(() => element.remove(), 500);
+    element.style.transform = 'scale(0.95)';
+    setTimeout(() => {
+        if (element && element.parentNode) {
+            element.parentNode.removeChild(element);
+        }
+    }, 250);
 }
+
+// Reliable click handler for any flash modal close button via event delegation
+document.addEventListener('click', function (event) {
+    const closeBtn = event.target.closest('#flash-container .close-btn, .flash-modal .close-btn');
+    if (closeBtn) {
+        event.preventDefault();
+        event.stopPropagation();
+        const flashModal = closeBtn.closest('.flash-modal');
+        if (flashModal) {
+            closeFlash(flashModal);
+        }
+    }
+});
 
 // Auto-hide flash messages after 5 seconds
 document.addEventListener('DOMContentLoaded', function () {

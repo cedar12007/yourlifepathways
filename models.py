@@ -37,6 +37,7 @@ class Post(db.Model):
     image_file = db.Column(db.String(100), nullable=False, default='default.jpg')
     category = db.Column(db.String(100))
     canonical_url = db.Column(db.String(500), nullable=True)
+    view_offset = db.Column(db.Integer, default=0, nullable=False)
 
     # NEW COLUMNS
     is_featured = db.Column(db.Boolean, default=False)

@@ -59,6 +59,22 @@
                 <small style="color: #666;">Leave empty to use this site's URL. Example: <code>https://notaicoach.substack.com/p/your-post-slug</code></small>
             </div>
 
+            <div class="form-group" style="max-width: 380px;">
+                <label for="view_offset">Base Views Offset (Public Display Boost)</label>
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <input type="number" id="view_offset" name="view_offset" min="0" step="1" 
+                        value="{{ post.view_offset if post and post.view_offset is not none else 0 }}"
+                        style="max-width: 130px;">
+                    <span id="offset-save-status" style="font-size: 0.8rem; font-weight: 600; display: inline-flex; align-items: center; gap: 4px; transition: opacity 0.3s ease;"></span>
+                </div>
+                <small style="color: #666; display: block; margin-top: 4px;">
+                    Adds this number to the public view count on the site.
+                    {% if post %}
+                    <strong style="color: #475569;">Auto-saves instantly on blur</strong> without submitting the post.
+                    {% endif %}
+                </small>
+            </div>
+
             <!-- Field 1: SEO Summary / Search Snippet -->
             <div class="form-group">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5em; flex-wrap: wrap; gap: 8px;">
@@ -238,12 +254,20 @@
             </style>
 
             <div class="form-actions">
+                {% if post and not post.is_draft %}
+                <!-- Already Published Post: Only show Update Post -->
+                <button type="submit" name="status_action" value="update" class="button primary">
+                    <i class="fa-solid fa-floppy-disk"></i> Update Post
+                </button>
+                {% else %}
+                <!-- New Post or Draft: Show Publish and Save as Draft -->
                 <button type="submit" name="status_action" value="publish" class="button primary">
-                    <i class="fa-solid fa-paper-plane"></i> {{ 'Publish Post' if not post or post.is_draft else 'Update Published Post' }}
+                    <i class="fa-solid fa-paper-plane"></i> {{ 'Publish Post' if not post else 'Publish Live' }}
                 </button>
                 <button type="submit" name="status_action" value="draft" class="button btn-secondary">
                     <i class="fa-regular fa-file-lines"></i> Save as Draft
                 </button>
+                {% endif %}
                 <button type="submit" formaction="{{ url_for('admin.preview_post') }}" formtarget="_blank" class="button btn-secondary">
                     <i class="fa-solid fa-arrow-up-right-from-square"></i> Preview in New Tab
                 </button>
@@ -457,6 +481,55 @@
     if (btnCloseCheatsheet && htmlGuideCard) {
         btnCloseCheatsheet.addEventListener('click', function() {
             htmlGuideCard.style.display = 'none';
+        });
+    }
+
+    // Auto-save view_offset on blur / change for existing posts
+    const offsetInput = document.getElementById('view_offset');
+    const offsetStatus = document.getElementById('offset-save-status');
+    if (offsetInput && !isNewPost) {
+        let lastSavedOffset = offsetInput.value.trim();
+        const saveOffset = function () {
+            const currentVal = offsetInput.value.trim();
+            if (currentVal === lastSavedOffset) return;
+
+            offsetStatus.innerHTML = '<i class="fa-solid fa-spinner fa-spin" style="color: #64748b;"></i> <span style="color: #64748b;">Saving...</span>';
+            offsetStatus.style.opacity = '1';
+
+            fetch("{{ url_for('admin.update_post_offset', post_id=post.id) if post else '' }}", {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: JSON.stringify({ view_offset: parseInt(currentVal, 10) || 0 })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data && data.success) {
+                    lastSavedOffset = String(data.view_offset);
+                    offsetInput.value = data.view_offset;
+                    offsetStatus.innerHTML = `<i class="fa-solid fa-check" style="color: #16a34a;"></i> <span style="color: #16a34a;">Saved! (${data.public_views} public views)</span>`;
+                    setTimeout(() => {
+                        offsetStatus.style.opacity = '0';
+                    }, 4000);
+                } else {
+                    offsetStatus.innerHTML = `<i class="fa-solid fa-triangle-exclamation" style="color: #dc2626;"></i> <span style="color: #dc2626;">${(data && data.error) || 'Failed to save'}</span>`;
+                }
+            })
+            .catch(err => {
+                console.error("Error saving offset:", err);
+                offsetStatus.innerHTML = '<i class="fa-solid fa-triangle-exclamation" style="color: #dc2626;"></i> <span style="color: #dc2626;">Error saving</span>';
+            });
+        };
+
+        offsetInput.addEventListener('blur', saveOffset);
+        offsetInput.addEventListener('change', saveOffset);
+        offsetInput.addEventListener('keydown', function (e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                offsetInput.blur();
+            }
         });
     }
 

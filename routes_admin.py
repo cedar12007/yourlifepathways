@@ -1524,6 +1524,7 @@ def dashboard():
 
     for post in posts:
         post.view_count = view_counts.get(post.id, 0)
+        post.public_views = post.view_count + (post.view_offset or 0)
         post.new_views = new_view_counts.get(post.id, 0)
 
     return render_template(
@@ -1560,6 +1561,10 @@ def new_post():
         image_file = request.form.get('image_file', 'default.jpg')
         category = request.form.get('category')
         canonical_url = request.form.get('canonical_url', '').strip() or None
+        try:
+            view_offset = max(0, int(request.form.get('view_offset', 0) or 0))
+        except (ValueError, TypeError):
+            view_offset = 0
         
         status_action = request.form.get('status_action', 'publish')
         is_draft = (status_action == 'draft')
@@ -1593,6 +1598,7 @@ def new_post():
             image_file=image_file,
             category=category,
             canonical_url=canonical_url,
+            view_offset=view_offset,
             is_draft=is_draft
         )
         db.session.add(post)
@@ -1620,6 +1626,10 @@ def preview_post():
     image_file = (request.form.get('image_file') or '').strip() or 'default.jpg'
     category = request.form.get('category', '')
     canonical_url = (request.form.get('canonical_url') or '').strip() or None
+    try:
+        view_offset = max(0, int(request.form.get('view_offset', 0) or 0))
+    except (ValueError, TypeError):
+        view_offset = 0
 
     final_slug = slugify(slug if slug else title) or 'preview-post'
 
@@ -1648,9 +1658,10 @@ def preview_post():
         image_file=image_file,
         category=category,
         canonical_url=canonical_url,
+        view_offset=view_offset,
         date_created=datetime.now(),
         is_deleted=False,
-        num_views=0
+        num_views=view_offset
     )
 
     canonical = canonical_url or f"https://www.yourlifepathways.com/blog/{final_slug}"
@@ -1664,7 +1675,7 @@ def preview_post():
         total_comments=0,
         likes_count=0,
         shares_count=0,
-        views_count=0,
+        views_count=view_offset,
         prev_post=None,
         next_post=None,
         canonical_url=canonical,
@@ -1796,6 +1807,10 @@ def edit_post(post_id):
         post.image_file = request.form.get('image_file')
         post.category = request.form.get('category')
         post.canonical_url = request.form.get('canonical_url', '').strip() or None
+        try:
+            post.view_offset = max(0, int(request.form.get('view_offset', 0) or 0))
+        except (ValueError, TypeError):
+            pass
         post.slug = slugify(slug if slug else post.title)
 
         # Auto-generate summary from highlight_summary or content if empty
@@ -1855,6 +1870,31 @@ def toggle_delete(post_id):
         
     flash(message, 'success')
     return redirect(url_for('admin.dashboard', admin='true'))
+
+@admin_bp.route('/post/<int:post_id>/update-offset', methods=['POST'])
+@admin_required
+def update_post_offset(post_id):
+    post = Post.query.get_or_404(post_id)
+    data = request.get_json(silent=True) or request.form
+    try:
+        raw_val = data.get('view_offset', 0)
+        post.view_offset = max(0, int(raw_val or 0))
+        db.session.commit()
+        real_views = PostView.query.filter_by(post_id=post.id).count()
+        public_views = real_views + post.view_offset
+        return jsonify({
+            'success': True,
+            'view_offset': post.view_offset,
+            'real_views': real_views,
+            'public_views': public_views,
+            'message': 'Base view offset saved successfully!'
+        })
+    except (ValueError, TypeError):
+        db.session.rollback()
+        return jsonify({'success': False, 'error': 'Invalid number'}), 400
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'success': False, 'error': str(e)}), 500
 
 @admin_bp.route('/comments')
 @admin_required
